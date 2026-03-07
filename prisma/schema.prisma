@@ -1,0 +1,425 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum SiteRole {
+  ADMIN
+  MOD
+  USER
+}
+
+enum CompanyRole {
+  OWNER
+  CO_OWNER
+  TRUSTED_MEMBER
+  MEMBER
+}
+
+enum Privacy {
+  PUBLIC
+  PRIVATE
+}
+
+enum RecruitingStatus {
+  OPEN
+  LIMITED
+  CLOSED
+}
+
+enum ModerationStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostType {
+  ANNOUNCEMENT
+  RECRUITMENT
+  SHOWCASE
+  UPDATE
+  BUILD_REQUEST
+}
+
+enum Visibility {
+  PUBLIC
+  COMPANY
+  PRIVATE
+}
+
+enum ProjectType {
+  NETWORK
+  STATION
+  ROLLING_STOCK
+  INFRASTRUCTURE
+  SHOWCASE
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  REVIEW
+  COMPLETE
+  ON_HOLD
+}
+
+enum BuildRequestCategory {
+  STATION
+  LINE
+  SIGNALING
+  INFRASTRUCTURE
+  LANDSCAPE
+  OTHER
+}
+
+enum BuildRequestStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETE
+  ARCHIVED
+}
+
+enum NotificationType {
+  GENERIC
+  INVITE
+  APPLICATION
+  POST
+  REPORT
+  MODERATION
+  ROLE_UPDATE
+}
+
+enum ReportTargetType {
+  USER
+  COMPANY
+  POST
+  PROJECT
+}
+
+enum ReportStatus {
+  OPEN
+  IN_REVIEW
+  ACTIONED
+  REJECTED
+  RESOLVED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum LinkedAccountProvider {
+  DISCORD
+  MICROSOFT
+  EMAIL
+}
+
+enum ActivityEventType {
+  MEMBER_JOINED
+  POST_PUBLISHED
+  ROLE_CHANGED
+  APPLICATION_REVIEWED
+  PROJECT_CREATED
+  COMPANY_UPDATED
+  BUILD_REQUEST_SUBMITTED
+}
+
+model User {
+  id                    String               @id @default(cuid())
+  name                  String?
+  email                 String?              @unique
+  emailVerified         DateTime?
+  image                 String?
+  discordId             String?              @unique
+  discordUsername       String?
+  username              String?              @unique
+  displayName           String?
+  bio                   String?              @db.Text
+  minecraftNickname     String?
+  passwordHash          String?
+  siteRole              SiteRole             @default(USER)
+  avatarUrl             String?
+  bannerUrl             String?
+  accentColor           String?
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  linkedAccounts        LinkedAccount[]
+  ownedCompanies        Company[]            @relation("CompanyOwner")
+  companyMemberships    CompanyMember[]
+  companyApplications   CompanyApplication[] @relation("ApplicationApplicant")
+  reviewedApplications  CompanyApplication[] @relation("ApplicationReviewer")
+  authoredPosts         Post[]               @relation("PostAuthor")
+  authoredProjects      Project[]            @relation("ProjectAuthor")
+  buildRequests         BuildRequest[]       @relation("BuildRequestAuthor")
+  notifications         Notification[]
+  reportsMade           Report[]             @relation("ReportReporter")
+  reportsReviewed       Report[]             @relation("ReportReviewer")
+  userBadges            UserBadge[]
+  activityEvents        ActivityEvent[]      @relation("ActivityActor")
+  companyInvites        CompanyInvite[]      @relation("InviteCreator")
+
+  @@index([siteRole])
+  @@index([username])
+}
+
+model LinkedAccount {
+  id                String                @id @default(cuid())
+  userId            String
+  provider          LinkedAccountProvider
+  providerAccountId String?
+  accountEmail      String?
+  metadata          Json?
+  linkedAt          DateTime              @default(now())
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+model Company {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  description      String           @db.Text
+  logoUrl          String?
+  bannerUrl        String?
+  brandColor       String?
+  privacy          Privacy          @default(PUBLIC)
+  recruitingStatus RecruitingStatus @default(OPEN)
+  ownerId          String
+  status           ModerationStatus @default(PENDING_REVIEW)
+  tags             String[]         @default([])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  owner            User             @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  members          CompanyMember[]
+  invites          CompanyInvite[]
+  applications     CompanyApplication[]
+  posts            Post[]
+  projects         Project[]
+  buildRequests    BuildRequest[]
+  activityEvents   ActivityEvent[]
+
+  @@index([status])
+  @@index([privacy])
+  @@index([recruitingStatus])
+}
+
+model CompanyMember {
+  id          String      @id @default(cuid())
+  companyId   String
+  userId      String
+  companyRole CompanyRole @default(MEMBER)
+  joinedAt    DateTime    @default(now())
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([companyRole])
+}
+
+model CompanyInvite {
+  id          String   @id @default(cuid())
+  companyId   String
+  code        String   @unique
+  createdById String
+  expiresAt   DateTime?
+  usageLimit  Int?
+  usageCount  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation("InviteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, active])
+}
+
+model CompanyApplication {
+  id           String            @id @default(cuid())
+  companyId    String
+  userId       String
+  message      String            @db.Text
+  status       ApplicationStatus @default(PENDING)
+  reviewedById String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  company      Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user         User              @relation("ApplicationApplicant", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy   User?             @relation("ApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, userId])
+  @@index([status])
+}
+
+model Post {
+  id         String           @id @default(cuid())
+  slug       String           @unique
+  authorId   String
+  companyId  String?
+  type       PostType
+  title      String
+  excerpt    String?
+  content    String           @db.Text
+  tags       String[]         @default([])
+  visibility Visibility       @default(PUBLIC)
+  status     ModerationStatus @default(DRAFT)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  author     User             @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  company    Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([visibility])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  companyId   String
+  authorId    String
+  title       String
+  description String        @db.Text
+  type        ProjectType
+  status      ProjectStatus
+  visibility  Visibility    @default(PUBLIC)
+  tags        String[]      @default([])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  author      User          @relation("ProjectAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([visibility])
+}
+
+model BuildRequest {
+  id               String               @id @default(cuid())
+  authorId         String
+  companyId        String?
+  title            String
+  description      String               @db.Text
+  category         BuildRequestCategory
+  status           BuildRequestStatus   @default(OPEN)
+  needsRecruitment Boolean              @default(false)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  author           User                 @relation("BuildRequestAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  company          Company?             @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String           @db.Text
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model Report {
+  id           String           @id @default(cuid())
+  targetType   ReportTargetType
+  targetId     String
+  reporterId   String
+  reason       String
+  details      String?          @db.Text
+  status       ReportStatus     @default(OPEN)
+  reviewedById String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  reporter     User             @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy   User?            @relation("ReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([targetType, targetId])
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String
+  color       String
+  icon        String?
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model ActivityEvent {
+  id        String            @id @default(cuid())
+  companyId String?
+  actorId   String?
+  type      ActivityEventType
+  title     String
+  body      String            @db.Text
+  createdAt DateTime          @default(now())
+  company   Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  actor     User?             @relation("ActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
