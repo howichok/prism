@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { TooltipLayer } from "@/components/providers/tooltip-layer";
 
 import "./globals.css";
 
-const sans = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const display = Space_Grotesk({
-  variable: "--font-display",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -29,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${sans.variable} ${display.variable} min-h-screen bg-[#050a14] text-white antialiased`}>
+      <body className={`${inter.variable} min-h-screen bg-background text-foreground antialiased`}>
         <TooltipLayer>{children}</TooltipLayer>
       </body>
     </html>

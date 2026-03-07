@@ -30,18 +30,18 @@ export function ProfileMenu({ displayName, username, avatarUrl, accentColor }: P
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full border border-white/10 bg-white/6 p-1.5 transition hover:border-white/20 hover:bg-white/10" />
+          <button className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-secondary" />
         }
       >
         <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} size="sm" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60 border border-white/10 bg-[#0a1020]/98">
+      <DropdownMenuContent align="end" className="w-56 border-border bg-card">
         <DropdownMenuLabel>
           <div className="flex items-center gap-3 py-1">
             <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} />
-            <div>
-              <div className="font-medium text-white">{displayName}</div>
-              <div className="text-xs text-white/60">@{username ?? "member"}</div>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-medium text-foreground">{displayName}</div>
+              <div className="truncate text-xs text-muted-foreground">@{username ?? "member"}</div>
             </div>
           </div>
         </DropdownMenuLabel>

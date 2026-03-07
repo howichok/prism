@@ -27,60 +27,62 @@ export function UserCard({
     <MiniProfileHoverCard user={user} companyRole={membership?.companyRole} primaryCompany={company}>
       <article
         className={cn(
-          "surface-panel group cursor-pointer overflow-hidden p-5 transition duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/6",
+          "group cursor-pointer rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:border-border/80 hover:shadow-lg hover:shadow-primary/5",
           className,
         )}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            <UserAvatar name={user.displayName} image={user.avatarUrl} accentColor={user.accentColor} className="size-14" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <UserAvatar name={user.displayName} image={user.avatarUrl} accentColor={user.accentColor} className="size-12" />
             <div className="min-w-0">
-              <div className="truncate text-lg font-semibold text-white">{user.displayName}</div>
-              <div className="truncate text-sm text-white/56">@{user.username ?? "member"}</div>
+              <div className="truncate text-sm font-semibold text-foreground">{user.displayName}</div>
+              <div className="truncate text-xs text-muted-foreground">@{user.username ?? "member"}</div>
             </div>
           </div>
           {membership ? <RoleBadge kind="company" role={membership.companyRole} /> : null}
         </div>
 
-        <p className="mt-4 text-sm leading-7 text-white/60">{user.bio ?? "No bio added yet. Hover to inspect the full Prism member card."}</p>
+        <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{user.bio ?? "No bio added yet."}</p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {user.badges.slice(0, 3).map((badge) => (
-            <span
-              key={badge.id}
-              className="rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white"
-              style={{ borderColor: `${badge.color}50`, backgroundColor: `${badge.color}20` }}
-            >
-              {badge.name}
-            </span>
-          ))}
-          {company ? (
-            <span className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
-              {company.name}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-sm text-white/56">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-cyan-100/72" />
-            {user.memberships.length} company links
+        {(user.badges.length > 0 || company) ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {user.badges.slice(0, 3).map((badge) => (
+              <span
+                key={badge.id}
+                className="rounded-md border px-2 py-0.5 text-xs text-foreground"
+                style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
+              >
+                {badge.name}
+              </span>
+            ))}
+            {company ? (
+              <span className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                {company.name}
+              </span>
+            ) : null}
           </div>
+        ) : null}
+
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Sparkles className="size-3.5 text-primary/60" />
+            {user.memberships.length} companies
+          </span>
           {company ? (
-            <div className="flex items-center gap-2">
-              <Building2 className="size-4 text-cyan-100/72" />
+            <span className="inline-flex items-center gap-1.5">
+              <Building2 className="size-3.5 text-primary/60" />
               {company.recruitingStatus.replaceAll("_", " ")}
-            </div>
+            </span>
           ) : null}
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <Button variant="outline" size="sm" render={<Link href={`/users/${user.username ?? ""}`} />} className="flex-1">
             View profile
           </Button>
           {company ? (
             <Button variant="secondary" size="sm" render={<Link href={`/companies/${company.slug}`} />} className="flex-1">
-              View company
+              Company
             </Button>
           ) : null}
         </div>

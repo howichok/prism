@@ -21,55 +21,56 @@ export default async function DashboardPage() {
   return (
     <AppShell
       title="Dashboard"
-      description="Personal overview, company access, posts, applications, and linked identity controls."
+      description="Personal overview, company access, posts, and identity controls."
       items={dashboardSidebarItems}
       rail={
         <>
-          <div className="surface-panel p-6">
-            <div className="panel-label">Notifications</div>
-            <div className="mt-4 space-y-3">
+          {/* Notifications */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Notifications</div>
+            <div className="mt-3 space-y-2">
               {data.notifications.slice(0, 4).map((notification) => (
-                <div key={notification.id} className="surface-panel-soft p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-medium text-white">{notification.title}</div>
-                    {notification.readAt ? null : <span className="size-2 rounded-full bg-cyan-300" />}
+                <div key={notification.id} className="rounded-lg bg-muted/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-foreground">{notification.title}</span>
+                    {notification.readAt ? null : <span className="size-2 rounded-full bg-primary" />}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-white/58">{notification.body}</p>
+                  <p className="mt-1.5 text-xs text-muted-foreground">{notification.body}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="surface-panel p-6">
-            <div className="panel-label">Linked accounts</div>
-            <div className="mt-4 space-y-3 text-sm text-white/60">
+          {/* Linked accounts */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Linked accounts</div>
+            <div className="mt-3 space-y-2 text-sm text-muted-foreground">
               {viewer.linkedAccounts.map((account) => (
-                <div key={account.id} className="surface-panel-soft flex items-center justify-between gap-3 p-4">
+                <div key={account.id} className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
                   <span>{account.provider}</span>
-                  <span className="text-[11px] uppercase tracking-[0.18em] text-white/42">Connected</span>
+                  <span className="text-xs text-muted-foreground/60">Connected</span>
                 </div>
               ))}
-              <div className="surface-panel-soft p-4">
-                Microsoft linking is intentionally future-ready here so launcher rollout can reuse the same Prism account graph later.
-              </div>
+              <p className="text-xs text-muted-foreground/60">
+                Microsoft linking is future-ready for launcher rollout.
+              </p>
             </div>
           </div>
 
-          <div className="surface-panel p-6">
-            <div className="panel-label">Pending items</div>
-            <div className="mt-4 space-y-3 text-sm text-white/60">
-              <div className="surface-panel-soft flex items-center justify-between p-4">
-                <span>Company applications</span>
-                <span>{data.companyApplications.length}</span>
-              </div>
-              <div className="surface-panel-soft flex items-center justify-between p-4">
-                <span>Build requests</span>
-                <span>{data.buildRequests.length}</span>
-              </div>
-              <div className="surface-panel-soft flex items-center justify-between p-4">
-                <span>Draft or moderated posts</span>
-                <span>{data.posts.length}</span>
-              </div>
+          {/* Pending items */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Pending</div>
+            <div className="mt-3 space-y-2">
+              {[
+                { label: "Applications", count: data.companyApplications.length },
+                { label: "Build requests", count: data.buildRequests.length },
+                { label: "Draft posts", count: data.posts.length },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-sm">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="font-medium text-foreground">{item.count}</span>
+                </div>
+              ))}
             </div>
           </div>
         </>
@@ -78,7 +79,7 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Dashboard"
         title={`Welcome back, ${viewer.displayName ?? viewer.username ?? "member"}`}
-        description="Jump back into your company spaces, handle pending PrismMTR workflows, and keep your identity surface current for the broader network."
+        description="Manage your company spaces, handle workflows, and keep your identity current."
         actions={
           <>
             <Button render={<Link href="/dashboard/posts/new" />}>
@@ -93,153 +94,136 @@ export default async function DashboardPage() {
         }
       />
 
-      <section className="surface-panel-strong overflow-hidden p-6 sm:p-7">
+      {/* Profile Overview */}
+      <div className="rounded-xl border border-border bg-card p-6">
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div>
-            <div className="flex items-start gap-4">
-              <UserAvatar
-                name={viewer.displayName ?? viewer.username}
-                image={viewer.avatarUrl}
-                accentColor={viewer.accentColor}
-                size="lg"
-                className="size-22"
-              />
-              <div className="space-y-3">
-                <div>
-                  <div className="panel-label">Personal control center</div>
-                  <div className="mt-2 font-display text-3xl font-semibold text-white">
-                    @{viewer.username ?? "member"}
-                  </div>
-                </div>
-                <p className="max-w-2xl text-sm leading-7 text-white/62">
-                  PrismMTR keeps your Discord-first identity, company memberships, posts, applications, and future linked account surfaces in one place without drifting into chat.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {viewer.companyMemberships.slice(0, 3).map((membership) => (
-                    <Link
-                      key={membership.id}
-                      href={`/dashboard/company/${membership.company.slug}`}
-                      className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-white/62 transition hover:text-white"
-                    >
-                      {membership.company.name}
-                    </Link>
-                  ))}
-                </div>
+          <div className="flex items-start gap-4">
+            <UserAvatar
+              name={viewer.displayName ?? viewer.username}
+              image={viewer.avatarUrl}
+              accentColor={viewer.accentColor}
+              size="lg"
+              className="size-20"
+            />
+            <div className="space-y-2">
+              <div>
+                <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Personal control center</div>
+                <div className="mt-1 text-2xl font-semibold text-foreground">@{viewer.username ?? "member"}</div>
+              </div>
+              <p className="max-w-lg text-sm text-muted-foreground">
+                Your Discord-first identity, company memberships, posts, and linked accounts in one place.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {viewer.companyMemberships.slice(0, 3).map((membership) => (
+                  <Link
+                    key={membership.id}
+                    href={`/dashboard/company/${membership.company.slug}`}
+                    className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {membership.company.name}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="grid gap-3">
+          <div className="space-y-2">
             {[
-              {
-                href: "/dashboard/profile",
-                icon: UserCircle2,
-                label: "Update profile",
-                body: "Keep your public identity, bio, and Minecraft nickname sharp.",
-              },
-              {
-                href: "/companies",
-                icon: Compass,
-                label: "Browse companies",
-                body: "Find public hubs that are recruiting and active right now.",
-              },
-              {
-                href: "/dashboard/settings",
-                icon: Link2,
-                label: "Linked accounts",
-                body: "Prepare Discord, email, and future launcher linkage in one settings surface.",
-              },
+              { href: "/dashboard/profile", icon: UserCircle2, label: "Update profile", body: "Keep your public identity current." },
+              { href: "/companies", icon: Compass, label: "Browse companies", body: "Find recruiting and active hubs." },
+              { href: "/dashboard/settings", icon: Link2, label: "Linked accounts", body: "Manage Discord and future integrations." },
             ].map((item) => (
-              <Link key={item.href} href={item.href} className="surface-panel-soft group p-4 transition hover:border-white/16 hover:bg-white/6">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex size-10 items-center justify-center rounded-2xl border border-white/10 bg-white/6 text-cyan-100">
-                      <item.icon className="size-4" />
-                    </div>
-                    <div className="mt-3 text-base font-semibold text-white">{item.label}</div>
-                    <p className="mt-2 text-sm leading-6 text-white/58">{item.body}</p>
+              <Link key={item.href} href={item.href} className="group flex items-center justify-between rounded-lg bg-muted/30 p-3 transition-colors hover:bg-secondary">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-secondary text-primary">
+                    <item.icon className="size-4" />
                   </div>
-                  <ArrowRight className="size-4 text-white/28 transition group-hover:translate-x-0.5 group-hover:text-cyan-100" />
+                  <div>
+                    <div className="text-sm font-medium text-foreground">{item.label}</div>
+                    <div className="text-xs text-muted-foreground">{item.body}</div>
+                  </div>
                 </div>
+                <ArrowRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
               </Link>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Stats */}
+      <div className="grid gap-3 sm:grid-cols-4">
         {[
           { label: "Companies", value: data.memberships.length },
           { label: "Posts", value: data.posts.length },
           { label: "Requests", value: data.buildRequests.length },
           { label: "Notifications", value: data.notifications.length },
         ].map((stat) => (
-          <div key={stat.label} className="surface-panel p-5">
-            <div className="panel-label">{stat.label}</div>
-            <div className="mt-3 text-3xl font-semibold text-white">{stat.value}</div>
+          <div key={stat.label} className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs text-muted-foreground">{stat.label}</div>
+            <div className="mt-2 text-2xl font-semibold text-foreground">{stat.value}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="space-y-4">
+      {/* Companies + Workflows side by side */}
+      <div className="grid gap-6 2xl:grid-cols-2">
+        <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold text-white">My companies</h2>
-            <Button variant="outline" render={<Link href="/companies" />}>
-              <Compass className="size-4" />
-              Browse Companies
+            <h2 className="text-lg font-semibold text-foreground">My companies</h2>
+            <Button variant="outline" size="sm" render={<Link href="/companies" />}>
+              <Compass className="size-3.5" />
+              Browse
             </Button>
           </div>
           {data.memberships.length ? (
-            <div className="grid gap-5 xl:grid-cols-2">
+            <div className="grid gap-3">
               {data.memberships.map((membership) => (
-                <CompanyCard key={membership.id} company={membership} href={`/dashboard/company/${membership.slug}`} />
+                <CompanyCard key={membership.id} company={membership} href={`/dashboard/company/${membership.slug}`} compact />
               ))}
             </div>
           ) : (
             <EmptyState
               icon={ClipboardList}
-              title="No company memberships yet"
-              description="Create a company, redeem an invite, or browse discovery to join an existing team."
-              action={<Button render={<Link href="/dashboard/company/create" />}>Create Company</Button>}
+              title="No company memberships"
+              description="Create a company, redeem an invite, or browse discovery."
+              action={<Button size="sm" render={<Link href="/dashboard/company/create" />}>Create Company</Button>}
             />
           )}
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-semibold text-white">Pending workflows</h2>
-            <Button variant="outline" render={<Link href="/dashboard/applications" />}>
-              View applications
+            <h2 className="text-lg font-semibold text-foreground">Pending workflows</h2>
+            <Button variant="outline" size="sm" render={<Link href="/dashboard/applications" />}>
+              Applications
             </Button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             {data.companyApplications.length ? (
               data.companyApplications.map((application) => (
-                <div key={application.id} className="surface-panel p-5">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={application.id} className="rounded-xl border border-border bg-card p-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="panel-label">Company application</div>
-                      <div className="mt-2 text-lg font-semibold text-white">{application.company.name}</div>
-                      <p className="mt-2 text-sm leading-7 text-white/60">{application.message}</p>
+                      <div className="text-xs text-muted-foreground">Company application</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{application.company.name}</div>
+                      <p className="mt-1.5 text-xs text-muted-foreground">{application.message}</p>
                     </div>
                     <StatusBadge status={application.status} />
                   </div>
                 </div>
               ))
             ) : (
-              <div className="surface-panel p-5 text-sm text-white/58">
-                No pending company applications. Use discovery to find new public companies.
+              <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                No pending applications.
               </div>
             )}
-
             {data.buildRequests.slice(0, 2).map((request) => (
-              <div key={request.id} className="surface-panel p-5">
-                <div className="flex items-start justify-between gap-4">
+              <div key={request.id} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="panel-label">Build request</div>
-                    <div className="mt-2 text-lg font-semibold text-white">{request.title}</div>
-                    <p className="mt-2 text-sm leading-7 text-white/60">{request.description}</p>
+                    <div className="text-xs text-muted-foreground">Build request</div>
+                    <div className="mt-1 text-sm font-semibold text-foreground">{request.title}</div>
+                    <p className="mt-1.5 text-xs text-muted-foreground">{request.description}</p>
                   </div>
                   <StatusBadge status={request.status} />
                 </div>
@@ -249,20 +233,21 @@ export default async function DashboardPage() {
         </section>
       </div>
 
-      <section className="space-y-4">
+      {/* Recent posts */}
+      <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold text-white">Recent posts</h2>
-          <div className="text-sm text-white/52">Updated {formatDate(new Date())}</div>
+          <h2 className="text-lg font-semibold text-foreground">Recent posts</h2>
+          <span className="text-xs text-muted-foreground">Updated {formatDate(new Date())}</span>
         </div>
         {data.posts.length ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {data.posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
         ) : (
-          <div className="surface-panel p-5 text-sm text-white/58">
-            No authored posts yet. Start a recruitment post, announcement, or project update from the dashboard.
+          <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+            No authored posts yet. Start with a post from the dashboard.
           </div>
         )}
       </section>

@@ -14,16 +14,16 @@ export function UserAvatar({ name, image, accentColor, size = "default", classNa
   return (
     <Avatar
       size={size}
-      className={cn("ring-1 ring-white/10", className)}
+      className={cn("ring-1 ring-border", className)}
       style={{
         background:
           accentColor && !image
-            ? `linear-gradient(135deg, ${accentColor} 0%, rgba(8, 15, 30, 0.94) 100%)`
+            ? `linear-gradient(135deg, ${accentColor}, hsl(240 5% 12%))`
             : undefined,
       }}
     >
       {image ? <AvatarImage src={image} alt={name ?? "Prism member"} /> : null}
-      <AvatarFallback className="bg-white/6 font-medium text-white">{getInitials(name)}</AvatarFallback>
+      <AvatarFallback className="bg-secondary text-xs font-medium text-foreground">{getInitials(name)}</AvatarFallback>
     </Avatar>
   );
 }

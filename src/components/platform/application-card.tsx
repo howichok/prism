@@ -26,37 +26,37 @@ export function ApplicationCard({
   }
 
   return (
-    <div className="surface-panel p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <MiniProfileHoverCard user={application.user}>
-          <div className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/10 bg-white/6 px-3 py-1.5">
+          <div className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-secondary px-2.5 py-1.5">
             <UserAvatar
               name={application.user.displayName}
               image={application.user.avatarUrl}
               accentColor={application.user.accentColor}
               size="sm"
             />
-            <span className="text-sm text-white">{application.user.displayName}</span>
+            <span className="text-sm font-medium text-foreground">{application.user.displayName}</span>
           </div>
         </MiniProfileHoverCard>
         <StatusBadge status={application.status} />
       </div>
-      <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-white/42">
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
         <span>Submitted {formatDate(application.createdAt)}</span>
-        {application.reviewedBy ? <span>Reviewed by {application.reviewedBy.displayName}</span> : null}
+        {application.reviewedBy ? <span>· Reviewed by {application.reviewedBy.displayName}</span> : null}
       </div>
-      <p className="mt-4 text-sm leading-7 text-white/62">{application.message}</p>
+      <p className="mt-3 text-sm text-muted-foreground">{application.message}</p>
       {canReview ? (
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-4 flex flex-wrap gap-2">
           <form action={approveAction}>
-            <Button variant="secondary" className="gap-2 bg-emerald-500/14 text-emerald-100 hover:bg-emerald-500/22">
-              <CheckCheck className="size-4" />
+            <Button size="sm" className="gap-1.5 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25">
+              <CheckCheck className="size-3.5" />
               Approve
             </Button>
           </form>
           <form action={rejectAction}>
-            <Button variant="secondary" className="gap-2 bg-rose-500/14 text-rose-100 hover:bg-rose-500/22">
-              <XCircle className="size-4" />
+            <Button size="sm" className="gap-1.5 bg-rose-500/15 text-rose-400 hover:bg-rose-500/25">
+              <XCircle className="size-3.5" />
               Reject
             </Button>
           </form>

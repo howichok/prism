@@ -21,71 +21,68 @@ export function CompanyCard({
     <Link
       href={href ?? `/companies/${company.slug}`}
       className={cn(
-        "surface-panel group block overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/6",
-        compact ? "p-5" : "p-6",
+        "group block rounded-xl border border-border bg-card transition-all duration-200 hover:border-border/80 hover:shadow-lg hover:shadow-primary/5",
+        compact ? "p-4" : "p-5",
       )}
     >
-      <div className="relative mb-5 overflow-hidden rounded-[1.4rem] border border-white/8">
+      <div className="relative mb-4 overflow-hidden rounded-lg">
         <div
-          className={cn("h-28", compact ? "sm:h-24" : "sm:h-30")}
+          className={cn("h-24", compact ? "sm:h-20" : "sm:h-28")}
           style={{
             background: company.bannerUrl
-              ? `linear-gradient(135deg, rgba(5,10,20,0.18), rgba(5,10,20,0.82)), url(${company.bannerUrl})`
-              : `linear-gradient(135deg, ${company.brandColor ?? "#55d4ff"} 0%, rgba(9,14,26,0.98) 72%)`,
+              ? `linear-gradient(135deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6)), url(${company.bannerUrl})`
+              : `linear-gradient(135deg, ${company.brandColor ?? "hsl(192 91% 55%)"} 0%, hsl(240 5% 10%) 100%)`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-4">
-          <div className="inline-flex rounded-full border border-white/12 bg-[#07101d]/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/62">
-            Company hub
-          </div>
-          <div className="flex items-center gap-2">
-            <StatusBadge status={company.recruitingStatus} />
-            {company.privacy === "PRIVATE" ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/12 bg-[#07101d]/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/60">
-                <LockKeyhole className="size-3.5" />
-                Private
-              </span>
-            ) : null}
-          </div>
+        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
+          <StatusBadge status={company.recruitingStatus} />
+          {company.privacy === "PRIVATE" ? (
+            <span className="inline-flex items-center gap-1 rounded-md bg-black/50 px-2 py-0.5 text-xs text-white/80 backdrop-blur-sm">
+              <LockKeyhole className="size-3" />
+              Private
+            </span>
+          ) : null}
         </div>
       </div>
 
-      <div className="space-y-5">
-        <div className="space-y-2">
+      <div className="space-y-3">
+        <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-display text-xl font-semibold text-white">{company.name}</h3>
-            <ArrowUpRight className="size-4 text-white/34 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-100" />
+            <h3 className="text-base font-semibold text-foreground">{company.name}</h3>
+            <ArrowUpRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
           </div>
-          <p className="text-sm leading-7 text-white/65">{company.description}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{company.description}</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {company.tags.map((tag) => (
-            <span key={tag} className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/65">
-              {tag}
-            </span>
-          ))}
+        {company.tags.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {company.tags.map((tag) => (
+              <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <UsersRound className="size-3.5 text-primary/60" />
+            {formatCompactNumber(company.counts.members)}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <BriefcaseBusiness className="size-3.5 text-primary/60" />
+            {company.counts.projects}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Sparkles className="size-3.5 text-primary/60" />
+            {company.counts.posts}
+          </span>
         </div>
 
-        <div className="grid gap-3 text-sm text-white/62 sm:grid-cols-3">
-          <div className="surface-panel-soft flex items-center gap-2 p-3">
-            <UsersRound className="size-4 text-cyan-200/70" />
-            {formatCompactNumber(company.counts.members)} members
-          </div>
-          <div className="surface-panel-soft flex items-center gap-2 p-3">
-            <BriefcaseBusiness className="size-4 text-cyan-200/70" />
-            {company.counts.projects} projects
-          </div>
-          <div className="surface-panel-soft flex items-center gap-2 p-3">
-            <Sparkles className="size-4 text-cyan-200/70" />
-            {company.counts.posts} posts
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 border-t border-white/8 pt-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-t border-border pt-3">
+          <div className="flex -space-x-1.5">
             {company.members.slice(0, 3).map((member) => (
               <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={company}>
                 <div className="cursor-pointer">
@@ -100,9 +97,9 @@ export function CompanyCard({
             ))}
           </div>
           <MiniProfileHoverCard user={company.owner} companyRole="OWNER" primaryCompany={company}>
-            <div className="flex cursor-pointer items-center gap-3 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 transition hover:bg-white/10">
+            <div className="flex cursor-pointer items-center gap-2 rounded-md bg-secondary px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground">
               <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} size="sm" />
-              <span className="text-sm text-white/62">Owner: {company.owner.displayName}</span>
+              <span>{company.owner.displayName}</span>
             </div>
           </MiniProfileHoverCard>
         </div>

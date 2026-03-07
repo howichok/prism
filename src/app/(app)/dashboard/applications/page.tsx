@@ -16,25 +16,25 @@ export default async function DashboardApplicationsPage() {
       <PageHeader
         eyebrow="Applications"
         title="Requests and applications"
-        description="Submit build requests, track your company applications, and keep an eye on recruitment activity."
+        description="Submit build requests, track your company applications, and monitor recruitment activity."
       />
       <BuildRequestForm companies={data.memberships} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-4">
-          <h2 className="font-display text-2xl font-semibold text-white">My build requests</h2>
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-foreground">My build requests</h2>
           {data.buildRequests.map((request) => (
             <BuildRequestCard key={request.id} request={request} />
           ))}
         </div>
-        <div className="space-y-4">
-          <h2 className="font-display text-2xl font-semibold text-white">Company applications</h2>
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-foreground">Company applications</h2>
           {data.companyApplications.map((application) => (
-            <div key={application.id} className="rounded-[1.6rem] border border-white/10 bg-white/4 p-5">
+            <div key={application.id} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-lg font-semibold text-white">{application.company.name}</div>
+                <span className="text-sm font-semibold text-foreground">{application.company.name}</span>
                 <StatusBadge status={application.status} />
               </div>
-              <p className="mt-3 text-sm leading-7 text-white/60">{application.message}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{application.message}</p>
             </div>
           ))}
         </div>

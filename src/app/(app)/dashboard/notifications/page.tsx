@@ -13,13 +13,16 @@ export default async function DashboardNotificationsPage() {
       <PageHeader
         eyebrow="Notifications"
         title="Your Prism inbox"
-        description="Notifications cover company membership updates, moderation events, recruitment activity, and post workflows."
+        description="Notifications cover company membership updates, moderation events, and post workflows."
       />
-      <div className="space-y-4">
+      <div className="space-y-3">
         {data.notifications.map((notification) => (
-          <div key={notification.id} className="rounded-[1.8rem] border border-white/10 bg-white/4 p-6">
-            <div className="text-lg font-semibold text-white">{notification.title}</div>
-            <p className="mt-2 text-sm leading-7 text-white/60">{notification.body}</p>
+          <div key={notification.id} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-semibold text-foreground">{notification.title}</span>
+              {notification.readAt ? null : <span className="size-2 rounded-full bg-primary" />}
+            </div>
+            <p className="mt-1.5 text-sm text-muted-foreground">{notification.body}</p>
           </div>
         ))}
       </div>

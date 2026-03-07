@@ -23,7 +23,6 @@ const tabs: DiscoveryTab[] = ["all", "companies", "users", "posts", "projects", 
 function sortByName<T extends { title?: string; name?: string; displayName?: string }>(left: T, right: T) {
   const a = left.name ?? left.title ?? left.displayName ?? "";
   const b = right.name ?? right.title ?? right.displayName ?? "";
-
   return a.localeCompare(b);
 }
 
@@ -52,38 +51,23 @@ export function DiscoveryExplorer({
       const searchSpace = [company.name, company.description, company.tags.join(" "), company.owner.displayName].join(" ");
       const privacyMatch = privacy === "all" || company.privacy === privacy;
       const recruitingMatch = recruiting === "all" || company.recruitingStatus === recruiting;
-
       return (!deferredQuery || searchSpace.toLowerCase().includes(deferredQuery)) && privacyMatch && recruitingMatch;
     });
-
     return [...results].sort((left, right) => {
-      if (sort === "a-z") {
-        return sortByName(left, right);
-      }
-
-      if (sort === "latest") {
-        return right.updatedAt.getTime() - left.updatedAt.getTime();
-      }
-
+      if (sort === "a-z") return sortByName(left, right);
+      if (sort === "latest") return right.updatedAt.getTime() - left.updatedAt.getTime();
       return right.counts.members + right.counts.posts + right.counts.projects - (left.counts.members + left.counts.posts + left.counts.projects);
     });
   }, [companies, deferredQuery, privacy, recruiting, sort]);
 
   const filteredUsers = useMemo(() => {
     const results = users.filter((user) => {
-      const searchSpace = [user.displayName, user.username ?? "", user.bio ?? "", user.memberships.map((membership) => membership.company.name).join(" ")].join(" ");
+      const searchSpace = [user.displayName, user.username ?? "", user.bio ?? "", user.memberships.map((m) => m.company.name).join(" ")].join(" ");
       return !deferredQuery || searchSpace.toLowerCase().includes(deferredQuery);
     });
-
     return [...results].sort((left, right) => {
-      if (sort === "a-z") {
-        return sortByName(left, right);
-      }
-
-      if (sort === "latest") {
-        return right.createdAt.getTime() - left.createdAt.getTime();
-      }
-
+      if (sort === "a-z") return sortByName(left, right);
+      if (sort === "latest") return right.createdAt.getTime() - left.createdAt.getTime();
       return right.memberships.length + right.badges.length - (left.memberships.length + left.badges.length);
     });
   }, [deferredQuery, sort, users]);
@@ -92,12 +76,8 @@ export function DiscoveryExplorer({
     const results = posts.filter((post) =>
       !deferredQuery || [post.title, post.excerpt ?? "", post.tags.join(" ")].join(" ").toLowerCase().includes(deferredQuery),
     );
-
     return [...results].sort((left, right) => {
-      if (sort === "a-z") {
-        return sortByName(left, right);
-      }
-
+      if (sort === "a-z") return sortByName(left, right);
       return right.createdAt.getTime() - left.createdAt.getTime();
     });
   }, [deferredQuery, posts, sort]);
@@ -106,12 +86,8 @@ export function DiscoveryExplorer({
     const results = projects.filter((project) =>
       !deferredQuery || [project.title, project.description, project.tags.join(" ")].join(" ").toLowerCase().includes(deferredQuery),
     );
-
     return [...results].sort((left, right) => {
-      if (sort === "a-z") {
-        return sortByName(left, right);
-      }
-
+      if (sort === "a-z") return sortByName(left, right);
       return right.updatedAt.getTime() - left.updatedAt.getTime();
     });
   }, [deferredQuery, projects, sort]);
@@ -121,12 +97,8 @@ export function DiscoveryExplorer({
       !deferredQuery ||
       [request.title, request.description, request.category, request.company?.name ?? ""].join(" ").toLowerCase().includes(deferredQuery),
     );
-
     return [...results].sort((left, right) => {
-      if (sort === "a-z") {
-        return sortByName(left, right);
-      }
-
+      if (sort === "a-z") return sortByName(left, right);
       return right.updatedAt.getTime() - left.updatedAt.getTime();
     });
   }, [buildRequests, deferredQuery, sort]);
@@ -134,33 +106,31 @@ export function DiscoveryExplorer({
   const totalResults =
     filteredCompanies.length + filteredUsers.length + filteredPosts.length + filteredProjects.length + filteredRequests.length;
 
-  const featuredCompany = filteredCompanies[0];
-  const featuredUser = filteredUsers[0];
-
   return (
-    <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <div className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-        <FilterPanel title="Search PrismMTR" description="Explore companies, members, posts, projects, and build requests from one structured surface.">
-          <SearchBar value={query} onChange={setQuery} placeholder="Search by company, member, tag, project, or request" />
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <label className="block text-sm text-white/62">
-              Sort
+    <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+      {/* Sidebar filters */}
+      <div className="space-y-4 xl:sticky xl:top-20 xl:self-start">
+        <FilterPanel title="Search" description="Find companies, members, posts, projects, and build requests.">
+          <SearchBar value={query} onChange={setQuery} placeholder="Search by name, tag, or keyword" />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+            <label className="block text-xs text-muted-foreground">
+              Sort by
               <select
                 value={sort}
-                onChange={(event) => setSort(event.target.value as DiscoverySort)}
-                className="mt-2 h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none"
+                onChange={(e) => setSort(e.target.value as DiscoverySort)}
+                className="mt-1.5 h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/40"
               >
                 <option value="activity">Most active</option>
                 <option value="latest">Latest</option>
-                <option value="a-z">A-Z</option>
+                <option value="a-z">A–Z</option>
               </select>
             </label>
-            <label className="block text-sm text-white/62">
+            <label className="block text-xs text-muted-foreground">
               Recruiting
               <select
                 value={recruiting}
-                onChange={(event) => setRecruiting(event.target.value)}
-                className="mt-2 h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none"
+                onChange={(e) => setRecruiting(e.target.value)}
+                className="mt-1.5 h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/40"
               >
                 <option value="all">All</option>
                 <option value="OPEN">Open</option>
@@ -169,12 +139,12 @@ export function DiscoveryExplorer({
               </select>
             </label>
           </div>
-          <label className="block text-sm text-white/62">
+          <label className="block text-xs text-muted-foreground">
             Privacy
             <select
               value={privacy}
-              onChange={(event) => setPrivacy(event.target.value)}
-              className="mt-2 h-11 w-full rounded-2xl border border-white/10 bg-white/6 px-4 text-white outline-none"
+              onChange={(e) => setPrivacy(e.target.value)}
+              className="mt-1.5 h-9 w-full rounded-lg border border-border bg-secondary px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary/40"
             >
               <option value="all">All</option>
               <option value="PUBLIC">Public</option>
@@ -183,113 +153,96 @@ export function DiscoveryExplorer({
           </label>
         </FilterPanel>
 
-        <FilterPanel title="Focus" description="Jump between the major discovery surfaces without losing your current search and filters.">
-          <div className="flex flex-wrap gap-2">
+        {/* Tab pills */}
+        <div className="rounded-xl border border-border bg-card p-3">
+          <div className="mb-2 text-xs font-medium text-muted-foreground">Focus</div>
+          <div className="flex flex-wrap gap-1.5">
             {tabs.map((value) => (
               <button
                 key={value}
                 onClick={() => setTab(value)}
                 className={cn(
-                  "rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.18em] transition",
+                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                   tab === value
-                    ? "border-cyan-400/24 bg-cyan-400/12 text-cyan-100"
-                    : "border-white/10 bg-white/6 text-white/58 hover:text-white",
+                    ? "bg-primary/15 text-primary"
+                    : "bg-secondary text-muted-foreground hover:text-foreground",
                 )}
               >
                 {titleCase(value)}
               </button>
             ))}
           </div>
-        </FilterPanel>
+        </div>
 
-        <div className="surface-panel p-5">
-          <div className="panel-label">Result pulse</div>
-          <div className="mt-4 grid gap-3 text-sm text-white/62">
-            <div className="surface-panel-soft flex items-center justify-between p-3">
-              <span>Companies</span>
-              <span>{filteredCompanies.length}</span>
-            </div>
-            <div className="surface-panel-soft flex items-center justify-between p-3">
-              <span>Members</span>
-              <span>{filteredUsers.length}</span>
-            </div>
-            <div className="surface-panel-soft flex items-center justify-between p-3">
-              <span>Posts + Projects</span>
-              <span>{filteredPosts.length + filteredProjects.length}</span>
-            </div>
-            <div className="surface-panel-soft flex items-center justify-between p-3">
-              <span>Build requests</span>
-              <span>{filteredRequests.length}</span>
-            </div>
+        {/* Stats */}
+        <div className="rounded-xl border border-border bg-card p-3">
+          <div className="mb-2 text-xs font-medium text-muted-foreground">Results</div>
+          <div className="space-y-1 text-xs">
+            {[
+              { label: "Companies", count: filteredCompanies.length },
+              { label: "Members", count: filteredUsers.length },
+              { label: "Posts + Projects", count: filteredPosts.length + filteredProjects.length },
+              { label: "Build requests", count: filteredRequests.length },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5">
+                <span className="text-muted-foreground">{item.label}</span>
+                <span className="font-medium text-foreground">{item.count}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
+      {/* Results */}
       <div className="space-y-8">
-        <section className="surface-panel-strong overflow-hidden p-6 sm:p-7">
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/18 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.24em] text-cyan-100">
-                <Compass className="size-3.5" />
-                Discovery hub
-              </div>
-              <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight text-white">Find the next company, member, or project thread worth following.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/62">
-                Discovery is tuned for PrismMTR&apos;s social-company model: visible communities, rich member identity, public posts, and work surfaces that still feel useful on a smaller seed dataset.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.2em] text-white/42">
-                <span>{totalResults} visible results</span>
-                {deferredQuery ? <span>Query: {deferredQuery}</span> : <span>No search query applied</span>}
-              </div>
-            </div>
-            <div className="grid gap-3">
-              <div className="surface-panel-soft p-4">
-                <div className="panel-label">Featured company</div>
-                <div className="mt-3 text-lg font-semibold text-white">{featuredCompany?.name ?? "No company matches"}</div>
-                <p className="mt-2 text-sm leading-6 text-white/58">{featuredCompany?.description ?? "Adjust the current filters to surface a different set of companies."}</p>
-              </div>
-              <div className="surface-panel-soft p-4">
-                <div className="panel-label">Featured member</div>
-                <div className="mt-3 text-lg font-semibold text-white">{featuredUser?.displayName ?? "No member matches"}</div>
-                <p className="mt-2 text-sm leading-6 text-white/58">{featuredUser?.bio ?? "Discovery cards keep user identity rich even before the dataset grows."}</p>
-              </div>
-            </div>
+        {/* Hero */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="inline-flex items-center gap-2 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+            <Compass className="size-3.5" />
+            Discovery
           </div>
-        </section>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+            Find companies, members, and projects
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Explore the PrismMTR network — visible communities, rich member identity, public posts, and active work.
+          </p>
+          <div className="mt-3 text-xs text-muted-foreground">
+            {totalResults} results{deferredQuery ? ` for "${deferredQuery}"` : ""}
+          </div>
+        </div>
 
+        {/* Companies */}
         {(tab === "all" || tab === "companies") && (
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="size-4 text-cyan-200/72" />
-                <h2 className="font-display text-2xl font-semibold text-white">Companies</h2>
-              </div>
-              <span className="text-sm text-white/56">{filteredCompanies.length} results</span>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <Building2 className="size-4 text-primary/60" />
+                Companies
+              </h2>
+              <span className="text-xs text-muted-foreground">{filteredCompanies.length}</span>
             </div>
             {filteredCompanies.length ? (
-              <div className="grid gap-5 2xl:grid-cols-2">
+              <div className="grid gap-4 2xl:grid-cols-2">
                 {filteredCompanies.map((company) => (
                   <CompanyCard key={company.id} company={company} compact />
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={SearchSlash}
-                title="No companies match the current filters"
-                description="Try broadening recruiting or privacy filters, or switch the discovery surface to members or posts."
-              />
+              <EmptyState icon={SearchSlash} title="No companies match" description="Try broadening your filters." />
             )}
           </section>
         )}
 
+        {/* Users */}
         {(tab === "all" || tab === "users") && (
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <UsersRound className="size-4 text-cyan-200/72" />
-                <h2 className="font-display text-2xl font-semibold text-white">Members</h2>
-              </div>
-              <span className="text-sm text-white/56">{filteredUsers.length} results</span>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <UsersRound className="size-4 text-primary/60" />
+                Members
+              </h2>
+              <span className="text-xs text-muted-foreground">{filteredUsers.length}</span>
             </div>
             {filteredUsers.length ? (
               <div className="grid gap-4 2xl:grid-cols-2">
@@ -298,48 +251,42 @@ export function DiscoveryExplorer({
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={UsersRound}
-                title="No members match this search"
-                description="Try searching by display name, handle, company, or a looser term."
-              />
+              <EmptyState icon={UsersRound} title="No members match" description="Try a different search term." />
             )}
           </section>
         )}
 
+        {/* Posts */}
         {(tab === "all" || tab === "posts") && (
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Newspaper className="size-4 text-cyan-200/72" />
-                <h2 className="font-display text-2xl font-semibold text-white">Posts</h2>
-              </div>
-              <span className="text-sm text-white/56">{filteredPosts.length} results</span>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <Newspaper className="size-4 text-primary/60" />
+                Posts
+              </h2>
+              <span className="text-xs text-muted-foreground">{filteredPosts.length}</span>
             </div>
             {filteredPosts.length ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredPosts.map((post) => (
                   <PostCard key={post.id} post={post} />
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={Newspaper}
-                title="No posts surfaced"
-                description="Search broader topics or switch to projects and requests to keep exploring the network."
-              />
+              <EmptyState icon={Newspaper} title="No posts found" description="Search broader topics." />
             )}
           </section>
         )}
 
+        {/* Projects */}
         {(tab === "all" || tab === "projects") && (
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-4 text-cyan-200/72" />
-                <h2 className="font-display text-2xl font-semibold text-white">Projects</h2>
-              </div>
-              <span className="text-sm text-white/56">{filteredProjects.length} results</span>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <Sparkles className="size-4 text-primary/60" />
+                Projects
+              </h2>
+              <span className="text-xs text-muted-foreground">{filteredProjects.length}</span>
             </div>
             {filteredProjects.length ? (
               <div className="grid gap-4 2xl:grid-cols-2">
@@ -348,36 +295,29 @@ export function DiscoveryExplorer({
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={Sparkles}
-                title="No projects match right now"
-                description="Projects will appear here as public company work becomes visible."
-              />
+              <EmptyState icon={Sparkles} title="No projects yet" description="Projects will appear as companies publish work." />
             )}
           </section>
         )}
 
+        {/* Build requests */}
         {(tab === "all" || tab === "requests") && (
-          <section className="space-y-4">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="size-4 text-cyan-200/72" />
-                <h2 className="font-display text-2xl font-semibold text-white">Build Requests</h2>
-              </div>
-              <span className="text-sm text-white/56">{filteredRequests.length} results</span>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <ClipboardList className="size-4 text-primary/60" />
+                Build Requests
+              </h2>
+              <span className="text-xs text-muted-foreground">{filteredRequests.length}</span>
             </div>
             {filteredRequests.length ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredRequests.map((request) => (
                   <BuildRequestCard key={request.id} request={request} />
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon={ClipboardList}
-                title="No build requests are visible"
-                description="This surface fills out as companies publish new requests or members submit public work needs."
-              />
+              <EmptyState icon={ClipboardList} title="No build requests" description="Requests appear as companies publish needs." />
             )}
           </section>
         )}

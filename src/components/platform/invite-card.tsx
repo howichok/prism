@@ -13,41 +13,35 @@ export function InviteCard({ invite }: { invite: InviteSummary }) {
   async function handleCopy() {
     await navigator.clipboard.writeText(invite.code);
     setCopied(true);
-
     window.setTimeout(() => setCopied(false), 1800);
   }
 
   return (
-    <div className="surface-panel p-5">
-      <div className="flex items-start justify-between gap-4">
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs uppercase tracking-[0.24em] text-cyan-200/70">Invite code</div>
-          <div className="mt-2 font-mono text-lg text-white">{invite.code}</div>
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Invite code</div>
+          <div className="mt-1.5 font-mono text-base font-medium text-foreground">{invite.code}</div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCopy}
-          className="border-white/10 bg-white/6 text-white hover:bg-white/10"
-        >
-          <Copy className="size-4" />
+        <Button variant="outline" size="sm" onClick={handleCopy}>
+          <Copy className="size-3.5" />
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
           {invite.active ? "Active" : "Inactive"}
         </span>
-        <span className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
-          {invite.usageCount} / {invite.usageLimit ?? "Unlimited"} uses
+        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+          {invite.usageCount} / {invite.usageLimit ?? "∞"} uses
         </span>
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-white/56">
-        <div className="inline-flex items-center gap-2">
-          <Hourglass className="size-4" />
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <Hourglass className="size-3.5" />
           {invite.expiresAt ? formatDate(invite.expiresAt) : "No expiry"}
-        </div>
-        <div>Created {formatDate(invite.createdAt)}</div>
+        </span>
+        <span>Created {formatDate(invite.createdAt)}</span>
       </div>
     </div>
   );

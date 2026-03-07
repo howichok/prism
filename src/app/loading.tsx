@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#050a14]">
-      <div className="rounded-[1.8rem] border border-white/10 bg-white/4 px-6 py-4 text-sm text-white/70">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="rounded-xl border border-border bg-card px-6 py-4 text-sm text-muted-foreground">
         Loading PrismMTR...
       </div>
     </div>

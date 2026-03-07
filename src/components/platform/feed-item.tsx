@@ -20,33 +20,33 @@ export function FeedItem({ item }: { item: ActivitySummary }) {
   const Icon = activityIconMap[item.type as keyof typeof activityIconMap] ?? ActivitySquare;
 
   return (
-    <div className="surface-panel-soft flex gap-4 p-4">
-      <div className="mt-1 flex size-10 items-center justify-center rounded-2xl border border-white/10 bg-white/8 text-cyan-100">
-        <Icon className="size-4" />
+    <div className="flex gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+        <Icon className="size-3.5" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           {item.actor ? (
             <MiniProfileHoverCard user={item.actor} primaryCompany={item.company}>
-              <div className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/6 px-2.5 py-1">
+              <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-secondary px-2 py-1">
                 <UserAvatar
                   name={item.actor.displayName}
                   image={item.actor.avatarUrl}
                   accentColor={item.actor.accentColor}
                   size="sm"
                 />
-                <span className="text-sm text-white">{item.actor.displayName}</span>
+                <span className="text-sm font-medium text-foreground">{item.actor.displayName}</span>
               </div>
             </MiniProfileHoverCard>
           ) : null}
-          <span className="text-sm text-white/72">{item.title}</span>
-          <span className="text-xs uppercase tracking-[0.18em] text-white/42">{formatRelativeTime(item.createdAt)}</span>
+          <span className="text-sm text-muted-foreground">{item.title}</span>
+          <span className="text-xs text-muted-foreground/60">{formatRelativeTime(item.createdAt)}</span>
         </div>
-        <p className="mt-2 text-sm leading-6 text-white/58">{item.body}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{item.body}</p>
         {item.company ? (
           <Link
             href={`/companies/${item.company.slug}`}
-            className="mt-3 inline-flex rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/58 transition hover:text-white"
+            className="mt-2 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             {item.company.name}
           </Link>

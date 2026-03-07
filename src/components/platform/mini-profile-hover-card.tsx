@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Gamepad2,
   Globe2,
+  MessageSquare,
   Sparkles,
   UserRoundPlus,
   UserSearch,
@@ -33,14 +34,14 @@ type MiniProfileHoverCardProps = {
 function getBannerStyle(user: UserPreview) {
   if (user.bannerUrl) {
     return {
-      backgroundImage: `linear-gradient(135deg, rgba(5, 10, 20, 0.28), rgba(5, 10, 20, 0.88)), url(${user.bannerUrl})`,
+      backgroundImage: `linear-gradient(to bottom, transparent 40%, hsl(240 5% 8%)), url(${user.bannerUrl})`,
       backgroundSize: "cover",
       backgroundPosition: "center",
     };
   }
 
   return {
-    background: `linear-gradient(135deg, ${user.accentColor ?? "#55d4ff"} 0%, rgba(8, 15, 30, 0.96) 100%)`,
+    background: `linear-gradient(135deg, ${user.accentColor ?? "hsl(192 91% 55%)"} 0%, hsl(240 5% 8%) 100%)`,
   };
 }
 
@@ -48,7 +49,6 @@ function getMembership(user: UserPreview, primaryCompany?: CompanyReference | nu
   if (!primaryCompany) {
     return user.memberships[0] ?? null;
   }
-
   return user.memberships.find((membership) => membership.company.id === primaryCompany.id) ?? user.memberships[0] ?? null;
 }
 
@@ -64,28 +64,30 @@ function QuickActions({
   compact?: boolean;
 }) {
   return (
-    <div className={cn("grid gap-2", compact ? "sm:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-3")}>
-      <Button render={<Link href={profileHref} />} className="w-full">
-        <UserSearch className="size-4" />
-        View Profile
+    <div className={cn("grid gap-2", compact ? "grid-cols-3" : "sm:grid-cols-3")}>
+      <Button size="sm" render={<Link href={profileHref} />} className="w-full">
+        <UserSearch className="size-3.5" />
+        Profile
       </Button>
       <Button
         variant="outline"
+        size="sm"
         render={<Link href={companyHref ?? "#"} />}
         disabled={!companyHref}
         className="w-full"
       >
-        <Building2 className="size-4" />
-        View Company
+        <Building2 className="size-3.5" />
+        Company
       </Button>
       <Button
         variant="secondary"
+        size="sm"
         render={<Link href={inviteHref ?? "#"} />}
         disabled={!inviteHref}
-        className={cn("w-full", compact ? "" : "sm:col-span-2 lg:col-span-1")}
+        className="w-full"
       >
-        <UserRoundPlus className="size-4" />
-        Invite
+        <MessageSquare className="size-3.5" />
+        Message
       </Button>
     </div>
   );
@@ -114,127 +116,127 @@ function ProfileCard({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[1.7rem] border border-white/10 bg-[#07101d]/96 text-white shadow-[0_34px_100px_-48px_rgba(0,0,0,0.96)]",
-        expanded ? "w-full" : "",
+        "overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-2xl",
+        expanded ? "w-full" : "animate-scale-in",
       )}
     >
-      <div className="relative h-28 border-b border-white/10" style={getBannerStyle(user)}>
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 pb-4">
-          <div className="flex items-center gap-2">
+      {/* Banner */}
+      <div className="relative h-24 border-b border-border" style={getBannerStyle(user)}>
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3">
+          <div className="flex items-center gap-1.5">
             {showSiteRole ? <RoleBadge kind="site" role={user.siteRole} /> : null}
             {resolvedRole ? <RoleBadge kind="company" role={resolvedRole} /> : null}
-          </div>
-          <div className="rounded-full border border-white/12 bg-[#07101d]/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
-            Prism member
           </div>
         </div>
       </div>
 
-      <div className="space-y-5 p-5">
-        <div className="-mt-16 flex items-end justify-between gap-4">
-          <div className="flex min-w-0 items-end gap-4">
-            <UserAvatar
-              name={user.displayName}
-              image={user.avatarUrl}
-              accentColor={user.accentColor}
-              size="lg"
-              className="size-22 border-4 border-[#07101d]"
-            />
-            <div className="min-w-0 pb-2">
-              <div className="truncate font-display text-2xl font-semibold text-white">{user.displayName}</div>
-              <div className="text-sm text-white/58">
-                @{user.username ?? "member"}
-                {user.discordUsername ? ` • ${user.discordUsername}` : ""}
-              </div>
+      {/* Content */}
+      <div className="space-y-4 p-4">
+        {/* Avatar + Name */}
+        <div className="-mt-12 flex items-end gap-3">
+          <UserAvatar
+            name={user.displayName}
+            image={user.avatarUrl}
+            accentColor={user.accentColor}
+            size="lg"
+            className="size-16 border-[3px] border-card"
+          />
+          <div className="min-w-0 pb-1">
+            <div className="truncate text-lg font-semibold text-foreground">{user.displayName}</div>
+            <div className="text-sm text-muted-foreground">
+              @{user.username ?? "member"}
+              {user.discordUsername ? ` · ${user.discordUsername}` : ""}
             </div>
           </div>
-          {!expanded ? (
-            <div className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white/58">
-              Hover card
-            </div>
-          ) : null}
         </div>
 
-        {user.bio ? <p className="text-sm leading-7 text-white/72">{user.bio}</p> : null}
+        {/* Bio */}
+        {user.bio ? (
+          <p className={cn("text-sm text-muted-foreground", expanded ? "" : "line-clamp-3")}>{user.bio}</p>
+        ) : null}
 
-        <div className="flex flex-wrap gap-2">
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1.5">
           {user.badges.slice(0, expanded ? 6 : 3).map((badge) => (
             <span
               key={badge.id}
-              className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white"
-              style={{ borderColor: `${badge.color}55`, backgroundColor: `${badge.color}20` }}
+              className="rounded-md border px-2 py-0.5 text-xs font-medium text-foreground"
+              style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
             >
               {badge.name}
             </span>
           ))}
           {user.badges.length === 0 ? (
-            <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/52">
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
               No badges yet
             </span>
           ) : null}
         </div>
 
-        <div className={cn("grid gap-3", expanded ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
-          <div className="surface-panel-soft p-4">
-            <div className="panel-label">Identity</div>
-            <div className="mt-3 space-y-2 text-sm text-white/68">
+        {/* Info panels */}
+        <div className={cn("grid gap-2", expanded ? "sm:grid-cols-3" : "grid-cols-2")}>
+          {/* Identity */}
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+            <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Identity</div>
+            <div className="space-y-1.5 text-xs text-muted-foreground">
               {user.discordUsername ? (
                 <div className="flex items-center gap-2">
-                  <Globe2 className="size-4 text-cyan-100" />
+                  <Globe2 className="size-3.5 text-primary" />
                   <span>{user.discordUsername}</span>
                 </div>
               ) : null}
               {user.minecraftNickname ? (
                 <div className="flex items-center gap-2">
-                  <Gamepad2 className="size-4 text-cyan-100" />
+                  <Gamepad2 className="size-3.5 text-primary" />
                   <span>{user.minecraftNickname}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Gamepad2 className="size-4 text-white/38" />
-                  <span className="text-white/48">Minecraft nickname not set</span>
+                  <Gamepad2 className="size-3.5 text-muted-foreground/40" />
+                  <span className="text-muted-foreground/60">No MC name</span>
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <CalendarDays className="size-4 text-cyan-100" />
+                <CalendarDays className="size-3.5 text-primary" />
                 <span>Joined {formatDate(user.createdAt)}</span>
               </div>
             </div>
           </div>
 
-          <div className="surface-panel-soft p-4">
-            <div className="panel-label">Company</div>
-            <div className="mt-3 space-y-2 text-sm text-white/68">
+          {/* Company */}
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+            <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Company</div>
+            <div className="space-y-1.5 text-xs text-muted-foreground">
               {company ? (
                 <>
-                  <div className="font-medium text-white">{company.name}</div>
+                  <div className="font-medium text-foreground">{company.name}</div>
                   <div>{resolvedRole ? resolvedRole.replaceAll("_", " ") : "Member"}</div>
+                  <div className="inline-flex rounded-md bg-secondary px-2 py-0.5 text-[11px]">
+                    {company.recruitingStatus.replaceAll("_", " ")}
+                  </div>
                 </>
               ) : (
-                <div className="text-white/48">No active company linked yet.</div>
+                <div className="text-muted-foreground/60">No company linked</div>
               )}
-              {company ? (
-                <div className="inline-flex w-fit rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/60">
-                  {company.recruitingStatus.replaceAll("_", " ")}
-                </div>
-              ) : null}
             </div>
           </div>
 
+          {/* Presence (expanded only) */}
           {expanded ? (
-            <div className="surface-panel-soft p-4">
-              <div className="panel-label">Presence</div>
-              <div className="mt-3 space-y-2 text-sm text-white/68">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Presence</div>
+              <div className="space-y-1.5 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="size-4 text-cyan-100" />
-                  <span>{user.memberships.length} company connection{user.memberships.length === 1 ? "" : "s"}</span>
+                  <Sparkles className="size-3.5 text-primary" />
+                  <span>{user.memberships.length} {user.memberships.length === 1 ? "company" : "companies"}</span>
                 </div>
-                <div>{user.badges.length} badge{user.badges.length === 1 ? "" : "s"} unlocked</div>
+                <div>{user.badges.length} {user.badges.length === 1 ? "badge" : "badges"} unlocked</div>
               </div>
             </div>
           ) : null}
         </div>
 
+        {/* Actions */}
         <QuickActions profileHref={profileHref} companyHref={companyHref} inviteHref={inviteHref} compact={!expanded} />
       </div>
     </div>
@@ -252,18 +254,18 @@ export function MiniProfileHoverCard({
   return (
     <HoverCard>
       <HoverCardTrigger>{children}</HoverCardTrigger>
-      <HoverCardContent align="start" sideOffset={14} className={cn("w-[25rem] border-none bg-transparent p-0 shadow-none", className)}>
+      <HoverCardContent align="start" sideOffset={12} className={cn("w-[22rem] border-none bg-transparent p-0 shadow-none", className)}>
         <Dialog>
-          <div className="space-y-3">
+          <div className="space-y-2">
             <ProfileCard user={user} companyRole={companyRole} primaryCompany={primaryCompany} inviteHref={inviteHref} />
-            <DialogTrigger render={<Button variant="secondary" className="w-full bg-white/8 text-white hover:bg-white/12" />}>
-              Open Profile Card
+            <DialogTrigger render={<Button variant="secondary" size="sm" className="w-full text-xs" />}>
+              Open full profile
             </DialogTrigger>
           </div>
-          <DialogContent className="max-w-3xl border border-white/10 bg-[#050b16] p-0 shadow-[0_40px_120px_-60px_rgba(0,0,0,0.98)]">
+          <DialogContent className="max-w-2xl border-border bg-card p-0 shadow-2xl">
             <DialogHeader className="sr-only">
               <DialogTitle>{user.displayName}</DialogTitle>
-              <DialogDescription>Expanded PrismMTR member profile card.</DialogDescription>
+              <DialogDescription>PrismMTR member profile card.</DialogDescription>
             </DialogHeader>
             <ProfileCard
               user={user}

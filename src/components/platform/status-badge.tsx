@@ -13,31 +13,31 @@ type StatusValue =
   | ReportStatus;
 
 const toneMap: Record<string, string> = {
-  OPEN: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
-  APPROVED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
-  PUBLISHED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
-  COMPLETE: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
-  PLANNING: "border-violet-500/20 bg-violet-500/10 text-violet-100",
-  LIMITED: "border-amber-500/20 bg-amber-500/10 text-amber-100",
-  IN_PROGRESS: "border-amber-500/20 bg-amber-500/10 text-amber-100",
-  IN_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-100",
-  REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-100",
-  PENDING: "border-sky-500/20 bg-sky-500/10 text-sky-100",
-  PENDING_REVIEW: "border-sky-500/20 bg-sky-500/10 text-sky-100",
-  ACTIONED: "border-sky-500/20 bg-sky-500/10 text-sky-100",
-  REJECTED: "border-rose-500/20 bg-rose-500/10 text-rose-100",
-  CLOSED: "border-white/12 bg-white/6 text-white/72",
-  ARCHIVED: "border-white/12 bg-white/6 text-white/72",
-  WITHDRAWN: "border-white/12 bg-white/6 text-white/72",
-  ON_HOLD: "border-white/12 bg-white/6 text-white/72",
-  RESOLVED: "border-white/12 bg-white/6 text-white/72",
+  OPEN: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  APPROVED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  PUBLISHED: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  COMPLETE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  PLANNING: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+  LIMITED: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  IN_PROGRESS: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  IN_REVIEW: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  REVIEW: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  PENDING: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+  PENDING_REVIEW: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+  ACTIONED: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+  REJECTED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
+  CLOSED: "border-border bg-secondary text-muted-foreground",
+  ARCHIVED: "border-border bg-secondary text-muted-foreground",
+  WITHDRAWN: "border-border bg-secondary text-muted-foreground",
+  ON_HOLD: "border-border bg-secondary text-muted-foreground",
+  RESOLVED: "border-border bg-secondary text-muted-foreground",
 };
 
 export function StatusBadge({ status, className }: { status: StatusValue; className?: string }) {
   return (
     <Badge
       className={cn(
-        "rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-sm",
+        "rounded-md border px-2 py-0.5 text-[11px] font-medium",
         toneMap[status] ?? toneMap.ARCHIVED,
         className,
       )}

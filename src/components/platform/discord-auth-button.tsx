@@ -22,7 +22,7 @@ export function DiscordAuthButton({
       className="gap-2"
     >
       {configured ? <LogIn className="size-4" /> : <Sparkles className="size-4" />}
-      {configured ? "Sign In with Discord" : "Configure Discord Auth"}
+      {configured ? "Sign in with Discord" : "Configure Discord Auth"}
     </Button>
   );
 }

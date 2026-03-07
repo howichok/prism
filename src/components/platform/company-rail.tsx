@@ -17,45 +17,56 @@ export function CompanyRail({
 }) {
   return (
     <>
-      <div className="surface-panel p-6">
-        <div className="panel-label">HQ snapshot</div>
-        <div className="mt-4 flex flex-wrap gap-2">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">HQ Snapshot</div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
           <StatusBadge status={company.status} />
           <StatusBadge status={company.recruitingStatus} />
           {currentRole ? <RoleBadge kind="company" role={currentRole} /> : null}
         </div>
-        <div className="mt-5 grid gap-3 text-sm text-white/62">
-          <div className="surface-panel-soft p-3">{company.counts.members} members</div>
-          <div className="surface-panel-soft p-3">{company.counts.posts} posts</div>
-          <div className="surface-panel-soft p-3">{company.counts.projects} projects</div>
+        <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+            <span>Members</span>
+            <span className="font-medium text-foreground">{company.counts.members}</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+            <span>Posts</span>
+            <span className="font-medium text-foreground">{company.counts.posts}</span>
+          </div>
+          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+            <span>Projects</span>
+            <span className="font-medium text-foreground">{company.counts.projects}</span>
+          </div>
         </div>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {company.tags.map((tag) => (
-            <span key={tag} className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <div className="mt-6">
-          <Button variant="outline" render={<Link href={`/companies/${company.slug}`} />} className="w-full">
-            View public profile
+        {company.tags.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {company.tags.map((tag) => (
+              <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        <div className="mt-4">
+          <Button variant="outline" size="sm" render={<Link href={`/companies/${company.slug}`} />} className="w-full">
+            View public page
           </Button>
         </div>
       </div>
 
-      <div className="surface-panel p-6">
-        <div className="panel-label">Leadership</div>
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Leadership</div>
         <MiniProfileHoverCard user={company.owner} companyRole="OWNER" primaryCompany={company}>
-          <div className="mt-4 flex cursor-pointer items-center gap-3 rounded-[1.4rem] border border-white/10 bg-white/6 p-3 transition hover:bg-white/10">
-            <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} />
+          <div className="mt-3 flex cursor-pointer items-center gap-3 rounded-lg bg-secondary p-2.5 transition-colors hover:bg-secondary/80">
+            <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} size="sm" />
             <div className="min-w-0">
-              <div className="truncate font-medium text-white">{company.owner.displayName}</div>
-              <div className="truncate text-sm text-white/56">@{company.owner.username ?? "member"}</div>
+              <div className="truncate text-sm font-medium text-foreground">{company.owner.displayName}</div>
+              <div className="truncate text-xs text-muted-foreground">@{company.owner.username ?? "member"}</div>
             </div>
           </div>
         </MiniProfileHoverCard>
-        <p className="mt-4 text-sm leading-7 text-white/58">
-          Public company pages stay discoverable while the internal hub remains structured around members, projects, posts, invites, and moderation-aware workflows.
+        <p className="mt-3 text-xs text-muted-foreground">
+          Public company pages stay discoverable while the internal hub provides structured workflows.
         </p>
       </div>
     </>

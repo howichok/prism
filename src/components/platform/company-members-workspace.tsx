@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { Search, ShieldCheck, UserSearch } from "lucide-react";
 
 import { MemberRoleEditor } from "@/components/forms/member-role-editor";
+import { EmptyState } from "@/components/platform/empty-state";
 import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
@@ -55,9 +56,7 @@ export function CompanyMembersWorkspace({
         .join(" ")
         .toLowerCase();
 
-      const matchesSearch = !search || searchSpace.includes(search);
-
-      return matchesRole && matchesSearch;
+      return matchesRole && (!search || searchSpace.includes(search));
     });
   }, [members, query, roleFilter]);
 
@@ -79,25 +78,26 @@ export function CompanyMembersWorkspace({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="space-y-6">
-        <div className="surface-panel p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-4">
+        {/* Controls */}
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="panel-label">Roster controls</div>
-              <p className="mt-2 text-sm leading-6 text-white/58">
-                Search by member name, handle, Minecraft nickname, or Discord identity and then focus the roster by role level.
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Roster controls</div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Search by name, handle, Minecraft nickname, or Discord identity.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {(["ALL", ...roleOrder] as const).map((role) => (
                 <button
                   key={role}
                   onClick={() => setRoleFilter(role)}
                   className={cn(
-                    "rounded-full border px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] transition",
+                    "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                     roleFilter === role
-                      ? "border-cyan-400/24 bg-cyan-400/12 text-cyan-100"
-                      : "border-white/10 bg-white/6 text-white/58 hover:text-white",
+                      ? "bg-primary/15 text-primary"
+                      : "bg-secondary text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {role === "ALL" ? "All roles" : role.replaceAll("_", " ")}
@@ -105,29 +105,29 @@ export function CompanyMembersWorkspace({
               ))}
             </div>
           </div>
-          <div className="relative mt-5">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-white/36" />
+          <div className="relative mt-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search members, handles, Minecraft names, or bios"
-              className="h-[3.25rem] w-full rounded-[1.2rem] border border-white/10 bg-white/6 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/36"
+              className="h-10 w-full rounded-lg border border-border bg-secondary pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/40"
             />
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* Member groups */}
+        <div className="space-y-3">
           {groupedMembers.map((group) =>
             group.members.length ? (
-              <section key={group.role} className="surface-panel p-5">
-                <div className="flex items-center justify-between border-b border-white/8 pb-4">
-                  <div className="flex items-center gap-3">
+              <section key={group.role} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
                     <RoleBadge kind="company" role={group.role} />
-                    <div className="text-sm text-white/56">{group.members.length} members</div>
+                    <span className="text-xs text-muted-foreground">{group.members.length} members</span>
                   </div>
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">Role group</div>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 space-y-1.5">
                   {group.members.map((member) => {
                     const active = selectedMember?.id === member.id;
                     const manageable = canManageRole(currentRole, member.companyRole);
@@ -136,39 +136,39 @@ export function CompanyMembersWorkspace({
                       <div
                         key={member.id}
                         className={cn(
-                          "rounded-[1.4rem] border p-3 transition",
+                          "rounded-lg border p-2.5 transition-colors",
                           active
-                            ? "border-cyan-400/24 bg-cyan-400/10 shadow-[inset_0_0_0_1px_rgba(85,212,255,0.12)]"
-                            : "border-white/10 bg-white/4 hover:border-white/16 hover:bg-white/6",
+                            ? "border-primary/30 bg-primary/5"
+                            : "border-border/60 bg-muted/20 hover:bg-secondary",
                         )}
                       >
-                        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                           <button
                             onClick={() => setSelectedMemberId(member.id)}
-                            className="flex min-w-0 flex-1 items-center gap-4 text-left"
+                            className="flex min-w-0 flex-1 items-center gap-3 text-left"
                           >
                             <MiniProfileHoverCard user={member} companyRole={member.companyRole} primaryCompany={company}>
-                              <div className="flex items-center gap-4">
-                                <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} />
+                              <div className="flex items-center gap-3">
+                                <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
                                 <div className="min-w-0">
-                                  <div className="truncate text-base font-semibold text-white">{member.displayName}</div>
-                                  <div className="truncate text-sm text-white/56">@{member.username ?? "member"}</div>
+                                  <div className="truncate text-sm font-medium text-foreground">{member.displayName}</div>
+                                  <div className="truncate text-xs text-muted-foreground">@{member.username ?? "member"}</div>
                                 </div>
                               </div>
                             </MiniProfileHoverCard>
                           </button>
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             {member.badges.slice(0, 2).map((badge) => (
                               <span
                                 key={badge.id}
-                                className="rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white"
-                                style={{ borderColor: `${badge.color}50`, backgroundColor: `${badge.color}20` }}
+                                className="rounded-md border px-2 py-0.5 text-xs font-medium text-foreground"
+                                style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
                               >
                                 {badge.name}
                               </span>
                             ))}
                             {manageable ? (
-                              <span className="rounded-full border border-cyan-400/18 bg-cyan-400/10 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-cyan-100">
+                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                                 Manageable
                               </span>
                             ) : null}
@@ -183,90 +183,87 @@ export function CompanyMembersWorkspace({
           )}
 
           {!filteredMembers.length ? (
-            <div className="surface-panel-strong p-8 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-3xl border border-white/10 bg-white/6">
-                <UserSearch className="size-5 text-white/72" />
-              </div>
-              <div className="mt-4 font-display text-2xl font-semibold text-white">No members match this roster filter</div>
-              <p className="mt-3 text-sm leading-7 text-white/60">
-                Clear the search or widen the role filter to bring more members back into the company roster.
-              </p>
-            </div>
+            <EmptyState
+              icon={UserSearch}
+              title="No members match"
+              description="Clear the search or widen the role filter."
+            />
           ) : null}
         </div>
       </div>
 
-      <aside className="surface-panel xl:sticky xl:top-24 xl:self-start">
+      {/* Selected member sidebar */}
+      <aside className="rounded-xl border border-border bg-card xl:sticky xl:top-20 xl:self-start">
         {selectedMember ? (
           <div className="overflow-hidden">
             <div
-              className="h-32 border-b border-white/10"
+              className="h-28 border-b border-border"
               style={{
                 background: selectedMember.bannerUrl
-                  ? `linear-gradient(135deg, rgba(5,10,20,0.2), rgba(5,10,20,0.88)), url(${selectedMember.bannerUrl})`
-                  : `linear-gradient(135deg, ${selectedMember.accentColor ?? "#55d4ff"} 0%, rgba(8, 15, 30, 0.96) 100%)`,
+                  ? `linear-gradient(to bottom, transparent 40%, hsl(240 5% 9%)), url(${selectedMember.bannerUrl})`
+                  : `linear-gradient(135deg, ${selectedMember.accentColor ?? "hsl(192 91% 55%)"} 0%, hsl(240 5% 10%) 100%)`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
-            <div className="space-y-5 p-5">
-              <div className="-mt-16 flex items-end gap-4">
+            <div className="space-y-4 p-4">
+              <div className="-mt-12 flex items-end gap-3">
                 <UserAvatar
                   name={selectedMember.displayName}
                   image={selectedMember.avatarUrl}
                   accentColor={selectedMember.accentColor}
                   size="lg"
-                  className="size-22 border-4 border-[#07101d]"
+                  className="size-16 border-[3px] border-card"
                 />
-                <div className="pb-2">
-                  <div className="font-display text-2xl font-semibold text-white">{selectedMember.displayName}</div>
-                  <div className="text-sm text-white/58">@{selectedMember.username ?? "member"}</div>
+                <div className="pb-1">
+                  <div className="text-lg font-semibold text-foreground">{selectedMember.displayName}</div>
+                  <div className="text-sm text-muted-foreground">@{selectedMember.username ?? "member"}</div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <RoleBadge kind="company" role={selectedMember.companyRole} />
                 {selectedMember.siteRole !== "USER" ? <RoleBadge kind="site" role={selectedMember.siteRole} /> : null}
               </div>
 
-              <p className="text-sm leading-7 text-white/64">{selectedMember.bio ?? "No bio added yet."}</p>
+              <p className="text-sm text-muted-foreground">{selectedMember.bio ?? "No bio added yet."}</p>
 
-              <div className="grid gap-3">
-                <div className="surface-panel-soft p-4">
-                  <div className="panel-label">Member details</div>
-                  <div className="mt-3 space-y-2 text-sm text-white/64">
+              <div className="space-y-2">
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Details</div>
+                  <div className="mt-2 space-y-1.5 text-xs text-muted-foreground">
                     <div>Joined company: {formatDate(selectedMember.joinedAt)}</div>
                     <div>Joined PrismMTR: {formatDate(selectedMember.createdAt)}</div>
                     <div>Minecraft: {selectedMember.minecraftNickname ?? "Not set"}</div>
                   </div>
                 </div>
 
-                <div className="surface-panel-soft p-4">
-                  <div className="panel-label">Badges</div>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Badges</div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {selectedMember.badges.length ? (
                       selectedMember.badges.map((badge) => (
                         <span
                           key={badge.id}
-                          className="rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-white"
-                          style={{ borderColor: `${badge.color}50`, backgroundColor: `${badge.color}20` }}
+                          className="rounded-md border px-2 py-0.5 text-xs font-medium text-foreground"
+                          style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
                         >
                           {badge.name}
                         </span>
                       ))
                     ) : (
-                      <span className="text-sm text-white/48">No badges assigned yet.</span>
+                      <span className="text-xs text-muted-foreground/60">No badges assigned yet.</span>
                     )}
                   </div>
                 </div>
 
                 {canManageRole(currentRole, selectedMember.companyRole) ? (
-                  <div className="surface-panel-soft p-4">
-                    <div className="flex items-center gap-2 text-cyan-100">
-                      <ShieldCheck className="size-4" />
-                      <div className="panel-label">Role management</div>
+                  <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+                    <div className="flex items-center gap-2 text-primary">
+                      <ShieldCheck className="size-3.5" />
+                      <span className="text-[11px] font-medium uppercase tracking-wider">Role management</span>
                     </div>
-                    <div className="mt-4">
+                    <div className="mt-3">
                       <MemberRoleEditor companyId={company.id} memberId={selectedMember.id} currentRole={selectedMember.companyRole} />
                     </div>
                   </div>
@@ -274,17 +271,17 @@ export function CompanyMembersWorkspace({
               </div>
 
               <div className="grid gap-2 sm:grid-cols-2">
-                <Button variant="outline" render={<Link href={`/users/${selectedMember.username ?? ""}`} />}>
+                <Button variant="outline" size="sm" render={<Link href={`/users/${selectedMember.username ?? ""}`} />}>
                   View profile
                 </Button>
-                <Button variant="secondary" onClick={() => setSelectedMemberId(selectedMember.id)}>
-                  Focused member
+                <Button variant="secondary" size="sm" onClick={() => setSelectedMemberId(selectedMember.id)}>
+                  Focused
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="p-6 text-sm text-white/58">Select a member from the roster to inspect their full company presence.</div>
+          <div className="p-6 text-sm text-muted-foreground">Select a member from the roster.</div>
         )}
       </aside>
     </div>

@@ -7,27 +7,28 @@ export default async function DashboardSettingsPage() {
   const viewer = await requireUser({ onboarded: true });
 
   return (
-    <AppShell title="Dashboard" description="Manage linked accounts and future-ready access settings." items={dashboardSidebarItems}>
+    <AppShell title="Dashboard" description="Manage linked accounts and access settings." items={dashboardSidebarItems}>
       <PageHeader
         eyebrow="Settings"
         title="Account settings"
-        description="Discord remains primary auth. Email/password and Microsoft linkage are future-ready additions layered on top."
+        description="Discord remains primary auth. Email/password and Microsoft linkage are future-ready additions."
       />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-[1.8rem] border border-white/10 bg-white/4 p-6">
-          <h2 className="font-display text-2xl font-semibold text-white">Linked accounts</h2>
-          <div className="mt-4 space-y-3 text-sm text-white/62">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold text-foreground">Linked accounts</h2>
+          <div className="mt-3 space-y-2 text-sm text-muted-foreground">
             {viewer.linkedAccounts.map((account) => (
-              <div key={account.id} className="rounded-2xl border border-white/8 bg-white/6 p-4">
-                {account.provider} {account.providerAccountId ? `· ${account.providerAccountId}` : ""}
+              <div key={account.id} className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+                <span>{account.provider}</span>
+                <span className="text-xs text-muted-foreground/60">{account.providerAccountId ? `· ${account.providerAccountId}` : "Connected"}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-[1.8rem] border border-white/10 bg-white/4 p-6">
-          <h2 className="font-display text-2xl font-semibold text-white">Launcher readiness</h2>
-          <p className="mt-4 text-sm leading-7 text-white/60">
-            Microsoft linkage and launcher account handoff are intentionally separated from this MVP. The user model and linked account structure are already prepared so the launcher can attach later without breaking existing identities.
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-lg font-semibold text-foreground">Launcher readiness</h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Microsoft linkage and launcher account handoff are separated from this MVP. The user model and linked account structure are already prepared for future launcher integration.
           </p>
         </div>
       </div>

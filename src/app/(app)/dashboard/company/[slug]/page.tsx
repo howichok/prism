@@ -32,7 +32,7 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
   return (
     <AppShell
       title={data.company.name}
-      description="Company hub overview, public feed, members, and current work."
+      description="Company hub overview, feed, members, and work."
       items={getCompanySidebarItems(slug)}
       rail={<CompanyRail company={data.company} currentRole={data.currentMembership?.companyRole} />}
     >
@@ -56,90 +56,86 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
         }
       />
 
-      <section className="surface-panel-strong overflow-hidden">
+      {/* Company banner and stats */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div
-          className="h-48 border-b border-white/10"
+          className="h-40 border-b border-border"
           style={{
             background: data.company.bannerUrl
-              ? `linear-gradient(135deg, rgba(5,10,20,0.18), rgba(5,10,20,0.86)), url(${data.company.bannerUrl})`
-              : `linear-gradient(135deg, ${data.company.brandColor ?? "#55d4ff"} 0%, rgba(8,15,30,0.96) 78%)`,
+              ? `linear-gradient(to bottom, transparent 40%, hsl(240 5% 9%)), url(${data.company.bannerUrl})`
+              : `linear-gradient(135deg, ${data.company.brandColor ?? "hsl(192 91% 55%)"} 0%, hsl(240 5% 10%) 100%)`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
-        <div className="space-y-6 p-6 sm:p-7">
-          <div className="-mt-18 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex items-end gap-4">
-              <div className="flex size-24 items-center justify-center rounded-[1.8rem] border border-white/14 bg-[#07101d]/84 font-display text-3xl font-semibold text-white shadow-[0_28px_60px_-36px_rgba(0,0,0,0.96)]">
-                {data.company.name.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="pb-2">
-                <div className="font-display text-4xl font-semibold text-white">{data.company.name}</div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <StatusBadge status={data.company.recruitingStatus} />
-                  <StatusBadge status={data.company.status} />
-                  {data.currentMembership ? <RoleBadge kind="company" role={data.currentMembership.companyRole} /> : null}
-                </div>
-              </div>
+        <div className="space-y-4 p-5">
+          <div className="-mt-14 flex items-end gap-4">
+            <div className="flex size-20 items-center justify-center rounded-2xl border-2 border-card bg-card text-2xl font-semibold text-foreground shadow-lg">
+              {data.company.name.slice(0, 2).toUpperCase()}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {data.company.tags.map((tag) => (
-                <span key={tag} className="rounded-full border border-white/10 bg-[#07101d]/72 px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-white/62">
-                  {tag}
-                </span>
-              ))}
+            <div className="pb-1">
+              <div className="text-2xl font-semibold text-foreground">{data.company.name}</div>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                <StatusBadge status={data.company.recruitingStatus} />
+                <StatusBadge status={data.company.status} />
+                {data.currentMembership ? <RoleBadge kind="company" role={data.currentMembership.companyRole} /> : null}
+              </div>
             </div>
           </div>
+          <div className="flex flex-wrap gap-1.5">
+            {data.company.tags.map((tag) => (
+              <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                {tag}
+              </span>
+            ))}
+          </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {[
               { label: "Members", value: data.company.counts.members },
               { label: "Projects", value: data.company.counts.projects },
               { label: "Posts", value: data.company.counts.posts },
             ].map((stat) => (
-              <div key={stat.label} className="surface-panel-soft p-4">
-                <div className="panel-label">{stat.label}</div>
-                <div className="mt-3 text-3xl font-semibold text-white">{stat.value}</div>
+              <div key={stat.label} className="rounded-lg bg-muted/40 p-3">
+                <div className="text-xs text-muted-foreground">{stat.label}</div>
+                <div className="mt-1 text-xl font-semibold text-foreground">{stat.value}</div>
               </div>
             ))}
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="surface-panel-soft p-5">
-              <div className="panel-label">Overview</div>
-              <p className="mt-3 text-sm leading-7 text-white/62">
-                This company hub is the operational HQ for members, projects, posts, invites, and applications. It keeps the social layer visible without turning the workspace into chat.
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <div className="text-xs font-medium text-muted-foreground">Overview</div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The company hub is the operational HQ for members, projects, posts, invites, and applications.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Button variant="outline" render={<Link href={`/dashboard/company/${slug}/members`} />}>
-                  Open member roster
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" render={<Link href={`/dashboard/company/${slug}/members`} />}>
+                  Members
                 </Button>
-                <Button variant="secondary" render={<Link href={`/dashboard/company/${slug}/projects`} />}>
-                  View projects
+                <Button variant="secondary" size="sm" render={<Link href={`/dashboard/company/${slug}/projects`} />}>
+                  Projects
                 </Button>
               </div>
             </div>
 
-            <div className="surface-panel-soft p-5">
-              <div className="panel-label">Leadership</div>
-              <div className="mt-4 space-y-3">
+            <div className="rounded-lg border border-border/60 bg-muted/30 p-4">
+              <div className="text-xs font-medium text-muted-foreground">Leadership</div>
+              <div className="mt-2 space-y-2">
                 <MiniProfileHoverCard user={data.company.owner} companyRole="OWNER" primaryCompany={data.company}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-[1.2rem] border border-white/10 bg-white/6 p-3 transition hover:bg-white/10">
-                    <UserAvatar name={data.company.owner.displayName} image={data.company.owner.avatarUrl} accentColor={data.company.owner.accentColor} />
+                  <div className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-secondary p-2 transition-colors hover:bg-secondary/80">
+                    <UserAvatar name={data.company.owner.displayName} image={data.company.owner.avatarUrl} accentColor={data.company.owner.accentColor} size="sm" />
                     <div>
-                      <div className="font-medium text-white">{data.company.owner.displayName}</div>
-                      <div className="text-sm text-white/56">Owner</div>
+                      <div className="text-sm font-medium text-foreground">{data.company.owner.displayName}</div>
+                      <div className="text-xs text-muted-foreground">Owner</div>
                     </div>
                   </div>
                 </MiniProfileHoverCard>
                 {coOwners.map((member) => (
                   <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={data.company}>
-                    <div className="flex cursor-pointer items-center gap-3 rounded-[1.2rem] border border-white/10 bg-white/4 p-3 transition hover:bg-white/8">
+                    <div className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-secondary">
                       <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
-                      <div>
-                        <div className="text-sm font-medium text-white">{member.displayName}</div>
-                        <div className="text-xs text-white/50">Co-owner</div>
-                      </div>
+                      <div className="text-sm text-foreground">{member.displayName}</div>
                     </div>
                   </MiniProfileHoverCard>
                 ))}
@@ -147,46 +143,42 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="surface-panel p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="panel-label">Company feed</div>
-            <h2 className="mt-3 font-display text-2xl font-semibold text-white">Operational activity</h2>
-          </div>
-          <Button variant="outline" render={<Link href={`/dashboard/company/${slug}/posts`} />}>
-            View posts
-            <ArrowRight className="size-4" />
+      {/* Activity feed */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">Company feed</h2>
+          <Button variant="outline" size="sm" render={<Link href={`/dashboard/company/${slug}/posts`} />}>
+            Posts
+            <ArrowRight className="size-3.5" />
           </Button>
         </div>
-        <div className="mt-5 space-y-4">
+        <div className="space-y-2">
           {data.activity.map((item) => (
             <FeedItem key={item.id} item={item} />
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <div className="surface-panel p-6">
+      {/* Members + Projects */}
+      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="panel-label">Members</div>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-white">Roster preview</h2>
-            </div>
-            <Button variant="outline" render={<Link href={`/dashboard/company/${slug}/members`} />}>
-              Open roster
+            <h2 className="text-sm font-semibold text-foreground">Members</h2>
+            <Button variant="outline" size="sm" render={<Link href={`/dashboard/company/${slug}/members`} />}>
+              Roster
             </Button>
           </div>
-          <div className="mt-5 space-y-3">
+          <div className="mt-3 space-y-1.5">
             {data.members.slice(0, 6).map((member) => (
               <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={data.company}>
-                <div className="flex cursor-pointer items-center justify-between rounded-[1.25rem] border border-white/10 bg-white/6 px-3 py-2.5 transition hover:bg-white/10">
-                  <div className="flex items-center gap-3">
+                <div className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-secondary">
+                  <div className="flex items-center gap-2.5">
                     <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
                     <div>
-                      <div className="text-sm font-medium text-white">{member.displayName}</div>
-                      <div className="text-xs text-white/50">@{member.username ?? "member"}</div>
+                      <div className="text-sm font-medium text-foreground">{member.displayName}</div>
+                      <div className="text-xs text-muted-foreground">@{member.username ?? "member"}</div>
                     </div>
                   </div>
                   <RoleBadge kind="company" role={member.companyRole} />
@@ -196,13 +188,10 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <div>
-              <div className="panel-label">Projects</div>
-              <h2 className="mt-3 font-display text-2xl font-semibold text-white">Active workstreams</h2>
-            </div>
-            <Button variant="outline" render={<Link href={`/dashboard/company/${slug}/projects`} />}>
+            <h2 className="text-sm font-semibold text-foreground">Active projects</h2>
+            <Button variant="outline" size="sm" render={<Link href={`/dashboard/company/${slug}/projects`} />}>
               View all
             </Button>
           </div>
@@ -210,7 +199,7 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
-      </section>
+      </div>
     </AppShell>
   );
 }
