@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
     : [],
   events: {
     async createUser({ user }) {
-      await db.user.update({
+      const updatedUsers = await db.user.updateMany({
         where: {
           id: user.id,
         },
@@ -49,6 +49,12 @@ export const authOptions: NextAuthOptions = {
           image: user.image ?? null,
         },
       });
+
+      if (!updatedUsers.count) {
+        console.warn("[auth] createUser event could not hydrate the new user record yet.", {
+          userId: user.id,
+        });
+      }
     },
   },
   callbacks: {
@@ -71,48 +77,64 @@ export const authOptions: NextAuthOptions = {
       const nextDisplayName =
         currentUser?.displayName ?? discordProfile?.global_name ?? user.name ?? "New Prism member";
 
-      await db.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          discordId: account.providerAccountId,
-          discordUsername: discordProfile?.username ?? user.name ?? null,
-          username:
-            currentUser?.username ??
-            buildUserHandle(discordProfile?.username ?? user.name ?? "member", user.id),
-          displayName: nextDisplayName,
-          name: nextDisplayName,
-          avatarUrl: user.image ?? null,
-          image: user.image ?? null,
-          siteRole: currentUser?.siteRole ?? SiteRole.USER,
-        },
-      });
+      if (!currentUser) {
+        console.warn("[auth] signIn callback could not find the persisted user yet.", {
+          userId: user.id,
+          provider: account.provider,
+        });
+        return true;
+      }
 
-      await db.linkedAccount.upsert({
-        where: {
-          userId_provider: {
+      try {
+        await db.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            discordId: account.providerAccountId,
+            discordUsername: discordProfile?.username ?? user.name ?? null,
+            username:
+              currentUser.username ??
+              buildUserHandle(discordProfile?.username ?? user.name ?? "member", user.id),
+            displayName: nextDisplayName,
+            name: nextDisplayName,
+            avatarUrl: user.image ?? null,
+            image: user.image ?? null,
+            siteRole: currentUser.siteRole ?? SiteRole.USER,
+          },
+        });
+
+        await db.linkedAccount.upsert({
+          where: {
+            userId_provider: {
+              userId: user.id,
+              provider: LinkedAccountProvider.DISCORD,
+            },
+          },
+          update: {
+            providerAccountId: account.providerAccountId,
+            accountEmail: user.email ?? null,
+            metadata: {
+              username: discordProfile?.username ?? null,
+            },
+          },
+          create: {
             userId: user.id,
             provider: LinkedAccountProvider.DISCORD,
+            providerAccountId: account.providerAccountId,
+            accountEmail: user.email ?? null,
+            metadata: {
+              username: discordProfile?.username ?? null,
+            },
           },
-        },
-        update: {
-          providerAccountId: account.providerAccountId,
-          accountEmail: user.email ?? null,
-          metadata: {
-            username: discordProfile?.username ?? null,
-          },
-        },
-        create: {
+        });
+      } catch (error) {
+        console.error("[auth] Discord profile hydration failed during sign-in.", {
           userId: user.id,
-          provider: LinkedAccountProvider.DISCORD,
           providerAccountId: account.providerAccountId,
-          accountEmail: user.email ?? null,
-          metadata: {
-            username: discordProfile?.username ?? null,
-          },
-        },
-      });
+          error,
+        });
+      }
 
       return true;
     },
