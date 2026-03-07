@@ -48,7 +48,7 @@ copy .env.example .env
 - `DIRECT_URL` should match `DATABASE_URL` locally.
 - `AUTH_SECRET` and `NEXTAUTH_SECRET` should be the same long random string.
 - `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET` should come from a Discord OAuth application.
-- `AUTH_URL`, `NEXTAUTH_URL`, and `NEXT_PUBLIC_APP_URL` should usually stay `http://localhost:3000` locally.
+- `AUTH_URL`, `NEXTAUTH_URL`, and `NEXT_PUBLIC_APP_URL` should all be set to your local app URL.
 
 4. Apply the schema.
 
@@ -68,13 +68,13 @@ npm run db:seed
 npm run dev
 ```
 
-7. Open `http://localhost:3000`.
+7. Open your local app URL in the browser.
 
 ## Discord OAuth Setup
 
 Create a Discord OAuth application and add this local callback URL:
 
-- `http://localhost:3000/api/auth/callback/discord`
+- `<LOCAL_APP_URL>/api/auth/callback/discord`
 
 If Discord credentials are missing, the sign-in button stays visible but disabled so the public product can still be explored.
 
@@ -84,7 +84,7 @@ PrismMTR is prepared for GitHub -> Netlify remote builds. Do not rely on local W
 
 Target Netlify site:
 
-- `https://heroic-liger-fa87a7.netlify.app`
+- your production Netlify site URL
 
 ### Build Settings
 
@@ -114,7 +114,7 @@ Recommended production values:
 
 - `DATABASE_URL`: Supabase pooled connection string on port `6543` with `pgbouncer=true&connection_limit=1`
 - `DIRECT_URL`: Supabase direct Postgres connection on port `5432`
-- `AUTH_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`: `https://heroic-liger-fa87a7.netlify.app`
+- `AUTH_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`: your production site URL
 - `AUTH_TRUST_HOST`: `true`
 
 ### Prisma + Supabase Production Notes
@@ -163,7 +163,7 @@ For future schema changes, the better long-term path is to start using Prisma mi
 4. Leave publish directory empty unless Netlify auto-fills the Next.js output handling.
 5. Add all production env vars in the Netlify UI before the first production build.
 6. Add the Discord production callback URL:
-   `https://heroic-liger-fa87a7.netlify.app/api/auth/callback/discord`
+   `<YOUR_PRODUCTION_SITE_URL>/api/auth/callback/discord`
 
 ### Prisma Client On Netlify
 
