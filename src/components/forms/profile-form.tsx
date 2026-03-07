@@ -39,35 +39,35 @@ export function ProfileForm({ viewer }: { viewer: SessionUser }) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(submit)} className="space-y-5 rounded-[1.8rem] border border-white/10 bg-white/4 p-6">
+    <form onSubmit={form.handleSubmit(submit)} className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="profile-display-name">Display name</Label>
-          <Input id="profile-display-name" {...form.register("displayName")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Input id="profile-display-name" {...form.register("displayName")} className="h-10" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="profile-username">Handle</Label>
-          <Input id="profile-username" {...form.register("username")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Input id="profile-username" {...form.register("username")} className="h-10" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="profile-mc">Minecraft nickname</Label>
-          <Input id="profile-mc" {...form.register("minecraftNickname")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Input id="profile-mc" {...form.register("minecraftNickname")} className="h-10" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="profile-email">Email</Label>
-          <Input id="profile-email" type="email" {...form.register("email")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Input id="profile-email" type="email" {...form.register("email")} className="h-10" />
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="profile-bio">Bio</Label>
-          <Textarea id="profile-bio" {...form.register("bio")} className="min-h-32 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Textarea id="profile-bio" {...form.register("bio")} className="min-h-24" />
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="profile-password">Password placeholder</Label>
-          <Input id="profile-password" type="password" {...form.register("password")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+          <Input id="profile-password" type="password" {...form.register("password")} className="h-10" />
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <p className="text-sm text-white/58">{message}</p>
+        <p className="text-sm text-muted-foreground">{message}</p>
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save profile"}
         </Button>

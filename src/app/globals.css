@@ -7,8 +7,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -38,48 +36,58 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.55);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.35);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.25);
-  --radius-4xl: calc(var(--radius) * 2.7);
+  --radius-xl: calc(var(--radius) * 1.25);
+  --radius-2xl: calc(var(--radius) * 1.5);
+  --radius-3xl: calc(var(--radius) * 1.75);
+  --radius-4xl: calc(var(--radius) * 2);
 }
 
 :root {
-  --background: hsl(240 6% 6%);
-  --foreground: hsl(0 0% 96%);
-  --card: hsl(240 5% 9%);
-  --card-foreground: hsl(0 0% 96%);
-  --popover: hsl(240 5% 8%);
-  --popover-foreground: hsl(0 0% 96%);
-  --primary: hsl(192 91% 55%);
-  --primary-foreground: hsl(240 6% 6%);
-  --secondary: hsl(240 4% 14%);
-  --secondary-foreground: hsl(0 0% 92%);
-  --muted: hsl(240 4% 14%);
-  --muted-foreground: hsl(240 3% 56%);
-  --accent: hsl(217 80% 56%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 72% 51%);
-  --border: hsl(240 4% 16%);
-  --input: hsl(240 4% 16%);
-  --ring: hsl(192 91% 55%);
-  --chart-1: hsl(192 91% 55%);
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
+
+  --card: hsl(0 0% 8%);
+  --card-foreground: hsl(0 0% 98%);
+
+  --popover: hsl(0 0% 9%);
+  --popover-foreground: hsl(0 0% 98%);
+
+  --primary: hsl(221 83% 53%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(0 0% 11%);
+  --secondary-foreground: hsl(0 0% 90%);
+
+  --muted: hsl(0 0% 10%);
+  --muted-foreground: hsl(0 0% 64%);
+
+  --accent: hsl(221 83% 53%);
+  --accent-foreground: hsl(0 0% 100%);
+
+  --destructive: hsl(0 84% 60%);
+  --border: hsl(0 0% 14%);
+  --input: hsl(0 0% 11%);
+  --ring: hsl(221 83% 53%);
+
+  --chart-1: hsl(221 83% 53%);
   --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(45 93% 58%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
-  --radius: 0.75rem;
-  --sidebar: hsl(240 5% 8%);
-  --sidebar-foreground: hsl(0 0% 92%);
-  --sidebar-primary: hsl(192 91% 55%);
-  --sidebar-primary-foreground: hsl(240 6% 6%);
-  --sidebar-accent: hsl(240 4% 12%);
+  --chart-3: hsl(45 90% 60%);
+  --chart-4: hsl(220 90% 65%);
+  --chart-5: hsl(340 80% 60%);
+
+  --radius: 0.625rem;
+
+  --sidebar: hsl(0 0% 6%);
+  --sidebar-foreground: hsl(0 0% 90%);
+  --sidebar-primary: hsl(221 83% 53%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(0 0% 11%);
   --sidebar-accent-foreground: hsl(0 0% 92%);
-  --sidebar-border: hsl(240 4% 14%);
-  --sidebar-ring: hsl(192 91% 55%);
+  --sidebar-border: hsl(0 0% 14%);
+  --sidebar-ring: hsl(221 83% 53%);
 }
 
 .dark {
@@ -88,24 +96,57 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
 
   html {
-    @apply scroll-smooth font-sans;
+    @apply scroll-smooth;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans), sans-serif;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 0%, hsl(221 83% 53% / 0.05), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 0%, hsl(221 83% 53% / 0.03), transparent),
+      linear-gradient(180deg, hsl(0 0% 5%) 0%, hsl(0 0% 4%) 50%, hsl(0 0% 3%) 100%);
+    min-height: 100vh;
+    letter-spacing: -0.01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, hsl(0 0% 100% / 0.018) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 100% / 0.014) 1px, transparent 1px);
+    background-size: 120px 120px;
+    mask-image: linear-gradient(180deg, hsl(0 0% 0% / 0.38), transparent 85%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, hsl(0 0% 4% / 0.25) 55%, hsl(0 0% 3% / 0.8) 100%);
+    pointer-events: none;
+    z-index: -1;
   }
 
   ::selection {
-    background: hsl(192 91% 55% / 0.24);
+    background: hsl(221 83% 53% / 0.3);
     color: white;
   }
 
   a {
-    @apply outline-none;
+    @apply outline-none focus-visible:ring-1 focus-visible:ring-ring;
   }
 
   *::-webkit-scrollbar {
@@ -118,63 +159,112 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
     border-radius: 999px;
-    background: hsl(240 3% 56% / 0.2);
-    background-clip: padding-box;
+    background: hsl(0 0% 100% / 0.12);
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: hsl(240 3% 56% / 0.35);
-    background-clip: padding-box;
+    background: hsl(0 0% 100% / 0.22);
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-display), sans-serif;
     font-weight: 600;
+    letter-spacing: -0.035em;
   }
 
   .surface-panel {
-    @apply rounded-xl border border-border bg-card;
+    @apply relative overflow-hidden rounded-2xl border bg-card/90;
+    border-color: hsl(0 0% 100% / 0.06);
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 0 1px hsl(0 0% 100% / 0.01),
+      0 12px 36px rgb(0 0 0 / 0.32);
   }
 
   .surface-panel-strong {
-    @apply rounded-xl border border-border bg-card shadow-sm;
+    @apply relative overflow-hidden rounded-2xl border bg-card/94;
+    border-color: hsl(0 0% 100% / 0.08);
+    backdrop-filter: blur(16px);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.03),
+      0 20px 50px rgb(0 0 0 / 0.38);
   }
 
   .surface-panel-soft {
-    @apply rounded-lg border border-border/60 bg-muted/40;
+    @apply rounded-2xl border bg-white/[0.02];
+    border-color: hsl(0 0% 100% / 0.05);
   }
 
   .panel-label {
-    @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
+    @apply text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground;
   }
 
   .panel-heading {
-    @apply text-xl font-semibold tracking-tight text-foreground;
+    font-family: var(--font-display), sans-serif;
+    font-size: 1.125rem;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    color: var(--foreground);
   }
 
   .panel-subtle-text {
-    @apply text-sm leading-relaxed text-muted-foreground;
+    @apply text-sm leading-7 text-muted-foreground;
+  }
+
+  .section-rule {
+    @apply h-px flex-1 bg-border;
+  }
+
+  .shell-border {
+    box-shadow: inset 0 -1px 0 var(--border);
+  }
+
+  .surface-panel::after,
+  .surface-panel-strong::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.018), transparent 18%);
+    pointer-events: none;
   }
 
   @keyframes fade-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
+    animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .animate-scale-in {
-    animation: scale-in 0.2s ease-out;
+    animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }

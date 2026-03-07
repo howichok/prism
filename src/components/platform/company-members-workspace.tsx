@@ -79,14 +79,33 @@ export function CompanyMembersWorkspace({
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-4">
-        {/* Controls */}
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="surface-panel-strong p-5">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px] xl:items-end">
             <div>
-              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Roster controls</div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Search by name, handle, Minecraft nickname, or Discord identity.
+              <div className="panel-label">Roster controls</div>
+              <h2 className="mt-3 font-display text-[1.9rem] leading-[0.94] text-white">Search the company identity graph</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+                Search by name, handle, Discord identity, Minecraft nickname, or bio. Filter by role when you need a narrower operational view.
               </p>
+            </div>
+            <div className="rounded-[1.2rem] border border-white/8 bg-[hsl(0_0%_5%)]/88 p-4">
+              <div className="panel-label">Visible members</div>
+              <div className="mt-3 font-display text-[2rem] leading-none text-white">{filteredMembers.length}</div>
+              <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                {roleFilter === "ALL" ? "Across all visible roles" : `Filtered to ${roleFilter.replaceAll("_", " ").toLowerCase()}`}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search members, handles, Minecraft names, or bios"
+                className="h-11 w-full rounded-[1rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-blue-400/28"
+              />
             </div>
             <div className="flex flex-wrap gap-1.5">
               {(["ALL", ...roleOrder] as const).map((role) => (
@@ -94,10 +113,10 @@ export function CompanyMembersWorkspace({
                   key={role}
                   onClick={() => setRoleFilter(role)}
                   className={cn(
-                    "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                    "rounded-full border px-3 py-2 text-[10px] font-medium uppercase tracking-[0.18em] transition-all duration-200",
                     roleFilter === role
-                      ? "bg-primary/15 text-primary"
-                      : "bg-secondary text-muted-foreground hover:text-foreground",
+                      ? "border-blue-400/22 bg-blue-400/12 text-blue-200"
+                      : "border-white/8 bg-white/[0.03] text-white/54 hover:border-white/14 hover:text-white",
                   )}
                 >
                   {role === "ALL" ? "All roles" : role.replaceAll("_", " ")}
@@ -105,29 +124,19 @@ export function CompanyMembersWorkspace({
               ))}
             </div>
           </div>
-          <div className="relative mt-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search members, handles, Minecraft names, or bios"
-              className="h-10 w-full rounded-lg border border-border bg-secondary pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-primary/40"
-            />
-          </div>
         </div>
 
-        {/* Member groups */}
         <div className="space-y-3">
           {groupedMembers.map((group) =>
             group.members.length ? (
-              <section key={group.role} className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
+              <section key={group.role} className="surface-panel space-y-4 p-4">
+                <div className="flex items-center justify-between border-b border-white/8 pb-4">
                   <div className="flex items-center gap-2">
                     <RoleBadge kind="company" role={group.role} />
-                    <span className="text-xs text-muted-foreground">{group.members.length} members</span>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-white/42">{group.members.length} members</span>
                   </div>
                 </div>
-                <div className="mt-3 space-y-1.5">
+                <div className="space-y-2">
                   {group.members.map((member) => {
                     const active = selectedMember?.id === member.id;
                     const manageable = canManageRole(currentRole, member.companyRole);
@@ -138,8 +147,8 @@ export function CompanyMembersWorkspace({
                         className={cn(
                           "rounded-lg border p-2.5 transition-colors",
                           active
-                            ? "border-primary/30 bg-primary/5"
-                            : "border-border/60 bg-muted/20 hover:bg-secondary",
+                            ? "border-blue-400/22 bg-blue-400/[0.08]"
+                            : "border-white/8 bg-white/[0.03] hover:border-white/14 hover:bg-white/[0.05]",
                         )}
                       >
                         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
@@ -168,7 +177,7 @@ export function CompanyMembersWorkspace({
                               </span>
                             ))}
                             {manageable ? (
-                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              <span className="rounded-full border border-blue-400/18 bg-blue-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-blue-200">
                                 Manageable
                               </span>
                             ) : null}
@@ -192,16 +201,15 @@ export function CompanyMembersWorkspace({
         </div>
       </div>
 
-      {/* Selected member sidebar */}
-      <aside className="rounded-xl border border-border bg-card xl:sticky xl:top-20 xl:self-start">
+      <aside className="surface-panel-strong overflow-hidden xl:sticky xl:top-28 xl:self-start">
         {selectedMember ? (
           <div className="overflow-hidden">
             <div
-              className="h-28 border-b border-border"
+              className="h-32 border-b border-white/8"
               style={{
                 background: selectedMember.bannerUrl
-                  ? `linear-gradient(to bottom, transparent 40%, hsl(240 5% 9%)), url(${selectedMember.bannerUrl})`
-                  : `linear-gradient(135deg, ${selectedMember.accentColor ?? "hsl(192 91% 55%)"} 0%, hsl(240 5% 10%) 100%)`,
+                  ? `linear-gradient(to bottom, transparent 40%, hsl(0 0% 8%)), url(${selectedMember.bannerUrl})`
+                  : `linear-gradient(135deg, ${selectedMember.accentColor ?? "hsl(221 83% 53%)"} 0%, hsl(0 0% 8%) 100%)`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -216,8 +224,9 @@ export function CompanyMembersWorkspace({
                   className="size-16 border-[3px] border-card"
                 />
                 <div className="pb-1">
-                  <div className="text-lg font-semibold text-foreground">{selectedMember.displayName}</div>
-                  <div className="text-sm text-muted-foreground">@{selectedMember.username ?? "member"}</div>
+                  <div className="panel-label">Selected member</div>
+                  <div className="mt-2 text-lg font-semibold text-foreground">{selectedMember.displayName}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">@{selectedMember.username ?? "member"}</div>
                 </div>
               </div>
 
@@ -229,8 +238,8 @@ export function CompanyMembersWorkspace({
               <p className="text-sm text-muted-foreground">{selectedMember.bio ?? "No bio added yet."}</p>
 
               <div className="space-y-2">
-                <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Details</div>
+                <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
+                  <div className="panel-label">Details</div>
                   <div className="mt-2 space-y-1.5 text-xs text-muted-foreground">
                     <div>Joined company: {formatDate(selectedMember.joinedAt)}</div>
                     <div>Joined PrismMTR: {formatDate(selectedMember.createdAt)}</div>
@@ -238,8 +247,8 @@ export function CompanyMembersWorkspace({
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Badges</div>
+                <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
+                  <div className="panel-label">Badges</div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {selectedMember.badges.length ? (
                       selectedMember.badges.map((badge) => (
@@ -258,10 +267,10 @@ export function CompanyMembersWorkspace({
                 </div>
 
                 {canManageRole(currentRole, selectedMember.companyRole) ? (
-                  <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
                     <div className="flex items-center gap-2 text-primary">
                       <ShieldCheck className="size-3.5" />
-                      <span className="text-[11px] font-medium uppercase tracking-wider">Role management</span>
+                      <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Role management</span>
                     </div>
                     <div className="mt-3">
                       <MemberRoleEditor companyId={company.id} memberId={selectedMember.id} currentRole={selectedMember.companyRole} />

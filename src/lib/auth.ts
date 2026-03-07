@@ -139,7 +139,7 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async session({ session, user }) {
-      if (!session.user) {
+      if (!session.user || !user?.id) {
         return session;
       }
 

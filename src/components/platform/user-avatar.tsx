@@ -18,7 +18,7 @@ export function UserAvatar({ name, image, accentColor, size = "default", classNa
       style={{
         background:
           accentColor && !image
-            ? `linear-gradient(135deg, ${accentColor}, hsl(240 5% 12%))`
+            ? `linear-gradient(135deg, ${accentColor}, hsl(0 0% 10%))`
             : undefined,
       }}
     >

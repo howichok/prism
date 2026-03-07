@@ -11,7 +11,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -30,21 +29,27 @@ export function ProfileMenu({ displayName, username, avatarUrl, accentColor }: P
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-secondary" />
+          <button className="flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.03] p-1 pr-3 transition-all duration-200 hover:border-primary/20 hover:bg-white/[0.06]" />
         }
       >
         <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} size="sm" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 border-border bg-card">
-        <DropdownMenuLabel>
-          <div className="flex items-center gap-3 py-1">
-            <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} />
-            <div className="min-w-0">
-              <div className="truncate text-sm font-medium text-foreground">{displayName}</div>
-              <div className="truncate text-xs text-muted-foreground">@{username ?? "member"}</div>
-            </div>
+        <div className="hidden text-left sm:block">
+          <div className="max-w-[8rem] truncate text-[13px] font-medium text-white">{displayName}</div>
+          <div className="max-w-[8rem] truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            @{username ?? "member"}
           </div>
-        </DropdownMenuLabel>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex items-center gap-3 p-2">
+          <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} />
+          <div className="min-w-0 flex flex-col gap-0.5">
+            <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              @{username ?? "member"}
+            </p>
+          </div>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push("/dashboard")}>

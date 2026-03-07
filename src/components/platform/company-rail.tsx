@@ -17,23 +17,23 @@ export function CompanyRail({
 }) {
   return (
     <>
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">HQ Snapshot</div>
+      <div className="surface-panel p-4">
+        <div className="panel-label">HQ snapshot</div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           <StatusBadge status={company.status} />
           <StatusBadge status={company.recruitingStatus} />
           {currentRole ? <RoleBadge kind="company" role={currentRole} /> : null}
         </div>
         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+          <div className="flex items-center justify-between rounded-[0.8rem] border border-white/6 bg-background/70 px-3 py-2.5">
             <span>Members</span>
             <span className="font-medium text-foreground">{company.counts.members}</span>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+          <div className="flex items-center justify-between rounded-[0.8rem] border border-white/6 bg-background/70 px-3 py-2.5">
             <span>Posts</span>
             <span className="font-medium text-foreground">{company.counts.posts}</span>
           </div>
-          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
+          <div className="flex items-center justify-between rounded-[0.8rem] border border-white/6 bg-background/70 px-3 py-2.5">
             <span>Projects</span>
             <span className="font-medium text-foreground">{company.counts.projects}</span>
           </div>
@@ -41,7 +41,7 @@ export function CompanyRail({
         {company.tags.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {company.tags.map((tag) => (
-              <span key={tag} className="rounded-md bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+              <span key={tag} className="rounded-[0.65rem] border border-white/6 bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                 {tag}
               </span>
             ))}
@@ -54,10 +54,10 @@ export function CompanyRail({
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Leadership</div>
+      <div className="surface-panel p-4">
+        <div className="panel-label">Leadership</div>
         <MiniProfileHoverCard user={company.owner} companyRole="OWNER" primaryCompany={company}>
-          <div className="mt-3 flex cursor-pointer items-center gap-3 rounded-lg bg-secondary p-2.5 transition-colors hover:bg-secondary/80">
+          <div className="mt-3 flex cursor-pointer items-center gap-3 rounded-[0.85rem] border border-white/6 bg-white/[0.03] p-2.5 transition-colors hover:border-primary/20 hover:bg-white/[0.05]">
             <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} size="sm" />
             <div className="min-w-0">
               <div className="truncate text-sm font-medium text-foreground">{company.owner.displayName}</div>
@@ -65,7 +65,7 @@ export function CompanyRail({
             </div>
           </div>
         </MiniProfileHoverCard>
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-3 text-xs leading-6 text-muted-foreground">
           Public company pages stay discoverable while the internal hub provides structured workflows.
         </p>
       </div>

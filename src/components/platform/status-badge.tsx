@@ -37,7 +37,7 @@ export function StatusBadge({ status, className }: { status: StatusValue; classN
   return (
     <Badge
       className={cn(
-        "rounded-md border px-2 py-0.5 text-[11px] font-medium",
+        "rounded-full px-2.5 py-1 text-[10px] tracking-[0.18em]",
         toneMap[status] ?? toneMap.ARCHIVED,
         className,
       )}

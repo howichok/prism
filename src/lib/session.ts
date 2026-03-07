@@ -27,18 +27,33 @@ const sessionUserArgs = Prisma.validator<Prisma.UserDefaultArgs>()({
 export type SessionUser = Prisma.UserGetPayload<typeof sessionUserArgs>;
 
 export async function getSessionUser() {
-  const session = await getAuthSession();
+  let session;
+
+  try {
+    session = await getAuthSession();
+  } catch (error) {
+    console.error("[session] Failed to resolve NextAuth session.", error);
+    return null;
+  }
 
   if (!session?.user?.id) {
     return null;
   }
 
-  return db.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    ...sessionUserArgs,
-  });
+  try {
+    return await db.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+      ...sessionUserArgs,
+    });
+  } catch (error) {
+    console.error("[session] Failed to load session user.", {
+      userId: session.user.id,
+      error,
+    });
+    return null;
+  }
 }
 
 export async function getOptionalSessionUser() {

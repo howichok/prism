@@ -20,15 +20,15 @@ export function FeedItem({ item }: { item: ActivitySummary }) {
   const Icon = activityIconMap[item.type as keyof typeof activityIconMap] ?? ActivitySquare;
 
   return (
-    <div className="flex gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
-      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+    <div className="group flex gap-3 rounded-[0.95rem] border border-border/80 bg-card/80 p-3.5 transition-colors hover:border-primary/16">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[0.8rem] border border-white/6 bg-white/[0.03] text-primary">
         <Icon className="size-3.5" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           {item.actor ? (
             <MiniProfileHoverCard user={item.actor} primaryCompany={item.company}>
-              <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-secondary px-2 py-1">
+              <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-[0.75rem] border border-white/6 bg-white/[0.03] px-2 py-1.5 transition-colors hover:border-primary/16">
                 <UserAvatar
                   name={item.actor.displayName}
                   image={item.actor.avatarUrl}
@@ -40,13 +40,13 @@ export function FeedItem({ item }: { item: ActivitySummary }) {
             </MiniProfileHoverCard>
           ) : null}
           <span className="text-sm text-muted-foreground">{item.title}</span>
-          <span className="text-xs text-muted-foreground/60">{formatRelativeTime(item.createdAt)}</span>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">{formatRelativeTime(item.createdAt)}</span>
         </div>
-        <p className="mt-1.5 text-sm text-muted-foreground">{item.body}</p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.body}</p>
         {item.company ? (
           <Link
             href={`/companies/${item.company.slug}`}
-            className="mt-2 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-3 inline-flex rounded-[0.75rem] border border-white/6 bg-white/[0.03] px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/16 hover:text-foreground"
           >
             {item.company.name}
           </Link>

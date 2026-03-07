@@ -85,48 +85,48 @@ export function OnboardingWizard({ viewer }: { viewer: SessionUser }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="rounded-[2rem] border border-white/10 bg-white/4 p-6 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.92)]">
-        <div className="text-xs uppercase tracking-[0.24em] text-cyan-200/70">Onboarding</div>
-        <h1 className="mt-3 font-display text-3xl font-semibold text-white">Set up your Prism identity</h1>
-        <div className="mt-6 h-2 rounded-full bg-white/6">
+      <aside className="rounded-xl border border-border bg-card p-6 shadow-sm h-min">
+        <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Onboarding</div>
+        <h1 className="mt-2 font-display text-2xl font-semibold text-foreground">Set up your Prism identity</h1>
+        <div className="mt-5 h-1.5 rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-cyan-400 to-amber-300 transition-[width]"
+            className="h-full rounded-full bg-primary transition-all duration-300"
             style={{ width: `${((step + 1) / steps.length) * 100}%` }}
           />
         </div>
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2">
           {steps.map((entry, index) => (
-            <div key={entry.key} className={`rounded-2xl border p-4 ${index === step ? "border-cyan-400/20 bg-cyan-400/10" : "border-white/8 bg-white/4"}`}>
-              <div className="text-xs uppercase tracking-[0.2em] text-white/42">Step {index + 1}</div>
-              <div className="mt-1 font-medium text-white">{entry.title}</div>
-              <p className="mt-1 text-sm leading-6 text-white/56">{entry.description}</p>
+            <div key={entry.key} className={`rounded-lg border p-3 ${index === step ? "border-border bg-muted/50" : "border-transparent bg-transparent"}`}>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Step {index + 1}</div>
+              <div className="mt-1 text-sm font-medium text-foreground">{entry.title}</div>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground/80">{entry.description}</p>
             </div>
           ))}
         </div>
       </aside>
-      <form onSubmit={form.handleSubmit(submit)} className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/4 shadow-[0_24px_80px_-36px_rgba(0,0,0,0.92)]">
+      <form onSubmit={form.handleSubmit(submit)} className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <motion.div
           key={currentStep.key}
-          initial={{ opacity: 0, x: 24 }}
+          initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="p-8"
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="p-6 sm:p-8 flex-1"
         >
           <div className="mb-8 flex items-start gap-4">
-            <div className="flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/6 text-cyan-100">
-              {step === 0 ? <Compass className="size-5" /> : step === 1 ? <UserCircle2 className="size-5" /> : step === 2 ? <Link2 className="size-5" /> : <Building2 className="size-5" />}
+            <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/40 text-foreground">
+              {step === 0 ? <Compass className="size-4" /> : step === 1 ? <UserCircle2 className="size-4" /> : step === 2 ? <Link2 className="size-4" /> : <Building2 className="size-4" />}
             </div>
             <div>
-              <div className="text-xs uppercase tracking-[0.24em] text-cyan-200/70">{currentStep.title}</div>
-              <h2 className="mt-2 font-display text-3xl font-semibold text-white">{currentStep.description}</h2>
+              <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{currentStep.title}</div>
+              <h2 className="mt-1 font-display text-2xl font-semibold text-foreground">{currentStep.description}</h2>
             </div>
           </div>
 
           {step === 0 ? (
-            <div className="rounded-[1.6rem] border border-white/10 bg-[#08101d] p-6">
-              <div className="text-sm text-white/60">Signed in as</div>
-              <div className="mt-2 text-2xl font-semibold text-white">{viewer.displayName ?? viewer.username ?? viewer.discordUsername}</div>
-              <p className="mt-3 text-sm leading-7 text-white/58">
+            <div className="rounded-lg border border-border/50 bg-muted/20 p-5">
+              <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Signed in as</div>
+              <div className="mt-1 text-xl font-semibold text-foreground">{viewer.displayName ?? viewer.username ?? viewer.discordUsername}</div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 Discord stays as your primary identity. The steps ahead shape how you appear across member hover cards, company hubs, moderation queues, and future launcher linking.
               </p>
             </div>
@@ -136,21 +136,21 @@ export function OnboardingWizard({ viewer }: { viewer: SessionUser }) {
             <div className="grid gap-5 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="displayName">Display name</Label>
-                <Input id="displayName" {...form.register("displayName")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
-                <p className="text-sm text-rose-200">{form.formState.errors.displayName?.message}</p>
+                <Input id="displayName" {...form.register("displayName")} className="h-10" />
+                <p className="text-xs text-destructive">{form.formState.errors.displayName?.message}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="username">Handle</Label>
-                <Input id="username" {...form.register("username")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
-                <p className="text-sm text-rose-200">{form.formState.errors.username?.message}</p>
+                <Input id="username" {...form.register("username")} className="h-10" />
+                <p className="text-xs text-destructive">{form.formState.errors.username?.message}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="minecraftNickname">Minecraft nickname</Label>
-                <Input id="minecraftNickname" {...form.register("minecraftNickname")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+                <Input id="minecraftNickname" {...form.register("minecraftNickname")} className="h-10" />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="bio">Short bio</Label>
-                <Textarea id="bio" {...form.register("bio")} className="min-h-32 rounded-2xl border-white/10 bg-white/6 text-white" />
+                <Textarea id="bio" {...form.register("bio")} className="min-h-24" />
               </div>
             </div>
           ) : null}
@@ -159,17 +159,17 @@ export function OnboardingWizard({ viewer }: { viewer: SessionUser }) {
             <div className="grid gap-5 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="email">Email (optional)</Label>
-                <Input id="email" type="email" {...form.register("email")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
-                <p className="text-sm text-rose-200">{form.formState.errors.email?.message}</p>
+                <Input id="email" type="email" {...form.register("email")} className="h-10" />
+                <p className="text-xs text-destructive">{form.formState.errors.email?.message}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password placeholder (optional)</Label>
-                <Input id="password" type="password" {...form.register("password")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
-                <p className="text-sm text-rose-200">{form.formState.errors.password?.message}</p>
+                <Input id="password" type="password" {...form.register("password")} className="h-10" />
+                <p className="text-xs text-destructive">{form.formState.errors.password?.message}</p>
               </div>
-              <div className="rounded-[1.6rem] border border-cyan-400/12 bg-cyan-400/8 p-5 md:col-span-2">
-                <div className="text-sm font-medium text-cyan-100">Microsoft linking</div>
-                <p className="mt-2 text-sm leading-7 text-white/62">
+              <div className="rounded-lg border border-border bg-muted/30 p-4 md:col-span-2">
+                <div className="text-sm font-medium text-foreground">Microsoft linking</div>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Microsoft account linking is already represented in the data model and account structure, but the launcher-side flow ships separately. You can add it later without rebuilding your profile.
                 </p>
               </div>
@@ -184,28 +184,28 @@ export function OnboardingWizard({ viewer }: { viewer: SessionUser }) {
                     key={intent.value}
                     type="button"
                     onClick={() => form.setValue("companyIntent", intent.value as OnboardingValues["companyIntent"])}
-                    className={`rounded-[1.5rem] border p-5 text-left transition ${companyIntent === intent.value ? "border-cyan-400/24 bg-cyan-400/10" : "border-white/10 bg-white/4 hover:border-white/18 hover:bg-white/6"}`}
+                    className={`rounded-xl border p-4 text-left transition-colors ${companyIntent === intent.value ? "border-foreground/30 bg-muted/40" : "border-border bg-transparent hover:border-border hover:bg-muted/10"}`}
                   >
-                    <div className="font-medium text-white">{intent.title}</div>
-                    <p className="mt-2 text-sm leading-6 text-white/58">{intent.body}</p>
+                    <div className="font-medium text-foreground">{intent.title}</div>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{intent.body}</p>
                   </button>
                 ))}
               </div>
               {companyIntent === "join-invite" ? (
                 <div className="space-y-2">
                   <Label htmlFor="inviteCode">Invite code</Label>
-                  <Input id="inviteCode" {...form.register("inviteCode")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
-                  <p className="text-sm text-rose-200">{form.formState.errors.inviteCode?.message}</p>
+                  <Input id="inviteCode" {...form.register("inviteCode")} className="h-10" />
+                  <p className="text-xs text-destructive">{form.formState.errors.inviteCode?.message}</p>
                 </div>
               ) : null}
             </div>
           ) : null}
         </motion.div>
-        <div className="flex flex-col gap-3 border-t border-white/8 bg-white/4 px-8 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-rose-200">{message}</div>
-          <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 border-t border-border bg-muted/10 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-destructive">{message}</div>
+          <div className="flex flex-wrap gap-2">
             {step > 0 ? (
-              <Button type="button" variant="outline" onClick={() => setStep((value) => Math.max(value - 1, 0))} className="border-white/10 bg-white/6 text-white hover:bg-white/10">
+              <Button type="button" variant="outline" onClick={() => setStep((value) => Math.max(value - 1, 0))}>
                 Back
               </Button>
             ) : null}
