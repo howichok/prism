@@ -48,7 +48,7 @@ copy .env.example .env
 - `DIRECT_URL` should match `DATABASE_URL` locally.
 - `AUTH_SECRET` and `NEXTAUTH_SECRET` should be the same long random string.
 - `AUTH_DISCORD_ID` and `AUTH_DISCORD_SECRET` should come from a Discord OAuth application.
-- `AUTH_URL`, `NEXTAUTH_URL`, and `NEXT_PUBLIC_APP_URL` should all be set to your local app URL.
+- `AUTH_URL` and `NEXTAUTH_URL` should both be set to your local app URL.
 
 4. Apply the schema.
 
@@ -105,7 +105,6 @@ Set these in the Netlify site dashboard:
 - `NEXTAUTH_SECRET`
 - `AUTH_URL`
 - `NEXTAUTH_URL`
-- `NEXT_PUBLIC_APP_URL`
 - `AUTH_TRUST_HOST`
 - `AUTH_DISCORD_ID`
 - `AUTH_DISCORD_SECRET`
@@ -114,7 +113,7 @@ Recommended production values:
 
 - `DATABASE_URL`: Supabase pooled connection string on port `6543` with `pgbouncer=true&connection_limit=1`
 - `DIRECT_URL`: Supabase direct Postgres connection on port `5432`
-- `AUTH_URL`, `NEXTAUTH_URL`, `NEXT_PUBLIC_APP_URL`: your production site URL
+- `AUTH_URL`, `NEXTAUTH_URL`: your production site URL
 - `AUTH_TRUST_HOST`: `true`
 
 ### Prisma + Supabase Production Notes

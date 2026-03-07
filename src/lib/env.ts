@@ -10,7 +10,6 @@ const envSchema = z.object({
   AUTH_TRUST_HOST: z.string().optional(),
   AUTH_DISCORD_ID: z.string().optional(),
   AUTH_DISCORD_SECRET: z.string().optional(),
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 });
 
 export const env = envSchema.parse({
@@ -23,11 +22,9 @@ export const env = envSchema.parse({
   AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
   AUTH_DISCORD_ID: process.env.AUTH_DISCORD_ID,
   AUTH_DISCORD_SECRET: process.env.AUTH_DISCORD_SECRET,
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
 });
 
 export const authSecret = env.AUTH_SECRET ?? env.NEXTAUTH_SECRET;
-export const authUrl = env.AUTH_URL ?? env.NEXTAUTH_URL ?? env.NEXT_PUBLIC_APP_URL;
 
 export const isDiscordAuthConfigured = Boolean(
   env.AUTH_DISCORD_ID && env.AUTH_DISCORD_SECRET && authSecret,
