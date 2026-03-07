@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { CompanyRole } from "@prisma/client";
-import { notFound } from "next/navigation";
-import { Megaphone, UserRoundPlus } from "lucide-react";
+import { ClipboardList, Megaphone, UserRoundPlus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { EmptyState } from "@/components/platform/empty-state";
 import { FeedItem } from "@/components/platform/feed-item";
 import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { PageHeader } from "@/components/platform/page-header";
@@ -20,10 +20,30 @@ import { requireUser } from "@/lib/session";
 export default async function CompanyHubOverviewPage({ params }: { params: Promise<{ slug: string }> }) {
   const viewer = await requireUser({ onboarded: true });
   const { slug } = await params;
-  const data = await getCompanyHubData(slug, viewer.id);
+  const data = await getCompanyHubData(slug, viewer.id).catch((error) => {
+    console.error("[company-hub:overview] Failed to load company hub data.", {
+      slug,
+      userId: viewer.id,
+      error,
+    });
+    return null;
+  });
 
   if (!data) {
-    notFound();
+    return (
+      <AppShell title="Company Hub" description="Company hub overview, feed, members, and work." items={getCompanySidebarItems(slug)}>
+        <EmptyState
+          icon={ClipboardList}
+          title="Company hub is temporarily unavailable"
+          description="The company workspace request failed before PrismMTR could load the hub surface."
+          action={
+            <Button size="sm" render={<Link href="/dashboard" />}>
+              Return to dashboard
+            </Button>
+          }
+        />
+      </AppShell>
+    );
   }
 
   const coOwners = data.members.filter((member) => member.companyRole === CompanyRole.CO_OWNER).slice(0, 3);

@@ -9,7 +9,7 @@ import { formatDate, titleCase } from "@/lib/format";
 
 export function PostCard({ post }: { post: PostSummary }) {
   return (
-    <article className="group relative overflow-hidden rounded-[1rem] border border-border bg-card/90 p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_22px_36px_rgba(0,0,0,0.26)]">
+    <article className="group relative overflow-hidden rounded-[1rem] border border-white/8 bg-card/90 p-4 transition-all duration-200 hover:border-white/14 hover:bg-card/96">
       <div className="relative space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
@@ -19,15 +19,15 @@ export function PostCard({ post }: { post: PostSummary }) {
           <StatusBadge status={post.status} />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_236px] lg:items-start">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px] xl:items-start">
           <div className="space-y-3">
             <Link
               href={`/posts/${post.slug}`}
-              className="block font-display text-[1.9rem] leading-[0.95] text-foreground transition-colors hover:text-foreground/80 cursor-pointer"
+              className="block font-display text-[1.55rem] leading-[0.96] text-foreground transition-colors hover:text-foreground/80 cursor-pointer"
             >
               {post.title}
             </Link>
-            <p className="line-clamp-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            <p className="line-clamp-3 max-w-2xl text-sm leading-7 text-muted-foreground">
               {post.excerpt ?? post.content}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -42,23 +42,23 @@ export function PostCard({ post }: { post: PostSummary }) {
             </div>
           </div>
 
-          <div className="rounded-[0.95rem] border border-white/6 bg-white/[0.03] p-3.5">
+          <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] p-3.5">
             <div className="panel-label">Surface</div>
             <div className="mt-3 space-y-3 text-sm">
               {post.company ? (
                 <Link
                   href={`/companies/${post.company.slug}`}
-                  className="flex items-center justify-between rounded-[0.8rem] border border-white/6 bg-background/75 px-3 py-2.5 text-foreground/80 transition-colors hover:border-primary/20 hover:text-foreground"
+                  className="flex items-center justify-between rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-foreground/80 transition-colors hover:border-white/14 hover:text-foreground"
                 >
                   <span className="truncate text-xs font-medium">{post.company.name}</span>
                   <ArrowUpRight className="size-3.5 shrink-0" />
                 </Link>
               ) : (
-                <div className="rounded-[0.8rem] border border-white/6 bg-background/75 px-3 py-2.5 text-xs font-medium text-muted-foreground">
+                <div className="rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-xs font-medium text-muted-foreground">
                   Independent post
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 rounded-[0.8rem] border border-white/6 bg-background/75 px-3 py-2.5 text-xs text-muted-foreground">
+              <div className="inline-flex items-center gap-2 rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-xs text-muted-foreground">
                 <CalendarClock className="size-3.5" />
                 {formatDate(post.createdAt)}
               </div>

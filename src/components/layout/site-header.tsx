@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 
 import { ProfileMenu } from "@/components/layout/profile-menu";
 import { DiscordAuthButton } from "@/components/platform/discord-auth-button";
-import type { SessionUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 const baseNavItems = [
@@ -13,11 +12,18 @@ const baseNavItems = [
   { href: "/discovery", label: "Discovery" },
 ];
 
+export type HeaderViewer = {
+  displayName: string | null;
+  username: string | null;
+  avatarUrl?: string | null;
+  accentColor?: string | null;
+};
+
 export function SiteHeader({
   viewer,
   discordAuthConfigured,
 }: {
-  viewer: SessionUser | null;
+  viewer: HeaderViewer | null;
   discordAuthConfigured: boolean;
 }) {
   const pathname = usePathname();
@@ -26,8 +32,8 @@ export function SiteHeader({
     : baseNavItems;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[linear-gradient(180deg,rgba(10,10,10,0.94),rgba(10,10,10,0.88))] backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[linear-gradient(180deg,rgba(10,10,10,0.95),rgba(10,10,10,0.9))] backdrop-blur-md">
+      <div className="mx-auto flex h-[3.85rem] max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-5 lg:gap-7">
           <Link href="/" className="group flex min-w-0 items-center gap-3 text-foreground">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/18 bg-[linear-gradient(140deg,rgba(14,165,233,0.18),rgba(10,10,10,0.94))] text-primary">
@@ -53,10 +59,10 @@ export function SiteHeader({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-[0.8rem] px-3.5 py-2 text-[13px] font-medium transition-colors duration-200",
+                    "rounded-[0.85rem] border px-3.5 py-2 text-[13px] font-medium transition-colors duration-200",
                     active
-                      ? "bg-white/[0.06] text-white"
-                      : "text-muted-foreground hover:bg-white/[0.04] hover:text-white",
+                      ? "border-white/10 bg-white/[0.05] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+                      : "border-transparent text-muted-foreground hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
                   )}
                 >
                   {item.label}

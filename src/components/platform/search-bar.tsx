@@ -13,12 +13,12 @@ export function SearchBar({
 }) {
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/42" />
+      <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/38" />
       <Input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-11 rounded-[1.1rem] border-white/8 bg-[hsl(0_0%_5%)]/92 pl-11 text-sm text-white placeholder:text-white/34 focus:border-blue-300/30 focus:ring-blue-300/10"
+        className="h-10 rounded-[0.95rem] border-white/8 bg-[hsl(0_0%_5%)]/92 pl-11 text-sm text-white placeholder:text-white/34 focus-visible:border-blue-300/30 focus-visible:ring-blue-300/10"
       />
     </div>
   );

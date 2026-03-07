@@ -1,15 +1,43 @@
+import Link from "next/link";
+import { ClipboardList } from "lucide-react";
+
 import { AppShell } from "@/components/layout/app-shell";
 import { BuildRequestForm } from "@/components/forms/build-request-form";
 import { BuildRequestCard } from "@/components/platform/build-request-card";
+import { EmptyState } from "@/components/platform/empty-state";
 import { PageHeader } from "@/components/platform/page-header";
 import { StatusBadge } from "@/components/platform/status-badge";
+import { Button } from "@/components/ui/button";
 import { dashboardSidebarItems } from "@/lib/navigation";
 import { getDashboardData } from "@/lib/data";
 import { requireUser } from "@/lib/session";
 
 export default async function DashboardApplicationsPage() {
   const viewer = await requireUser({ onboarded: true });
-  const data = await getDashboardData(viewer.id);
+  const data = await getDashboardData(viewer.id).catch((error) => {
+    console.error("[dashboard:applications] Failed to load dashboard application data.", {
+      userId: viewer.id,
+      error,
+    });
+    return null;
+  });
+
+  if (!data) {
+    return (
+      <AppShell title="Dashboard" description="Track join requests and build request submissions." items={dashboardSidebarItems}>
+        <EmptyState
+          icon={ClipboardList}
+          title="Applications are temporarily unavailable"
+          description="Your account is online, but the applications workspace could not load right now."
+          action={
+            <Button size="sm" render={<Link href="/dashboard" />}>
+              Return to dashboard
+            </Button>
+          }
+        />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell title="Dashboard" description="Track join requests and build request submissions." items={dashboardSidebarItems}>

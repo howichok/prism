@@ -2,17 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import {
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  ClipboardCheck,
+  FolderKanban,
+  LayoutDashboard,
+  Megaphone,
+  Settings,
+  Shield,
+  UserCircle2,
+  UsersRound,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
+const sidebarIcons = {
+  bell: Bell,
+  briefcaseBusiness: BriefcaseBusiness,
+  building2: Building2,
+  clipboardCheck: ClipboardCheck,
+  folderKanban: FolderKanban,
+  layoutDashboard: LayoutDashboard,
+  megaphone: Megaphone,
+  settings: Settings,
+  shield: Shield,
+  userCircle2: UserCircle2,
+  usersRound: UsersRound,
+} as const;
+
+export type SidebarIconKey = keyof typeof sidebarIcons;
 
 export type SidebarItem = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: SidebarIconKey;
 };
 
 function SidebarLink({ item, active }: { item: SidebarItem; active: boolean }) {
+  const Icon = sidebarIcons[item.icon] ?? LayoutDashboard;
+
   return (
     <Link
       href={item.href}
@@ -31,7 +61,7 @@ function SidebarLink({ item, active }: { item: SidebarItem; active: boolean }) {
             : "border-white/8 bg-background/70 text-muted-foreground group-hover:border-white/12 group-hover:text-white",
         )}
       >
-        <item.icon className="size-4 shrink-0" />
+        <Icon className="size-4 shrink-0" />
       </div>
       <span className="truncate">{item.label}</span>
     </Link>

@@ -5,11 +5,19 @@ import { getOptionalSessionUser } from "@/lib/session";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const viewer = await getOptionalSessionUser();
+  const headerViewer = viewer
+    ? {
+        displayName: viewer.displayName,
+        username: viewer.username,
+        avatarUrl: viewer.avatarUrl,
+        accentColor: viewer.accentColor,
+      }
+    : null;
 
   return (
     <div className="relative min-h-screen">
       <div className="relative z-10 flex min-h-screen flex-col">
-        <SiteHeader viewer={viewer} discordAuthConfigured={isDiscordAuthConfigured} />
+        <SiteHeader viewer={headerViewer} discordAuthConfigured={isDiscordAuthConfigured} />
         <div className="flex-1">{children}</div>
         <SiteFooter />
       </div>

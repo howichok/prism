@@ -9,14 +9,14 @@ import { titleCase } from "@/lib/format";
 
 export function ProjectCard({ project }: { project: ProjectSummary }) {
   return (
-    <div className="group overflow-hidden rounded-[1rem] border border-border bg-card/90 p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_22px_36px_rgba(0,0,0,0.26)]">
+    <div className="group overflow-hidden rounded-[1rem] border border-white/8 bg-card/90 p-4 transition-all duration-200 hover:border-white/14 hover:bg-card/96">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             <DraftingCompass className="size-3.5" />
             {titleCase(project.type)}
           </div>
-          <h3 className="font-display text-[1.65rem] leading-[0.95] text-foreground">{project.title}</h3>
+          <h3 className="font-display text-[1.45rem] leading-[0.96] text-foreground">{project.title}</h3>
           <p className="mt-3 line-clamp-3 text-sm leading-7 text-muted-foreground">{project.description}</p>
         </div>
         <StatusBadge status={project.status} />
@@ -36,7 +36,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
 
         <Link
           href={`/companies/${project.company.slug}`}
-          className="inline-flex items-center gap-2 rounded-[0.8rem] border border-white/8 bg-white/[0.03] px-3 py-2.5 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-primary/20 hover:text-foreground"
+          className="inline-flex items-center gap-2 rounded-[0.8rem] border border-white/8 bg-white/[0.03] px-3 py-2.5 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:border-white/14 hover:text-foreground"
         >
           <Map className="size-3.5" />
           {project.company.name}
