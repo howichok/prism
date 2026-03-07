@@ -12,6 +12,32 @@ export type SidebarItem = {
   icon: LucideIcon;
 };
 
+function SidebarLink({ item, active }: { item: SidebarItem; active: boolean }) {
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "group flex items-center gap-3 rounded-[0.95rem] border px-3 py-3 text-[13px] font-medium transition-colors",
+        active
+          ? "border-white/12 bg-white/[0.06] text-white"
+          : "border-transparent text-muted-foreground hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
+      )}
+    >
+      <div
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-[0.8rem] border transition-colors",
+          active
+            ? "border-primary/20 bg-primary/10 text-primary"
+            : "border-white/8 bg-background/70 text-muted-foreground group-hover:border-white/12 group-hover:text-white",
+        )}
+      >
+        <item.icon className="size-4 shrink-0" />
+      </div>
+      <span className="truncate">{item.label}</span>
+    </Link>
+  );
+}
+
 export function AppSidebarPanel({
   title,
   description,
@@ -24,59 +50,48 @@ export function AppSidebarPanel({
   className?: string;
 }) {
   const pathname = usePathname();
+  const overviewItem = items[0];
+  const workspaceItems = items.slice(1);
 
   return (
-    <div className={cn("surface-panel-strong space-y-5 p-4", className)}>
-      <div className="rounded-[0.85rem] border border-white/6 bg-white/[0.03] p-4">
-        <div className="panel-label">Workspace shell</div>
-        <h2 className="mt-3 font-display text-[1.55rem] leading-none text-white">{title}</h2>
+    <div className={cn("space-y-6 rounded-[1.05rem] border border-white/8 bg-[hsl(0_0%_5%)]/88 p-4", className)}>
+      <div className="rounded-[0.9rem] border border-white/8 bg-white/[0.02] p-4">
+        <div className="panel-label">Workspace</div>
+        <h2 className="mt-3 font-display text-[1.35rem] leading-none text-white">{title}</h2>
         <p className="mt-3 max-w-[15rem] text-xs leading-6 text-muted-foreground">{description}</p>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-[0.7rem] border border-white/6 bg-background/65 px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Mode</div>
-            <div className="mt-2 text-xs font-medium text-foreground">Operational</div>
-          </div>
-          <div className="rounded-[0.7rem] border border-white/6 bg-background/65 px-3 py-2">
-            <div className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">State</div>
-            <div className="mt-2 text-xs font-medium text-foreground">Connected</div>
-          </div>
-        </div>
       </div>
-      <div className="px-1">
-        <div className="panel-label px-3">Navigation</div>
-      </div>
-      <nav className="flex flex-col gap-1">
-        {items.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-[0.8rem] border px-3 py-2.5 text-[13px] font-medium transition-all duration-200",
-                active
-                  ? "border-primary/18 bg-[linear-gradient(180deg,rgba(37,99,235,0.14),rgba(255,255,255,0.02))] text-white shadow-[0_14px_30px_rgba(37,99,235,0.12)]"
-                  : "border-transparent text-muted-foreground hover:border-white/6 hover:bg-white/[0.035] hover:text-white",
-              )}
-            >
-              <div
-                className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-[0.7rem] border transition-colors",
-                  active
-                    ? "border-primary/20 bg-primary/12 text-primary"
-                    : "border-white/6 bg-background/55 text-muted-foreground group-hover:border-primary/15 group-hover:text-white",
-                )}
-              >
-                <item.icon className="size-4 shrink-0" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="truncate">{item.label}</span>
-              </div>
-            </Link>
-          );
-        })}
+      <nav className="space-y-5">
+        {overviewItem ? (
+          <div className="space-y-1.5">
+            <div className="px-1">
+              <div className="panel-label px-3">Overview</div>
+            </div>
+            <SidebarLink
+              item={overviewItem}
+              active={pathname === overviewItem.href || pathname.startsWith(`${overviewItem.href}/`)}
+            />
+          </div>
+        ) : null}
+
+        {workspaceItems.length ? (
+          <div className="space-y-1.5">
+            <div className="px-1">
+              <div className="panel-label px-3">Workspace</div>
+            </div>
+            {workspaceItems.map((item) => (
+              <SidebarLink key={item.href} item={item} active={pathname === item.href || pathname.startsWith(`${item.href}/`)} />
+            ))}
+          </div>
+        ) : null}
       </nav>
+
+      <div className="rounded-[0.9rem] border border-white/8 bg-white/[0.02] px-4 py-3">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-white/36">System</div>
+        <p className="mt-2 text-xs leading-6 text-muted-foreground">
+          Use the sidebar as the primary workspace switch, then operate inside the main panel.
+        </p>
+      </div>
     </div>
   );
 }

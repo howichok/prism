@@ -15,7 +15,6 @@ import {
 import { BuildRequestCard } from "@/components/platform/build-request-card";
 import { CompanyCard } from "@/components/platform/company-card";
 import { EmptyState } from "@/components/platform/empty-state";
-import { FilterPanel } from "@/components/platform/filter-panel";
 import { PostCard } from "@/components/platform/post-card";
 import { ProjectCard } from "@/components/platform/project-card";
 import { SearchBar } from "@/components/platform/search-bar";
@@ -38,33 +37,33 @@ const tabMeta: Record<
   }
 > = {
   all: {
-    label: "All surfaces",
-    summary: "Cross-network view across public companies, people, publishing, work, and requests.",
+    label: "All",
+    summary: "Cross-network view across public companies, members, publishing, work, and requests.",
     icon: LayoutGrid,
   },
   companies: {
     label: "Companies",
-    summary: "Operating hubs, recruiting state, and visible leadership context.",
+    summary: "Operating hubs, recruiting posture, and leadership context.",
     icon: Building2,
   },
   users: {
     label: "Members",
-    summary: "Identity surfaces with company context, badges, and visible roles.",
+    summary: "Identity surfaces with company, role, and badge context.",
     icon: UsersRound,
   },
   posts: {
     label: "Posts",
-    summary: "Publishing surfaces for announcements, showcases, and public updates.",
+    summary: "Public publishing surfaces for announcements, showcases, and recruitment.",
     icon: Newspaper,
   },
   projects: {
     label: "Projects",
-    summary: "Work in motion with status, authorship, and company ownership.",
+    summary: "Active work with authorship, status, and company ownership.",
     icon: Sparkles,
   },
   requests: {
     label: "Requests",
-    summary: "Open operational needs and build requests visible to the network.",
+    summary: "Open operational needs and build requests across the network.",
     icon: ClipboardList,
   },
 };
@@ -172,36 +171,72 @@ export function DiscoveryExplorer({
   };
 
   const activeTabMeta = tabMeta[tab];
-  const ActiveTabIcon = activeTabMeta.icon;
+  const lensResults = tabCounts[tab];
 
   return (
-    <div className="grid gap-10 xl:grid-cols-[320px_minmax(0,1fr)] xl:gap-12">
-      <aside className="space-y-4 xl:sticky xl:top-28 xl:self-start">
-        <FilterPanel
-          title="Discovery controls"
-          description="Search the public network with the same mental model the platform uses internally: lens first, filters second, results always visible."
-        >
-          <SearchBar value={query} onChange={setQuery} placeholder="Search names, tags, roles, and surfaces" />
+    <div className="space-y-6">
+      <section className="surface-panel-strong overflow-hidden p-0">
+        <div className="border-b border-white/8 px-5 py-8 sm:px-8 sm:py-10">
+          <div className="mx-auto max-w-[48rem] text-center">
+            <div className="panel-label">Explore</div>
+            <h2 className="mt-4 font-display text-[3rem] leading-[0.9] text-white sm:text-[4rem]">Discovery</h2>
+            <p className="mt-4 text-sm leading-8 text-muted-foreground sm:text-base">
+              Explore PrismMTR as a live network of companies, people, posts, projects, and requests instead of browsing isolated lists.
+            </p>
+            <div className="mt-6">
+              <SearchBar value={query} onChange={setQuery} placeholder="Search companies, members, tags, and work surfaces" />
+            </div>
+          </div>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <label className="block text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Sort
+        <div className="overflow-x-auto border-b border-white/8">
+          <div className="flex min-w-max gap-2 px-4 py-3 sm:px-6">
+            {tabs.map((value) => {
+              const meta = tabMeta[value];
+              const Icon = meta.icon;
+
+              return (
+                <button
+                  key={value}
+                  onClick={() => setTab(value)}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-[0.9rem] border px-3.5 py-2.5 text-left text-sm transition-colors",
+                    tab === value
+                      ? "border-white/14 bg-white/[0.06] text-white"
+                      : "border-transparent text-muted-foreground hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
+                  )}
+                >
+                  <Icon className="size-4" />
+                  <span>{meta.label}</span>
+                  <span className="rounded-full border border-white/8 bg-background/70 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-white/58">
+                    {tabCounts[value]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex flex-1 flex-wrap gap-3">
+            <label className="min-w-[11rem] text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Sort by
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value as DiscoverySort)}
-                className="mt-2 h-11 w-full rounded-[1rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
+                onChange={(event) => setSort(event.target.value as DiscoverySort)}
+                className="mt-2 h-11 w-full rounded-[0.95rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
               >
                 <option value="activity">Most active</option>
                 <option value="latest">Latest</option>
                 <option value="a-z">A-Z</option>
               </select>
             </label>
-            <label className="block text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <label className="min-w-[11rem] text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Recruiting
               <select
                 value={recruiting}
-                onChange={(e) => setRecruiting(e.target.value)}
-                className="mt-2 h-11 w-full rounded-[1rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
+                onChange={(event) => setRecruiting(event.target.value)}
+                className="mt-2 h-11 w-full rounded-[0.95rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
               >
                 <option value="all">All</option>
                 <option value="OPEN">Open</option>
@@ -209,279 +244,153 @@ export function DiscoveryExplorer({
                 <option value="CLOSED">Closed</option>
               </select>
             </label>
+            <label className="min-w-[11rem] text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Privacy
+              <select
+                value={privacy}
+                onChange={(event) => setPrivacy(event.target.value)}
+                className="mt-2 h-11 w-full rounded-[0.95rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
+              >
+                <option value="all">All</option>
+                <option value="PUBLIC">Public</option>
+                <option value="PRIVATE">Private</option>
+              </select>
+            </label>
           </div>
 
-          <label className="block text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Privacy
-            <select
-              value={privacy}
-              onChange={(e) => setPrivacy(e.target.value)}
-              className="mt-2 h-11 w-full rounded-[1rem] border border-white/8 bg-[hsl(0_0%_5%)]/92 px-3 text-sm text-white outline-none transition-colors focus:border-blue-400/28"
-            >
-              <option value="all">All</option>
-              <option value="PUBLIC">Public</option>
-              <option value="PRIVATE">Private</option>
-            </select>
-          </label>
-        </FilterPanel>
-
-        <div className="surface-panel p-5">
-          <div className="panel-label">Result split</div>
-          <div className="mt-4 space-y-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
             {resultSplit.map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between rounded-[1rem] border border-white/8 bg-[hsl(0_0%_5%)]/90 px-3.5 py-3"
+                className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] px-3 py-2.5"
               >
-                <span className="text-muted-foreground">{item.label}</span>
-                <span className="font-semibold text-white">{item.count}</span>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">{item.label}</div>
+                <div className="mt-1.5 text-sm font-medium text-white">{item.count}</div>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        <div className="surface-panel p-5">
-          <div className="panel-label">Browsing logic</div>
-          <div className="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-            <p>Use tabs as a network lens, not just a visual filter.</p>
-            <p>Search terms match names, descriptions, tags, visible roles, and company context.</p>
+      <section className="flex flex-col gap-4 border-b border-white/8 pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="panel-label">Current lens</div>
+          <h3 className="mt-3 font-display text-[1.8rem] leading-[0.95] text-white">{activeTabMeta.label}</h3>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">{activeTabMeta.summary}</p>
+        </div>
+        <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-4 py-4 lg:min-w-[15rem]">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Visible results</div>
+          <div className="mt-3 font-display text-[2rem] leading-none text-white">{lensResults}</div>
+          <div className="mt-2 text-xs leading-6 text-muted-foreground">
+            {deferredQuery ? `Filtered by "${deferredQuery}" / ${titleCase(sort)}` : `Sorted by ${titleCase(sort)}`}
           </div>
         </div>
-      </aside>
+      </section>
 
-      <div className="space-y-10">
-        <div className="surface-panel-strong overflow-hidden p-0">
-          <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_330px]">
-            <div className="p-6 sm:p-8 xl:p-10">
-              <div className="flex items-center gap-3">
-                <span className="h-px w-8 bg-muted-foreground/30" />
-                <div className="panel-label">Discovery index</div>
-              </div>
-              <h2 className="mt-6 max-w-4xl font-display text-[2.85rem] leading-[0.92] text-foreground sm:text-[3.6rem]">
-                Browse PrismMTR like a network, not a directory.
-              </h2>
-              <p className="mt-5 max-w-3xl text-base leading-8 text-muted-foreground">
-                The old platform was strongest when discovery behaved like an index of live systems. This surface keeps that
-                logic, but with better identity, cleaner filters, and denser operating context.
-              </p>
-
-              <div className="mt-8 grid gap-4 xl:grid-cols-[minmax(0,1fr)_220px] xl:items-end">
-                <div className="space-y-3">
-                  <div className="panel-label">Index query</div>
-                  <SearchBar value={query} onChange={setQuery} placeholder="Search companies, members, tags, and work surfaces" />
-                </div>
-                <div className="rounded-[1.35rem] border border-white/8 bg-[hsl(0_0%_5%)]/88 p-4">
-                  <div className="panel-label">Visible results</div>
-                  <div className="mt-3 font-display text-[2.3rem] leading-none text-white">{totalResults}</div>
-                  <div className="mt-2 text-sm leading-7 text-muted-foreground">
-                    {deferredQuery ? `Filtered for "${deferredQuery}"` : "Across the full public PrismMTR index"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
-                {tabs.map((value) => {
-                  const meta = tabMeta[value];
-                  const Icon = meta.icon;
-
-                  return (
-                    <button
-                      key={value}
-                      onClick={() => setTab(value)}
-                      className={cn(
-                        "group rounded-[1.2rem] border px-4 py-3 text-left transition-all duration-200",
-                        tab === value
-                          ? "border-blue-400/28 bg-blue-400/[0.08] shadow-[0_18px_42px_-30px_rgba(37,99,235,0.45)]"
-                          : "border-white/8 bg-[hsl(0_0%_5%)]/88 hover:border-white/14 hover:bg-white/[0.04]",
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="inline-flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-blue-200/76">
-                            <Icon className="size-3.5" />
-                            {meta.label}
-                          </div>
-                          <p className="mt-2 text-sm leading-6 text-muted-foreground">{meta.summary}</p>
-                        </div>
-                        <div
-                          className={cn(
-                            "rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em]",
-                            tab === value
-                              ? "border-blue-400/22 bg-blue-400/12 text-blue-200"
-                              : "border-white/8 bg-white/[0.03] text-white/58 group-hover:text-white/74",
-                          )}
-                        >
-                          {tabCounts[value]}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+      {(tab === "all" || tab === "companies") && (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="panel-label">Companies</div>
+              <h2 className="mt-3 font-display text-[1.75rem] leading-[0.95] text-white">Visible company operating centers</h2>
             </div>
-
-            <div className="border-t border-white/8 bg-[hsl(0_0%_5%)]/94 p-6 xl:border-l xl:border-t-0">
-              <div className="panel-label">Current lens</div>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex size-11 items-center justify-center rounded-[1rem] border border-blue-400/16 bg-blue-400/[0.08] text-blue-200">
-                  <ActiveTabIcon className="size-4.5" />
-                </div>
-                <div>
-                  <div className="font-display text-[1.55rem] leading-none text-white">{activeTabMeta.label}</div>
-                  <div className="mt-1 text-xs uppercase tracking-[0.2em] text-white/42">{titleCase(sort)} sort</div>
-                </div>
-              </div>
-              <p className="mt-4 text-sm leading-7 text-muted-foreground">{activeTabMeta.summary}</p>
-
-              <div className="mt-6 space-y-2">
-                {[
-                  { label: "Recruiting", value: recruiting === "all" ? "Any state" : titleCase(recruiting) },
-                  { label: "Privacy", value: privacy === "all" ? "Any surface" : titleCase(privacy) },
-                  { label: "Query", value: deferredQuery || "No free-text query" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-3.5 py-3"
-                  >
-                    <div className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/40">{item.label}</div>
-                    <div className="mt-2 text-sm text-white">{item.value}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{filteredCompanies.length} results</div>
           </div>
-        </div>
-
-        {(tab === "all" || tab === "companies") && (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="panel-label">Companies</div>
-                <h2 className="mt-3 font-display text-[2rem] leading-[0.94] text-white">Structured company operating centers</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  Public companies should read like real operating units: leadership, work density, recruiting state, and visible context.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3.5 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/62">
-                {filteredCompanies.length} visible
-              </div>
+          {filteredCompanies.length ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {filteredCompanies.map((company) => (
+                <CompanyCard key={company.id} company={company} compact />
+              ))}
             </div>
-            {filteredCompanies.length ? (
-              <div className="grid gap-4 2xl:grid-cols-2">
-                {filteredCompanies.map((company) => (
-                  <CompanyCard key={company.id} company={company} compact />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={SearchSlash} title="No companies match" description="Try broadening the current filters." />
-            )}
-          </section>
-        )}
+          ) : (
+            <EmptyState icon={SearchSlash} title="No companies match" description="Try broadening the current filters." />
+          )}
+        </section>
+      )}
 
-        {(tab === "all" || tab === "users") && (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="panel-label">Members</div>
-                <h2 className="mt-3 font-display text-[2rem] leading-[0.94] text-white">Identity surfaces with company context</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  People appear here with enough structure to understand who they are, where they work, and how they show up publicly.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3.5 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/62">
-                {filteredUsers.length} visible
-              </div>
+      {(tab === "all" || tab === "users") && (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="panel-label">Members</div>
+              <h2 className="mt-3 font-display text-[1.75rem] leading-[0.95] text-white">Public identity surfaces</h2>
             </div>
-            {filteredUsers.length ? (
-              <div className="grid gap-4 2xl:grid-cols-2">
-                {filteredUsers.map((user) => (
-                  <UserCard key={user.id} user={user} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={UsersRound} title="No members match" description="Try a different search term." />
-            )}
-          </section>
-        )}
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{filteredUsers.length} results</div>
+          </div>
+          {filteredUsers.length ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {filteredUsers.map((user) => (
+                <UserCard key={user.id} user={user} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={UsersRound} title="No members match" description="Try a different search term." />
+          )}
+        </section>
+      )}
 
-        {(tab === "all" || tab === "posts") && (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="panel-label">Posts</div>
-                <h2 className="mt-3 font-display text-[2rem] leading-[0.94] text-white">Public publishing stream</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  Announcements, recruitment posts, showcases, and progress updates with visible authorship and company context.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3.5 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/62">
-                {filteredPosts.length} visible
-              </div>
+      {(tab === "all" || tab === "posts") && (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="panel-label">Posts</div>
+              <h2 className="mt-3 font-display text-[1.75rem] leading-[0.95] text-white">Publishing stream</h2>
             </div>
-            {filteredPosts.length ? (
-              <div className="space-y-4">
-                {filteredPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={Newspaper} title="No posts found" description="Search broader topics." />
-            )}
-          </section>
-        )}
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{filteredPosts.length} results</div>
+          </div>
+          {filteredPosts.length ? (
+            <div className="space-y-3">
+              {filteredPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={Newspaper} title="No posts match" description="Try a broader publishing search." />
+          )}
+        </section>
+      )}
 
-        {(tab === "all" || tab === "projects") && (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="panel-label">Projects</div>
-                <h2 className="mt-3 font-display text-[2rem] leading-[0.94] text-white">Visible work in motion</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  Project cards should explain ownership, state, and intent quickly enough to scan the network without extra clicks.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3.5 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/62">
-                {filteredProjects.length} visible
-              </div>
+      {(tab === "all" || tab === "projects") && (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="panel-label">Projects</div>
+              <h2 className="mt-3 font-display text-[1.75rem] leading-[0.95] text-white">Work in motion</h2>
             </div>
-            {filteredProjects.length ? (
-              <div className="grid gap-4 2xl:grid-cols-2">
-                {filteredProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={Sparkles} title="No projects yet" description="Projects will appear as companies publish work." />
-            )}
-          </section>
-        )}
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{filteredProjects.length} results</div>
+          </div>
+          {filteredProjects.length ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={Sparkles} title="No projects match" description="No visible project matches this lens." />
+          )}
+        </section>
+      )}
 
-        {(tab === "all" || tab === "requests") && (
-          <section className="space-y-5">
-            <div className="flex flex-col gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="panel-label">Build requests</div>
-                <h2 className="mt-3 font-display text-[2rem] leading-[0.94] text-white">Requests that surface live operational needs</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  Requests make the network feel alive by exposing where companies need support, contributors, or build help.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/8 bg-white/[0.03] px-3.5 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-white/62">
-                {filteredRequests.length} visible
-              </div>
+      {(tab === "all" || tab === "requests") && (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="panel-label">Requests</div>
+              <h2 className="mt-3 font-display text-[1.75rem] leading-[0.95] text-white">Operational needs</h2>
             </div>
-            {filteredRequests.length ? (
-              <div className="space-y-4">
-                {filteredRequests.map((request) => (
-                  <BuildRequestCard key={request.id} request={request} />
-                ))}
-              </div>
-            ) : (
-              <EmptyState icon={ClipboardList} title="No build requests" description="Requests appear as companies publish needs." />
-            )}
-          </section>
-        )}
-      </div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{filteredRequests.length} results</div>
+          </div>
+          {filteredRequests.length ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {filteredRequests.map((request) => (
+                <BuildRequestCard key={request.id} request={request} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState icon={ClipboardList} title="No requests match" description="No build request matches the current view." />
+          )}
+        </section>
+      )}
     </div>
   );
 }

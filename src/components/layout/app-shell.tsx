@@ -18,12 +18,12 @@ export function AppShell({
   rail?: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-[1520px] flex-col gap-6 px-4 pb-12 pt-5 sm:px-6 lg:px-8">
-      <div className="lg:hidden border-b border-border/80 pb-4">
+    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+      <div className="border-b border-white/8 pb-4 lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <div className="panel-label">Workspace</div>
-            <div className="mt-1 font-display text-lg text-foreground">{title}</div>
+            <div className="mt-2 font-display text-lg text-foreground">{title}</div>
           </div>
           <Sheet>
             <SheetTrigger render={<Button variant="outline" size="icon-sm" />}>
@@ -42,17 +42,18 @@ export function AppShell({
           </Sheet>
         </div>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[296px_minmax(0,1fr)] xl:grid-cols-[296px_minmax(0,1fr)_334px] xl:gap-8">
+      <div className="grid gap-6 lg:grid-cols-[264px_minmax(0,1fr)] xl:gap-8">
         <AppSidebar
           title={title}
           description={description}
           items={items}
-          className="hidden self-start lg:sticky lg:top-[5.45rem] lg:block"
+          className="hidden self-start lg:sticky lg:top-[4.8rem] lg:block"
         />
-        <main className="min-w-0 space-y-8">{children}</main>
-        {rail ? <aside className="space-y-4 xl:sticky xl:top-[5.45rem] xl:block">{rail}</aside> : null}
+        <div className="min-w-0 space-y-6 lg:border-l lg:border-white/8 lg:pl-8 xl:pl-10">
+          <main className="min-w-0 space-y-8">{children}</main>
+          {rail ? <div className="grid gap-4 xl:grid-cols-2">{rail}</div> : null}
+        </div>
       </div>
-      {rail ? <div className="space-y-4 xl:hidden">{rail}</div> : null}
     </div>
   );
 }
