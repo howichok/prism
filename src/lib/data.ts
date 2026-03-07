@@ -571,6 +571,10 @@ export async function getCompaniesDirectory() {
   return companies.map(mapCompanySummary);
 }
 
+export async function getPublicCompanies() {
+  return getCompaniesDirectory();
+}
+
 export async function getPublicCompanyBySlug(slug: string) {
   const company = await db.company.findFirst({
     where: {

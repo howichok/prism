@@ -1,30 +1,43 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Building2, CalendarDays, Gamepad2, Globe2, Sparkles } from "lucide-react";
+import { CalendarDays, Gamepad2, Globe2, Sparkles } from "lucide-react";
 
-import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
+import { FeedItem } from "@/components/platform/feed-item";
 import { PostCard } from "@/components/platform/post-card";
+import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
-import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { getPublicUserByUsername } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 
 export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const user = await getPublicUserByUsername(username).catch((error) => {
+  const data = await getPublicUserByUsername(username).catch((error) => {
     console.error("[user-profile] Error loading user", error);
     return null;
   });
 
-  if (!user) return notFound();
+  if (!data) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <PublicDataUnavailable
+          title="This profile could not be loaded"
+          description="The public profile route responded, but the server could not fetch the member data from Prisma."
+        />
+      </div>
+    );
+  }
+
+  const { user, posts, activity } = data;
+
+  if (!user) {
+    return notFound();
+  }
 
   const primaryMembership = user.memberships[0] ?? null;
-  const company = primaryMembership?.company ?? null;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      {/* Profile header */}
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
         <div
           className="h-32 sm:h-40"
@@ -55,11 +68,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
             </div>
           </div>
 
-          {user.bio ? (
-            <p className="mt-4 text-sm text-muted-foreground">{user.bio}</p>
-          ) : null}
+          {user.bio ? <p className="mt-4 text-sm text-muted-foreground">{user.bio}</p> : null}
 
-          {/* Identity details */}
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
             {user.discordUsername ? (
               <span className="inline-flex items-center gap-1.5">
@@ -79,7 +89,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
             </span>
           </div>
 
-          {/* Badges */}
           {user.badges.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-1.5">
               {user.badges.map((badge) => (
@@ -97,15 +106,14 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
-        {/* Posts */}
         <div className="space-y-4">
           <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
             <Sparkles className="size-4 text-primary/60" />
             Posts by {user.displayName}
           </h2>
-          {user.posts.length > 0 ? (
+          {posts.length > 0 ? (
             <div className="space-y-3">
-              {user.posts.map((post) => (
+              {posts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
@@ -114,11 +122,20 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
               No posts published yet.
             </div>
           )}
+
+          {activity.length > 0 ? (
+            <section className="rounded-xl border border-border bg-card p-4">
+              <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
+              <div className="mt-3 space-y-2">
+                {activity.slice(0, 5).map((item) => (
+                  <FeedItem key={item.id} item={item} />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
-          {/* Companies */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Companies</div>
             {user.memberships.length > 0 ? (
@@ -139,7 +156,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
             )}
           </div>
 
-          {/* Stats */}
           <div className="rounded-xl border border-border bg-card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Stats</div>
             <div className="mt-3 space-y-2">
@@ -153,7 +169,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
               </div>
               <div className="flex items-center justify-between rounded-md bg-muted/40 px-2.5 py-1.5 text-xs">
                 <span className="text-muted-foreground">Posts</span>
-                <span className="font-medium text-foreground">{user.posts.length}</span>
+                <span className="font-medium text-foreground">{posts.length}</span>
               </div>
             </div>
           </div>
