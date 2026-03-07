@@ -111,8 +111,8 @@ Set these in the Netlify site dashboard:
 
 Recommended production values:
 
-- `DATABASE_URL`: Supabase pooled connection string on port `6543` with `pgbouncer=true&connection_limit=1`
-- `DIRECT_URL`: Supabase direct Postgres connection on port `5432`
+- `DATABASE_URL`: Supabase pooled connection string on port `6543` with `pgbouncer=true&connection_limit=1&sslmode=require`
+- `DIRECT_URL`: Supabase direct Postgres connection on port `5432` with `sslmode=require`
 - `AUTH_URL`, `NEXTAUTH_URL`: your production site URL
 - `AUTH_TRUST_HOST`: `true`
 
@@ -124,6 +124,7 @@ Use Supabase with two connection strings:
   This should be the pooled connection string for Prisma in the deployed app.
 - Migrations use `DIRECT_URL`
   This should be the direct database connection because Prisma migrate should not run through PgBouncer.
+- Both URLs should include `sslmode=require` for deployed Supabase connections.
 
 This is why `prisma/schema.prisma` defines both `url` and `directUrl`.
 
