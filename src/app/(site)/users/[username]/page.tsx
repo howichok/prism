@@ -5,6 +5,7 @@ import { Building2, CalendarDays, Gamepad2, Globe2, Sparkles } from "lucide-reac
 import { FeedItem } from "@/components/platform/feed-item";
 import { PageHeader } from "@/components/platform/page-header";
 import { PostCard } from "@/components/platform/post-card";
+import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,22 @@ import { formatDate } from "@/lib/format";
 
 export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const data = await getPublicUserByUsername(username);
+  let data;
+
+  try {
+    data = await getPublicUserByUsername(username);
+  } catch (error) {
+    console.error(`[user:${username}] Failed to load public user profile.`, error);
+
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 lg:px-8">
+        <PublicDataUnavailable
+          title="This profile could not be loaded"
+          description="The public profile route responded, but the server could not fetch the member data. The production Prisma or Supabase connection likely needs attention."
+        />
+      </div>
+    );
+  }
 
   if (!data) {
     notFound();
@@ -49,7 +65,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
                 <div className="font-display text-4xl font-semibold text-white">{user.displayName}</div>
                 <div className="mt-1 text-sm text-white/58">
                   @{user.username ?? "member"}
-                  {user.discordUsername ? ` • ${user.discordUsername}` : ""}
+                  {user.discordUsername ? ` | ${user.discordUsername}` : ""}
                 </div>
               </div>
             </div>
@@ -107,12 +123,19 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
             <div className="panel-label">Badges and companies</div>
             <div className="mt-4 flex flex-wrap gap-2">
               {user.badges.map((badge) => (
-                <span key={badge.id} className="rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white" style={{ borderColor: `${badge.color}55`, backgroundColor: `${badge.color}22` }}>
+                <span
+                  key={badge.id}
+                  className="rounded-full border px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white"
+                  style={{ borderColor: `${badge.color}55`, backgroundColor: `${badge.color}22` }}
+                >
                   {badge.name}
                 </span>
               ))}
               {user.memberships.map((membership) => (
-                <span key={membership.company.id} className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white/70">
+                <span
+                  key={membership.company.id}
+                  className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white/70"
+                >
                   {membership.company.name}
                 </span>
               ))}

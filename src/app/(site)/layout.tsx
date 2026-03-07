@@ -1,10 +1,10 @@
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { isDiscordAuthConfigured } from "@/lib/env";
-import { getSessionUser } from "@/lib/session";
+import { getOptionalSessionUser } from "@/lib/session";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const viewer = await getSessionUser();
+  const viewer = await getOptionalSessionUser();
 
   return (
     <div className="relative min-h-screen overflow-hidden">

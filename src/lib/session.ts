@@ -41,6 +41,15 @@ export async function getSessionUser() {
   });
 }
 
+export async function getOptionalSessionUser() {
+  try {
+    return await getSessionUser();
+  } catch (error) {
+    console.error("[session] Failed to resolve session user for public rendering.", error);
+    return null;
+  }
+}
+
 export async function requireUser(options?: { onboarded?: boolean }) {
   const user = await getSessionUser();
 

@@ -6,12 +6,27 @@ import { CompanyCard } from "@/components/platform/company-card";
 import { PageHeader } from "@/components/platform/page-header";
 import { PostCard } from "@/components/platform/post-card";
 import { ProjectCard } from "@/components/platform/project-card";
+import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { Button } from "@/components/ui/button";
 import { getHomeData } from "@/lib/data";
 import { formatCompactNumber } from "@/lib/format";
 
 export default async function HomePage() {
-  const data = await getHomeData();
+  const data = await getHomeData().catch((error) => {
+    console.error("[home] Failed to load public home data.", error);
+    return null;
+  });
+
+  if (!data) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10 lg:px-8">
+        <PublicDataUnavailable
+          title="The PrismMTR overview is temporarily offline"
+          description="We could not load companies, posts, and project highlights right now. This usually means the production database is still syncing or the deployment environment needs attention."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-6 py-10 lg:px-8">

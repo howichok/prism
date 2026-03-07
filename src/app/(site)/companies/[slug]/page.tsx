@@ -7,6 +7,7 @@ import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-c
 import { PageHeader } from "@/components/platform/page-header";
 import { PostCard } from "@/components/platform/post-card";
 import { ProjectCard } from "@/components/platform/project-card";
+import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { StatusBadge } from "@/components/platform/status-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
@@ -15,7 +16,22 @@ import { getPublicCompanyBySlug } from "@/lib/data";
 
 export default async function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getPublicCompanyBySlug(slug);
+  let data;
+
+  try {
+    data = await getPublicCompanyBySlug(slug);
+  } catch (error) {
+    console.error(`[company:${slug}] Failed to load public company page.`, error);
+
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 lg:px-8">
+        <PublicDataUnavailable
+          title="This company page could not be loaded"
+          description="The route exists, but the server could not fetch the company profile from Prisma. Check the production database connection and schema state."
+        />
+      </div>
+    );
+  }
 
   if (!data) {
     notFound();
@@ -70,7 +86,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
           <div className="flex flex-wrap gap-3">
             {company.tags.map((tag) => (
-              <span key={tag} className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white/65">
+              <span
+                key={tag}
+                className="rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-white/65"
+              >
                 {tag}
               </span>
             ))}

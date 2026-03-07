@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { PageHeader } from "@/components/platform/page-header";
+import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { StatusBadge } from "@/components/platform/status-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
 import { getPublicPostBySlug } from "@/lib/data";
@@ -9,7 +10,22 @@ import { formatDate } from "@/lib/format";
 
 export default async function PublicPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = await getPublicPostBySlug(slug);
+  let post;
+
+  try {
+    post = await getPublicPostBySlug(slug);
+  } catch (error) {
+    console.error(`[post:${slug}] Failed to load public post page.`, error);
+
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8 lg:px-8">
+        <PublicDataUnavailable
+          title="This post could not be loaded"
+          description="The page route exists, but the server could not fetch the published post content from the production database."
+        />
+      </div>
+    );
+  }
 
   if (!post) {
     notFound();
