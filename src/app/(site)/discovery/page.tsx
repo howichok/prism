@@ -10,7 +10,7 @@ export default async function DiscoveryPage() {
 
   if (!data) {
     return (
-      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-8 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-4 pb-12 pt-6 sm:px-6 lg:px-8">
         <PublicDataUnavailable
           title="Discovery could not load"
           description="The public catalog is reachable, but Prisma could not return the current discovery dataset."
@@ -20,7 +20,7 @@ export default async function DiscoveryPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-8 px-4 pb-14 pt-6 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-[1280px] flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">
       <DiscoveryExplorer
         companies={data.companies}
         users={data.users}

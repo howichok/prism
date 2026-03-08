@@ -967,7 +967,6 @@ export async function getModerationOverviewData() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 6,
       select: companySummarySelect,
     }),
     db.post.findMany({
@@ -978,7 +977,6 @@ export async function getModerationOverviewData() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 6,
       select: postSummarySelect,
     }),
     db.report.findMany({
@@ -990,7 +988,6 @@ export async function getModerationOverviewData() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 6,
       select: {
         id: true,
         targetType: true,
@@ -1025,6 +1022,12 @@ export async function getModerationOverviewData() {
       reporter: mapUserPreview(report.reporter),
       reviewedBy: report.reviewedBy ? mapUserPreview(report.reviewedBy) : null,
     })),
+    counts: {
+      companies: pendingCompanies.length,
+      posts: pendingPosts.length,
+      reports: openReports.length,
+      total: pendingCompanies.length + pendingPosts.length + openReports.length,
+    },
   };
 }
 

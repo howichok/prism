@@ -8,7 +8,7 @@ type UserAvatarProps = {
   name: string | null | undefined;
   image?: string | null;
   accentColor?: string | null;
-  size?: "sm" | "default" | "lg";
+  size?: "sm" | "default" | "lg" | "xl";
   className?: string;
 };
 

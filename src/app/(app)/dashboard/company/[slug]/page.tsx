@@ -194,7 +194,7 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="motion-stagger mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { label: "Members", value: data.company.counts.members, body: "Visible roster and role structure." },
               { label: "Projects", value: data.company.counts.projects, body: "Active work tied to the company." },
@@ -216,12 +216,12 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
                 <h2 className="mt-3 font-display text-[1.55rem] leading-none text-white">Navigate the company workspace</h2>
               </div>
             </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="motion-stagger mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {managementPaths.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group rounded-[1rem] border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-white/14 hover:bg-white/[0.05]"
+                  className="group rounded-[1rem] border border-white/8 bg-white/[0.03] p-4 motion-lift hover:border-white/14 hover:bg-white/[0.05]"
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-[0.9rem] border border-blue-400/16 bg-blue-400/[0.08] text-blue-200">

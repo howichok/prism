@@ -49,25 +49,16 @@ function SidebarLink({ item, active }: { item: SidebarItem; active: boolean }) {
     <Link
       href={item.href}
       className={cn(
-        "group relative flex items-center gap-3 rounded-[0.85rem] px-3 py-2.5 text-[13px] transition-all duration-200",
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-colors",
         active
-          ? "bg-primary/5 font-semibold text-white ring-1 ring-primary/10"
-          : "font-medium text-muted-foreground hover:bg-white/[0.04] hover:text-white",
+          ? "bg-white/[0.06] font-medium text-white"
+          : "text-white/45 hover:bg-white/[0.03] hover:text-white/75",
       )}
     >
       {active && (
-        <div className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-primary shadow-[0_0_12px_rgba(59,130,246,0.5)]" />
+        <div className="absolute inset-y-2 left-0 w-[2px] rounded-r-full bg-blue-400" />
       )}
-      <div
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-[0.8rem] transition-all duration-200",
-          active
-            ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(59,130,246,0.3)] ring-1 ring-primary/30"
-            : "bg-background/50 text-muted-foreground ring-1 ring-white/5 group-hover:bg-white/10 group-hover:text-white",
-        )}
-      >
-        <Icon className={cn("shrink-0 transition-transform", active ? "size-4.5 scale-110" : "size-4")} />
-      </div>
+      <Icon className={cn("size-4 shrink-0", active ? "text-blue-400" : "text-white/30")} />
       <span className="truncate">{item.label}</span>
     </Link>
   );
@@ -89,19 +80,16 @@ export function AppSidebarPanel({
   const workspaceItems = items.slice(1);
 
   return (
-    <div className={cn("space-y-6 px-1", className)}>
-      <div className="border-b border-white/8 pb-4">
-        <div className="panel-label">Workspace</div>
-        <h2 className="mt-3 font-display text-[1.35rem] leading-none text-white">{title}</h2>
-        <p className="mt-3 max-w-[15rem] text-xs leading-6 text-muted-foreground">{description}</p>
+    <div className={cn("space-y-5", className)}>
+      <div className="border-b border-white/6 pb-3">
+        <h2 className="font-display text-base text-white">{title}</h2>
+        <p className="mt-1 max-w-[15rem] text-xs text-white/35">{description}</p>
       </div>
 
-      <nav className="space-y-5">
+      <nav className="space-y-4">
         {overviewItem ? (
-          <div className="space-y-1.5">
-            <div className="px-1">
-              <div className="px-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-white/50 opacity-90">Overview</div>
-            </div>
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-medium uppercase tracking-[0.18em] text-white/30">Overview</div>
             <SidebarLink
               item={overviewItem}
               active={pathname === overviewItem.href || pathname.startsWith(`${overviewItem.href}/`)}
@@ -110,23 +98,14 @@ export function AppSidebarPanel({
         ) : null}
 
         {workspaceItems.length ? (
-          <div className="space-y-1.5">
-            <div className="px-1">
-              <div className="px-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-white/50 opacity-90">Workspace</div>
-            </div>
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-medium uppercase tracking-[0.18em] text-white/30">Workspace</div>
             {workspaceItems.map((item) => (
               <SidebarLink key={item.href} item={item} active={pathname === item.href || pathname.startsWith(`${item.href}/`)} />
             ))}
           </div>
         ) : null}
       </nav>
-
-      <div className="border-t border-white/8 px-4 pt-5">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/50 opacity-90">System</div>
-        <p className="mt-2 text-xs leading-6 text-muted-foreground">
-          Use the sidebar as the primary workspace switch, then operate inside the main panel.
-        </p>
-      </div>
     </div>
   );
 }
@@ -144,9 +123,7 @@ export function AppSidebar({
 }) {
   return (
     <aside className={className}>
-      <div className="flex flex-col gap-6 py-2">
-        <AppSidebarPanel title={title} description={description} items={items} />
-      </div>
+      <AppSidebarPanel title={title} description={description} items={items} />
     </aside>
   );
 }

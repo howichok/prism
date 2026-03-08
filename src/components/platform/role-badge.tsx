@@ -1,92 +1,118 @@
 import { CompanyRole, SiteRole } from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
-import { titleCase } from "@/lib/format";
+import type { BadgeChip } from "@/lib/data";
+import { companyRoleMeta, getCompanyRoleLabel, getSiteRoleLabel, getSiteRoleTheme } from "@/lib/role-system";
 import { cn } from "@/lib/utils";
 
 type RoleBadgeProps = {
   role: CompanyRole | SiteRole;
   kind: "company" | "site";
   className?: string;
-};
-
-const siteToneMap: Partial<Record<SiteRole, string>> = {
-  ADMIN: "border-rose-500/28 bg-rose-500/12 text-rose-300 hover:bg-rose-500/20",
-  MOD: "border-sky-500/28 bg-sky-500/12 text-sky-300 hover:bg-sky-500/20",
-  USER: "border-border bg-secondary text-muted-foreground",
-};
-
-const companyToneMap: Partial<Record<CompanyRole, string>> = {
-  OWNER: "border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20",
-  CO_OWNER: "border-orange-500/20 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20",
-  TRUSTED_MEMBER: "border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20",
-  MEMBER: "border-border bg-secondary text-muted-foreground",
-};
-
-const siteRoleLabelMap: Record<SiteRole, string> = {
-  ADMIN: "Admin",
-  MOD: "Moderator",
-  USER: "User",
-};
-
-const companyRoleLabelMap: Record<CompanyRole, string> = {
-  OWNER: "Owner",
-  CO_OWNER: "Co Owner",
-  TRUSTED_MEMBER: "Trusted Member",
-  MEMBER: "Member",
+  contextLabel?: string | null;
+  contextClassName?: string;
 };
 
 export function getSiteIdentityTheme(role: SiteRole) {
-  switch (role) {
-    case SiteRole.ADMIN:
-      return {
-        usernameClass: "text-rose-300",
-        surfaceClass: "border-rose-500/20 bg-[linear-gradient(180deg,rgba(18,10,12,0.985),rgba(10,10,10,0.985))]",
-        softPanelClass: "border-rose-500/14 bg-rose-500/[0.05]",
-        avatarRingClass: "border-rose-400/30",
-        accentLabelClass: "border-rose-400/18 bg-rose-500/14 text-rose-200/88",
-        dividerClass: "border-rose-500/14",
-      };
-    case SiteRole.MOD:
-      return {
-        usernameClass: "text-sky-300",
-        surfaceClass: "border-sky-500/20 bg-[linear-gradient(180deg,rgba(8,12,18,0.985),rgba(10,10,10,0.985))]",
-        softPanelClass: "border-sky-500/14 bg-sky-500/[0.05]",
-        avatarRingClass: "border-sky-400/30",
-        accentLabelClass: "border-sky-400/18 bg-sky-500/14 text-sky-200/88",
-        dividerClass: "border-sky-500/14",
-      };
-    default:
-      return {
-        usernameClass: "text-white/72",
-        surfaceClass: "border-white/8 bg-popover/95",
-        softPanelClass: "border-border/60 bg-muted/30",
-        avatarRingClass: "border-white/12",
-        accentLabelClass: "border-white/12 bg-black/25 text-white/72",
-        dividerClass: "border-white/8",
-      };
-  }
+  return getSiteRoleTheme(role);
 }
 
-export function RoleBadge({ role, kind, className }: RoleBadgeProps) {
+export function RoleBadge({ role, kind, className, contextLabel, contextClassName }: RoleBadgeProps) {
+  const siteTheme = kind === "site" ? getSiteRoleTheme(role as SiteRole) : null;
+  const companyMeta = kind === "company" ? companyRoleMeta[role as CompanyRole] : null;
+  const Icon = kind === "site" ? siteTheme?.chipIcon : companyMeta?.icon;
   const tone =
-    kind === "site"
-      ? siteToneMap[role as SiteRole] ?? siteToneMap.USER
-      : companyToneMap[role as CompanyRole] ?? companyToneMap.MEMBER;
+    kind === "site" ? siteTheme?.chipClass : companyMeta?.chipClass;
   const label =
     kind === "site"
-      ? siteRoleLabelMap[role as SiteRole] ?? titleCase(role)
-      : companyRoleLabelMap[role as CompanyRole] ?? titleCase(role);
+      ? getSiteRoleLabel(role as SiteRole)
+      : getCompanyRoleLabel(role as CompanyRole);
 
   return (
     <Badge
       className={cn(
-        "rounded-md px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider transition-colors",
-        tone,
+        "inline-flex max-w-full items-center gap-1.5 overflow-hidden px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] transition-colors",
+        tone ?? "rounded-full border-white/10 bg-white/[0.03] text-white/62",
         className,
       )}
+      aria-label={contextLabel ? `${label}, ${contextLabel}` : label}
     >
-      {label}
+      {Icon ? <Icon className="size-3 shrink-0" /> : null}
+      <span className="shrink-0">{label}</span>
+      {kind === "company" && contextLabel ? (
+        <span className={cn("whitespace-nowrap border-l border-current/18 pl-1.5 text-[10px] text-white/68", contextClassName)}>
+          {contextLabel}
+        </span>
+      ) : null}
     </Badge>
+  );
+}
+
+export function DecorativeBadgeChip({
+  badge,
+  className,
+}: {
+  badge: BadgeChip;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap", className)}
+      style={{ borderColor: `${badge.color}45`, backgroundColor: `${badge.color}12`, color: badge.color }}
+    >
+      {badge.name}
+    </span>
+  );
+}
+
+function normalizeBadgeLabel(value: string) {
+  return value.trim().toLowerCase().replace(/[_\s-]+/g, " ");
+}
+
+export function filterRenderableDecorativeBadges({
+  badges,
+  siteRoleLabel,
+  companyRoleLabel,
+}: {
+  badges: BadgeChip[];
+  siteRoleLabel?: string | null;
+  companyRoleLabel?: string | null;
+}) {
+  const blockedLabels = new Set(
+    [siteRoleLabel, companyRoleLabel]
+      .filter(Boolean)
+      .map((label) => normalizeBadgeLabel(label as string)),
+  );
+
+  return badges.filter((badge) => !blockedLabels.has(normalizeBadgeLabel(badge.name)));
+}
+
+export function DecorativeBadgeStack({
+  badges,
+  limit = 3,
+  className,
+}: {
+  badges: BadgeChip[];
+  limit?: number;
+  className?: string;
+}) {
+  const visibleBadges = badges.slice(0, limit);
+  const overflow = badges.length - visibleBadges.length;
+
+  if (!badges.length) {
+    return null;
+  }
+
+  return (
+    <div className={cn("flex flex-wrap gap-1.5", className)}>
+      {visibleBadges.map((badge) => (
+        <DecorativeBadgeChip key={badge.id} badge={badge} />
+      ))}
+      {overflow > 0 ? (
+        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-white/62">
+          +{overflow}
+        </span>
+      ) : null}
+    </div>
   );
 }

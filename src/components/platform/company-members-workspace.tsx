@@ -8,25 +8,18 @@ import { Search, ShieldCheck, UserSearch } from "lucide-react";
 import { MemberRoleEditor } from "@/components/forms/member-role-editor";
 import { EmptyState } from "@/components/platform/empty-state";
 import { IdentityPanel, ProfileIdentitySurface } from "@/components/platform/profile-identity";
-import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
+import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { RoleBadge } from "@/components/platform/role-badge";
-import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
 import type { CompanySummary, UserPreview } from "@/lib/data";
 import { canManageRole } from "@/lib/permissions";
+import { companyRoleOrder, getCompanyRoleLabel } from "@/lib/role-system";
 import { cn } from "@/lib/utils";
 
 type CompanyMember = UserPreview & {
   companyRole: CompanyRole;
   joinedAt: Date;
 };
-
-const roleOrder: CompanyRole[] = [
-  CompanyRole.OWNER,
-  CompanyRole.CO_OWNER,
-  CompanyRole.TRUSTED_MEMBER,
-  CompanyRole.MEMBER,
-];
 
 export function CompanyMembersWorkspace({
   company,
@@ -65,7 +58,7 @@ export function CompanyMembersWorkspace({
 
   const groupedMembers = useMemo(
     () =>
-      roleOrder.map((role) => ({
+      companyRoleOrder.map((role) => ({
         role,
         members: filteredMembers
           .filter((member) => member.companyRole === role)
@@ -108,7 +101,7 @@ export function CompanyMembersWorkspace({
               />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {(["ALL", ...roleOrder] as const).map((role) => (
+              {(["ALL", ...companyRoleOrder] as const).map((role) => (
                 <button
                   key={role}
                   onClick={() => setRoleFilter(role)}
@@ -119,7 +112,7 @@ export function CompanyMembersWorkspace({
                       : "border-white/8 bg-white/[0.03] text-white/54 hover:border-white/14 hover:text-white",
                   )}
                 >
-                  {role === "ALL" ? "All roles" : role.replaceAll("_", " ")}
+                  {role === "ALL" ? "All roles" : getCompanyRoleLabel(role)}
                 </button>
               ))}
             </div>
@@ -152,36 +145,20 @@ export function CompanyMembersWorkspace({
                         )}
                       >
                         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                          <button
-                            onClick={() => setSelectedMemberId(member.id)}
-                            className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                          >
-                            <MiniProfileHoverCard user={member} companyRole={member.companyRole} primaryCompany={company}>
-                              <div className="flex items-center gap-3">
-                                <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
-                                <div className="min-w-0">
-                                  <div className="truncate text-sm font-medium text-foreground">{member.displayName}</div>
-                                  <div className="truncate text-xs text-muted-foreground">@{member.username ?? "member"}</div>
-                                </div>
-                              </div>
-                            </MiniProfileHoverCard>
-                          </button>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {member.badges.slice(0, 2).map((badge) => (
-                              <span
-                                key={badge.id}
-                                className="rounded-md border px-2 py-0.5 text-xs font-medium text-foreground"
-                                style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
-                              >
-                                {badge.name}
-                              </span>
-                            ))}
-                            {manageable ? (
-                              <span className="rounded-full border border-blue-400/18 bg-blue-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-blue-200">
-                                Manageable
-                              </span>
-                            ) : null}
-                          </div>
+                          <ProfileRosterRow
+                            user={member}
+                            primaryCompany={company}
+                            companyRole={member.companyRole}
+                            active={active}
+                            onSelect={() => setSelectedMemberId(member.id)}
+                            rightRailExtra={
+                              manageable ? (
+                                <span className="rounded-full border border-blue-400/18 bg-blue-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-blue-200">
+                                  Manageable
+                                </span>
+                              ) : null
+                            }
+                          />
                         </div>
                       </div>
                     );

@@ -61,258 +61,176 @@ export default async function DashboardSettingsPage() {
   };
 
   return (
-    <AppShell title="Dashboard" description="Manage linked accounts and access settings." items={dashboardSidebarItems}>
+    <AppShell title="Dashboard" description="Account and workspace settings." items={dashboardSidebarItems}>
       <PageHeader
         eyebrow="Settings"
-        title="Network settings"
-        description="A lighter account shell for identity, company access, publishing, moderation, and integration readiness."
+        title="Settings"
+        description="Manage your account, identity, integrations, and workspace preferences."
       />
 
-      <div className="grid gap-8 xl:grid-cols-[220px_minmax(0,1fr)_320px]">
+      <div className="grid gap-8 xl:grid-cols-[200px_minmax(0,1fr)_280px]">
+        {/* Settings nav */}
         <aside className="hidden xl:block xl:sticky xl:top-28 xl:self-start">
-          <div className="space-y-1 border-r border-white/8 pr-5">
-            <div className="panel-label px-3 pb-3">Settings</div>
+          <nav className="space-y-0.5 border-r border-white/6 pr-4">
             {settingsNav.map((item) => (
               <a
                 key={item}
                 href={`#${slugifySection(item)}`}
-                className="block rounded-[0.85rem] px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-white/[0.03] hover:text-white"
+                className="block rounded-lg px-3 py-2 text-[13px] text-white/50 transition-colors hover:bg-white/[0.03] hover:text-white"
               >
                 {item}
               </a>
             ))}
-          </div>
+          </nav>
         </aside>
 
-        <div className="space-y-10">
-          <section id="my-account" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">My Account</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Primary account surface</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                PrismMTR keeps Discord as the primary identity source. Profile, company access, moderation, and future launcher readiness build on that account layer.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-3 border-b border-white/8 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Primary sign-in</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{linkedDiscord ? "Discord connected" : "Discord not detected"}</div>
-                </div>
-                <div className="text-xs uppercase tracking-[0.18em] text-white/48">{viewer.discordUsername ?? "No Discord username"}</div>
-              </div>
-              <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Profile editing</div>
-                  <div className="mt-1 text-sm text-muted-foreground">Display name, handle, bio, and Minecraft nickname live in the profile workspace.</div>
-                </div>
-                <Button variant="outline" render={<Link href="/dashboard/profile" />}>
-                  Open profile
-                </Button>
-              </div>
+        {/* Settings content */}
+        <div className="space-y-8">
+          <section id="my-account" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">My Account</h2>
+            <div className="space-y-1">
+              <SettingsRow
+                label="Primary sign-in"
+                value={linkedDiscord ? "Discord connected" : "Not connected"}
+                detail={viewer.discordUsername ?? undefined}
+              />
+              <SettingsRow
+                label="Profile editing"
+                value="Display name, handle, bio, avatar"
+                action={<Button variant="outline" size="sm" render={<Link href="/dashboard/profile" />}>Open profile</Button>}
+              />
             </div>
           </section>
 
-          <section id="identity-profile" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">Identity &amp; Profile</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Presence across the network</h2>
-            </div>
-            <div className="space-y-2">
-              {[
-                { label: "Display name", value: viewer.displayName ?? "Not set" },
-                { label: "Handle", value: viewer.username ? `@${viewer.username}` : "Not set" },
-                { label: "Minecraft nickname", value: viewer.minecraftNickname ?? "Not linked yet" },
-                { label: "Email", value: viewer.email ?? "Optional / empty" },
-              ].map((row) => (
-                <div key={row.label} className="flex flex-col gap-1 border-b border-white/8 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="text-sm font-medium text-white">{row.label}</div>
-                    <div className="mt-1 text-sm text-muted-foreground">Used where relevant across hover identity, discovery, and public member pages.</div>
-                  </div>
-                  <div className="text-sm text-white">{row.value}</div>
-                </div>
-              ))}
+          <section id="identity-profile" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">Identity & Profile</h2>
+            <div className="space-y-1">
+              <SettingsRow label="Display name" value={viewer.displayName ?? "Not set"} />
+              <SettingsRow label="Handle" value={viewer.username ? `@${viewer.username}` : "Not set"} />
+              <SettingsRow label="Minecraft nickname" value={viewer.minecraftNickname ?? "Not linked"} />
+              <SettingsRow label="Email" value={viewer.email ?? "Not set"} />
             </div>
           </section>
 
-          <section id="privacy-security" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">Privacy &amp; Security</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Authentication boundaries</h2>
-            </div>
-            <div className="space-y-2">
-              {[
-                {
-                  label: "Password flow",
-                  body: "Reserved for future use. Discord remains the active authentication source in this MVP.",
-                },
-                {
-                  label: "Public profile visibility",
-                  body: "Your public member page stays discoverable when a username is set and content is visible.",
-                },
-                {
-                  label: "Role boundaries",
-                  body: "Moderator and admin tools appear only when your site role explicitly allows them.",
-                },
-              ].map((row) => (
-                <div key={row.label} className="border-b border-white/8 py-4 last:border-b-0">
-                  <div className="text-sm font-medium text-white">{row.label}</div>
-                  <div className="mt-1 max-w-2xl text-sm leading-7 text-muted-foreground">{row.body}</div>
-                </div>
-              ))}
+          <section id="privacy-security" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">Privacy & Security</h2>
+            <div className="space-y-1">
+              <SettingsRow label="Password" value="Discord-only authentication (MVP)" />
+              <SettingsRow label="Profile visibility" value="Public when username is set" />
+              <SettingsRow label="Role boundaries" value="Tools appear based on site role" />
             </div>
           </section>
 
-          <section id="company-workspace" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">Company Workspace</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Where company access lives</h2>
-            </div>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-3 border-b border-white/8 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Memberships</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{viewer.companyMemberships.length} visible company membership(s).</div>
-                </div>
-                <Button
-                  variant="outline"
-                  render={<Link href={primaryMembership ? `/dashboard/company/${primaryMembership.company.slug}` : "/dashboard/company/create"} />}
-                >
-                  {primaryMembership ? "Open company hub" : "Create company hub"}
-                </Button>
-              </div>
-              <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Directory access</div>
-                  <div className="mt-1 text-sm text-muted-foreground">Browse public companies before joining or creating one.</div>
-                </div>
-                <Button variant="secondary" render={<Link href="/companies" />}>
-                  Company directory
-                </Button>
-              </div>
+          <section id="company-workspace" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">Company Workspace</h2>
+            <div className="space-y-1">
+              <SettingsRow
+                label="Memberships"
+                value={`${viewer.companyMemberships.length} active`}
+                action={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    render={<Link href={primaryMembership ? `/dashboard/company/${primaryMembership.company.slug}` : "/dashboard/company/create"} />}
+                  >
+                    {primaryMembership ? "Open hub" : "Create hub"}
+                  </Button>
+                }
+              />
+              <SettingsRow
+                label="Directory"
+                value="Browse and join public companies"
+                action={<Button variant="secondary" size="sm" render={<Link href="/companies" />}>Browse</Button>}
+              />
             </div>
           </section>
 
-          <section id="publishing" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">Publishing</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Public posts and internal publishing flow</h2>
-            </div>
-            <div className="space-y-2">
-              <div className="flex flex-col gap-3 border-b border-white/8 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Post studio</div>
-                  <div className="mt-1 text-sm text-muted-foreground">Create announcements, showcases, recruitment posts, and updates.</div>
-                </div>
-                <Button variant="outline" render={<Link href="/dashboard/posts/new" />}>
-                  Create post
-                </Button>
-              </div>
-              <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">My posts</div>
-                  <div className="mt-1 text-sm text-muted-foreground">Manage authored posts and their review status.</div>
-                </div>
-                <Button variant="secondary" render={<Link href="/dashboard/posts" />}>
-                  Open posts
-                </Button>
-              </div>
+          <section id="publishing" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">Publishing</h2>
+            <div className="space-y-1">
+              <SettingsRow
+                label="Post studio"
+                value="Create and manage posts"
+                action={<Button variant="outline" size="sm" render={<Link href="/dashboard/posts/new" />}>New post</Button>}
+              />
+              <SettingsRow
+                label="My posts"
+                value="View and manage authored posts"
+                action={<Button variant="secondary" size="sm" render={<Link href="/dashboard/posts" />}>View</Button>}
+              />
             </div>
           </section>
 
-          <section id="integrations" className="space-y-5 border-b border-white/8 pb-8">
-            <div>
-              <div className="panel-label">Integrations</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Connected identity providers</h2>
-            </div>
-            <div className="space-y-2">
+          <section id="integrations" className="space-y-4 border-b border-white/6 pb-6">
+            <h2 className="text-sm font-medium text-white">Integrations</h2>
+            <div className="space-y-1">
               {viewer.linkedAccounts.length ? (
                 viewer.linkedAccounts.map((account) => (
-                  <div key={account.id} className="flex flex-col gap-1 border-b border-white/8 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-white">{account.provider}</div>
-                      <div className="mt-1 text-sm text-muted-foreground">Connected identity provider used by PrismMTR.</div>
-                    </div>
-                    <div className="text-xs uppercase tracking-[0.18em] text-white/48">
-                      {account.providerAccountId ? account.providerAccountId : "Connected"}
-                    </div>
-                  </div>
+                  <SettingsRow
+                    key={account.id}
+                    label={account.provider}
+                    value="Connected"
+                    detail={account.providerAccountId ?? undefined}
+                  />
                 ))
               ) : (
-                <div className="py-4 text-sm text-muted-foreground">No linked accounts recorded for this session.</div>
+                <div className="py-3 text-sm text-white/35">No linked accounts.</div>
               )}
-              <div className="border-b border-white/8 py-4 text-sm text-muted-foreground">
-                Microsoft linkage and launcher account handoff remain future-ready and deliberately separate from this MVP.
-              </div>
             </div>
           </section>
 
-          <section id="devices-sessions" className="space-y-5">
-            <div>
-              <div className="panel-label">Devices / Sessions</div>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Current session model</h2>
-            </div>
-            <div className="space-y-2">
-              <div className="border-b border-white/8 py-4 text-sm leading-7 text-muted-foreground">
-                This MVP keeps the session model intentionally simple: Discord sign-in, local guest mode, and server-enforced route checks.
-              </div>
+          <section id="devices-sessions" className="space-y-4">
+            <h2 className="text-sm font-medium text-white">Devices / Sessions</h2>
+            <div className="py-2 text-sm text-white/40">
+              Simple session model: Discord sign-in with server-enforced route checks.
             </div>
           </section>
 
           {canAccessModeration(viewer.siteRole) ? (
-            <section id="moderator-tools" className="space-y-5 border-t border-white/8 pt-8">
-              <div>
-                <div className="panel-label">Moderator Tools</div>
-                <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Staff queue and review surface</h2>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm leading-7 text-muted-foreground">
-                  Open the staff inbox for moderation queues, company approvals, post review, and reports.
-                </div>
-                <Button variant="outline" render={<Link href="/moderation" />}>
-                  Open moderation
-                </Button>
-              </div>
+            <section id="moderator-tools" className="space-y-4 border-t border-white/6 pt-6">
+              <h2 className="text-sm font-medium text-white">Moderator Tools</h2>
+              <SettingsRow
+                label="Staff inbox"
+                value="Moderation queues, approvals, and reports"
+                action={<Button variant="outline" size="sm" render={<Link href="/moderation" />}>Open</Button>}
+              />
             </section>
           ) : null}
 
           {viewer.siteRole === SiteRole.ADMIN ? (
-            <section id="admin-tools" className="space-y-5 border-t border-white/8 pt-8">
-              <div>
-                <div className="panel-label">Admin Tools</div>
-                <h2 className="mt-3 font-display text-[1.75rem] leading-none text-white">Administrative control</h2>
-              </div>
-              <div className="text-sm leading-7 text-muted-foreground">
-                Admin role keeps full platform override power. Continue into the moderation workspace for actual admin review actions.
+            <section id="admin-tools" className="space-y-4 border-t border-white/6 pt-6">
+              <h2 className="text-sm font-medium text-white">Admin Tools</h2>
+              <div className="py-2 text-sm text-white/40">
+                Full platform override via the moderation workspace.
               </div>
             </section>
           ) : null}
         </div>
 
+        {/* Right preview */}
         <aside className="space-y-4 xl:sticky xl:top-28 xl:self-start">
           <ProfileIdentitySurface
             user={previewUser}
             companyRole={primaryMembership?.companyRole}
             primaryCompany={primaryMembership?.company}
             variant="preview"
-            headerLabel="Settings preview"
+            headerLabel="Profile preview"
           />
 
-          <IdentityPanel title="Workspace summary">
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center justify-between rounded-[0.85rem] border border-white/8 bg-background/65 px-3 py-2.5">
+          <IdentityPanel title="Summary">
+            <div className="space-y-1.5 text-sm">
+              <div className="flex items-center justify-between text-white/40">
                 <span>Linked accounts</span>
-                <span className="font-medium text-white">{viewer.linkedAccounts.length}</span>
+                <span className="text-white">{viewer.linkedAccounts.length}</span>
               </div>
-              <div className="flex items-center justify-between rounded-[0.85rem] border border-white/8 bg-background/65 px-3 py-2.5">
+              <div className="flex items-center justify-between text-white/40">
                 <span>Company memberships</span>
-                <span className="font-medium text-white">{viewer.companyMemberships.length}</span>
+                <span className="text-white">{viewer.companyMemberships.length}</span>
               </div>
               {staffOverview ? (
-                <div className="flex items-center justify-between rounded-[0.85rem] border border-white/8 bg-background/65 px-3 py-2.5">
+                <div className="flex items-center justify-between text-white/40">
                   <span>Pending staff items</span>
-                  <span className="font-medium text-white">
+                  <span className="text-white">
                     {staffOverview.companies.length + staffOverview.posts.length + staffOverview.reports.length}
                   </span>
                 </div>
@@ -322,5 +240,31 @@ export default async function DashboardSettingsPage() {
         </aside>
       </div>
     </AppShell>
+  );
+}
+
+function SettingsRow({
+  label,
+  value,
+  detail,
+  action,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border-b border-white/[0.04] py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <div className="text-sm text-white/80">{label}</div>
+        <div className="mt-0.5 text-xs text-white/35">{value}</div>
+      </div>
+      {detail ? (
+        <div className="text-xs text-white/25">{detail}</div>
+      ) : action ? (
+        action
+      ) : null}
+    </div>
   );
 }

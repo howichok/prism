@@ -3,11 +3,11 @@ import { BellOff, Shield } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/platform/empty-state";
-import { ModerationQueueTable } from "@/components/platform/moderation-queue-table";
+import { ModerationQueueTable, type ModerationQueueRow } from "@/components/platform/moderation-queue-table";
 import { PageHeader } from "@/components/platform/page-header";
 import { Button } from "@/components/ui/button";
-import { dashboardSidebarItems } from "@/lib/navigation";
 import { getDashboardData, getModerationOverviewData } from "@/lib/data";
+import { dashboardSidebarItems } from "@/lib/navigation";
 import { canAccessModeration } from "@/lib/permissions";
 import { requireUser } from "@/lib/session";
 
@@ -47,7 +47,8 @@ export default async function DashboardNotificationsPage() {
         return null;
       })
     : null;
-  const staffRows = staffInbox
+
+  const staffRows: ModerationQueueRow[] = staffInbox
     ? [
         ...staffInbox.companies.map((company) => ({
           id: company.id,
@@ -55,6 +56,10 @@ export default async function DashboardNotificationsPage() {
           subtitle: company.description,
           status: company.status,
           targetType: "company" as const,
+          submittedAt: company.createdAt,
+          submittedBy: company.owner.displayName,
+          context: `${company.privacy.toLowerCase()} company · ${company.recruitingStatus.toLowerCase()} recruiting`,
+          href: `/companies/${company.slug}`,
         })),
         ...staffInbox.posts.map((post) => ({
           id: post.id,
@@ -62,13 +67,21 @@ export default async function DashboardNotificationsPage() {
           subtitle: post.excerpt ?? post.content,
           status: post.status,
           targetType: "post" as const,
+          submittedAt: post.createdAt,
+          submittedBy: post.author.displayName,
+          context: post.company ? `For ${post.company.name}` : "Independent post",
+          href: `/posts/${post.slug}`,
         })),
         ...staffInbox.reports.map((report) => ({
           id: report.id,
           title: report.reason,
-          subtitle: report.details ?? `${report.targetType} · ${report.targetId}`,
+          subtitle: report.details ?? `Report on ${report.targetType.toLowerCase()} ${report.targetId}`,
           status: report.status,
           targetType: "report" as const,
+          submittedAt: report.createdAt,
+          submittedBy: report.reporter.displayName,
+          context: `Target ${report.targetType.toLowerCase()}`,
+          href: null,
         })),
       ]
     : [];
@@ -78,7 +91,7 @@ export default async function DashboardNotificationsPage() {
       <PageHeader
         eyebrow="Notifications"
         title="Your Prism inbox"
-        description="Notifications cover company membership updates, moderation events, and post workflows."
+        description="Notifications cover company membership updates, moderation events, and publishing workflows."
         actions={
           staffInbox ? (
             <Button variant="outline" render={<Link href="/moderation" />}>
@@ -88,7 +101,8 @@ export default async function DashboardNotificationsPage() {
           ) : undefined
         }
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_360px]">
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_320px]">
         <div className="space-y-4">
           {staffInbox ? (
             <section className="surface-panel space-y-4 p-5">
@@ -96,11 +110,16 @@ export default async function DashboardNotificationsPage() {
                 <div className="panel-label">Staff approvals</div>
                 <h2 className="mt-3 font-display text-[1.65rem] leading-none text-white">Moderation actions waiting</h2>
                 <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  This inbox combines pending company approvals, post reviews, and report outcomes so staff can act without leaving the dashboard flow.
+                  Pending companies, posts, and reports stay visible here until a staff decision moves them out of the active queue.
                 </p>
               </div>
               {staffRows.length ? (
-                <ModerationQueueTable rows={staffRows.slice(0, 8)} />
+                <ModerationQueueTable
+                  rows={staffRows.slice(0, 8)}
+                  showTypeFilters={false}
+                  emptyTitle="Staff inbox is clear"
+                  emptyDescription="New moderation work will land here automatically."
+                />
               ) : (
                 <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-4 text-sm text-muted-foreground">
                   No moderation items are waiting right now.
@@ -148,15 +167,15 @@ export default async function DashboardNotificationsPage() {
               <>
                 <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] px-3.5 py-3">
                   <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Pending company approvals</div>
-                  <div className="mt-2 text-sm text-white">{staffInbox.companies.length}</div>
+                  <div className="mt-2 text-sm text-white">{staffInbox.counts.companies}</div>
                 </div>
                 <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] px-3.5 py-3">
                   <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Pending post reviews</div>
-                  <div className="mt-2 text-sm text-white">{staffInbox.posts.length}</div>
+                  <div className="mt-2 text-sm text-white">{staffInbox.counts.posts}</div>
                 </div>
                 <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] px-3.5 py-3">
                   <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Open reports</div>
-                  <div className="mt-2 text-sm text-white">{staffInbox.reports.length}</div>
+                  <div className="mt-2 text-sm text-white">{staffInbox.counts.reports}</div>
                 </div>
               </>
             ) : null}

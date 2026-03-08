@@ -20,7 +20,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="space-y-4">
+      <div className="animate-fade-up space-y-4">
         <div className="flex items-center gap-2 text-xs text-primary">
           <Newspaper className="size-3.5" />
           <span className="font-medium">{post.type.replaceAll("_", " ")}</span>

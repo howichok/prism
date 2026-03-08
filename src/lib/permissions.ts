@@ -1,17 +1,5 @@
 import { CompanyRole, SiteRole } from "@prisma/client";
-
-const siteRoleRank: Record<SiteRole, number> = {
-  USER: 0,
-  MOD: 1,
-  ADMIN: 2,
-};
-
-const companyRoleRank: Record<CompanyRole, number> = {
-  MEMBER: 0,
-  TRUSTED_MEMBER: 1,
-  CO_OWNER: 2,
-  OWNER: 3,
-};
+import { companyRoleRank, siteRoleRank } from "@/lib/role-system";
 
 export function hasSiteRole(current: SiteRole, required: SiteRole) {
   return siteRoleRank[current] >= siteRoleRank[required];

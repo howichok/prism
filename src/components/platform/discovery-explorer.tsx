@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
   Building2,
@@ -9,66 +10,44 @@ import {
   Newspaper,
   SearchSlash,
   Sparkles,
-  type LucideIcon,
   UsersRound,
+  type LucideIcon,
 } from "lucide-react";
 
 import { BuildRequestCard } from "@/components/platform/build-request-card";
 import { CompanyCard } from "@/components/platform/company-card";
-import { EmptyState } from "@/components/platform/empty-state";
+import { IdentityPanel, ProfileIdentitySurface, resolveProfilePresence } from "@/components/platform/profile-identity";
+import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { PostCard } from "@/components/platform/post-card";
 import { ProjectCard } from "@/components/platform/project-card";
+import { RoleBadge } from "@/components/platform/role-badge";
 import { SearchBar } from "@/components/platform/search-bar";
-import { UserCard } from "@/components/platform/user-card";
-import type { BuildRequestSummary, CompanySummary, PostSummary, ProjectSummary, UserPreview } from "@/lib/data";
-import { titleCase } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { BuildRequestSummary, CompanySummary, PostSummary, ProjectSummary, UserPreview } from "@/lib/data";
+import {
+  companyRoleRank,
+  discoverySiteRoleOrder,
+  getCompanyRoleLabel,
+  getCompanyRoleSearchAliases,
+  getDiscoveryGroupLabel,
+  getSiteRoleLabel,
+  getSiteRoleSearchAliases,
+  getSiteRoleTheme,
+} from "@/lib/role-system";
+import { cn } from "@/lib/utils";
 
 type DiscoveryTab = "all" | "companies" | "users" | "posts" | "projects" | "requests";
 type DiscoverySort = "activity" | "latest" | "a-z";
 
-const tabs: DiscoveryTab[] = ["all", "companies", "users", "posts", "projects", "requests"];
-
-const tabMeta: Record<
-  DiscoveryTab,
-  {
-    label: string;
-    summary: string;
-    icon: LucideIcon;
-  }
-> = {
-  all: {
-    label: "All",
-    summary: "Cross-network view across public companies, members, publishing, work, and requests.",
-    icon: LayoutGrid,
-  },
-  companies: {
-    label: "Companies",
-    summary: "Operating hubs, recruiting posture, and leadership context.",
-    icon: Building2,
-  },
-  users: {
-    label: "Members",
-    summary: "Identity surfaces with company, role, and badge context.",
-    icon: UsersRound,
-  },
-  posts: {
-    label: "Posts",
-    summary: "Public publishing surfaces for announcements, showcases, and recruitment.",
-    icon: Newspaper,
-  },
-  projects: {
-    label: "Projects",
-    summary: "Active work with authorship, status, and company ownership.",
-    icon: Sparkles,
-  },
-  requests: {
-    label: "Requests",
-    summary: "Open operational needs and build requests across the network.",
-    icon: ClipboardList,
-  },
-};
+const tabDefs: { value: DiscoveryTab; label: string; icon: LucideIcon }[] = [
+  { value: "all", label: "All", icon: LayoutGrid },
+  { value: "companies", label: "Companies", icon: Building2 },
+  { value: "users", label: "Members", icon: UsersRound },
+  { value: "posts", label: "Posts", icon: Newspaper },
+  { value: "projects", label: "Projects", icon: Sparkles },
+  { value: "requests", label: "Requests", icon: ClipboardList },
+];
 
 function sortByName<T extends { title?: string; name?: string; displayName?: string }>(left: T, right: T) {
   const a = left.name ?? left.title ?? left.displayName ?? "";
@@ -76,27 +55,23 @@ function sortByName<T extends { title?: string; name?: string; displayName?: str
   return a.localeCompare(b);
 }
 
-function SectionHeader({
-  eyebrow,
-  title,
-  count,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  count: number;
-  description: string;
-}) {
-  return (
-    <div className="flex flex-col gap-3 border-b border-white/8 pb-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <div className="panel-label">{eyebrow}</div>
-        <h2 className="mt-3 font-display text-[1.45rem] leading-[0.96] text-white">{title}</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">{description}</p>
-      </div>
-      <div className="text-[10px] uppercase tracking-[0.2em] text-white/46">{count} results</div>
-    </div>
-  );
+function buildUserSearchSpace(user: UserPreview) {
+  return [
+    user.displayName,
+    user.username ?? "",
+    user.bio ?? "",
+    user.minecraftNickname ?? "",
+    user.discordUsername ?? "",
+    getSiteRoleLabel(user.siteRole),
+    getDiscoveryGroupLabel(user.siteRole),
+    getSiteRoleSearchAliases(user.siteRole).join(" "),
+    user.memberships.map((membership) => membership.company.name).join(" "),
+    user.memberships.map((membership) => getCompanyRoleLabel(membership.companyRole)).join(" "),
+    user.memberships.map((membership) => getCompanyRoleSearchAliases(membership.companyRole).join(" ")).join(" "),
+    user.badges.map((badge) => badge.name).join(" "),
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 export function DiscoveryExplorer({
@@ -118,6 +93,7 @@ export function DiscoveryExplorer({
   const [privacy, setPrivacy] = useState("all");
   const [sort, setSort] = useState<DiscoverySort>("activity");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
+  const searchTerm = query.trim();
 
   const filteredCompanies = useMemo(() => {
     const results = companies.filter((company) => {
@@ -134,14 +110,25 @@ export function DiscoveryExplorer({
   }, [companies, deferredQuery, privacy, recruiting, sort]);
 
   const filteredUsers = useMemo(() => {
-    const results = users.filter((user) => {
-      const searchSpace = [user.displayName, user.username ?? "", user.bio ?? "", user.memberships.map((m) => m.company.name).join(" ")].join(" ");
-      return !deferredQuery || searchSpace.toLowerCase().includes(deferredQuery);
-    });
+    const results = users.filter((user) => !deferredQuery || buildUserSearchSpace(user).includes(deferredQuery));
+
     return [...results].sort((left, right) => {
       if (sort === "a-z") return sortByName(left, right);
       if (sort === "latest") return right.createdAt.getTime() - left.createdAt.getTime();
-      return right.memberships.length + right.badges.length - (left.memberships.length + left.badges.length);
+
+      const siteRankDelta = discoverySiteRoleOrder.indexOf(left.siteRole) - discoverySiteRoleOrder.indexOf(right.siteRole);
+      if (siteRankDelta !== 0) return siteRankDelta;
+
+      const leftPrimaryRole = left.memberships[0]?.companyRole;
+      const rightPrimaryRole = right.memberships[0]?.companyRole;
+      const leftCompanyRank = leftPrimaryRole ? companyRoleRank[leftPrimaryRole] : -1;
+      const rightCompanyRank = rightPrimaryRole ? companyRoleRank[rightPrimaryRole] : -1;
+      if (leftCompanyRank !== rightCompanyRank) return rightCompanyRank - leftCompanyRank;
+
+      if (left.badges.length !== right.badges.length) return right.badges.length - left.badges.length;
+      if (left.memberships.length !== right.memberships.length) return right.memberships.length - left.memberships.length;
+
+      return left.displayName.localeCompare(right.displayName);
     });
   }, [deferredQuery, sort, users]);
 
@@ -176,18 +163,8 @@ export function DiscoveryExplorer({
     });
   }, [buildRequests, deferredQuery, sort]);
 
-  const totalResults =
-    filteredCompanies.length + filteredUsers.length + filteredPosts.length + filteredProjects.length + filteredRequests.length;
-
-  const resultSplit = [
-    { label: "Companies", count: filteredCompanies.length },
-    { label: "Members", count: filteredUsers.length },
-    { label: "Publishing", count: filteredPosts.length + filteredProjects.length },
-    { label: "Requests", count: filteredRequests.length },
-  ];
-
   const tabCounts: Record<DiscoveryTab, number> = {
-    all: totalResults,
+    all: filteredCompanies.length + filteredUsers.length + filteredPosts.length + filteredProjects.length + filteredRequests.length,
     companies: filteredCompanies.length,
     users: filteredUsers.length,
     posts: filteredPosts.length,
@@ -195,301 +172,424 @@ export function DiscoveryExplorer({
     requests: filteredRequests.length,
   };
 
-  const activeTabMeta = tabMeta[tab];
-
-  const companiesList = tab === "all" ? filteredCompanies.slice(0, 3) : filteredCompanies;
-  const companiesSection = (
-    <section className="relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <SectionHeader
-        eyebrow="Companies"
-        title="Visible operating centers"
-        count={filteredCompanies.length}
-        description="Public companies with visible recruiting posture, leadership, and work context."
-      />
-      {companiesList.length ? (
-        <div className="mt-6 grid gap-3">
-          {companiesList.map((company) => (
+  const allSections = [
+    {
+      key: "members",
+      title: "Members",
+      count: filteredUsers.length,
+      viewAll: filteredUsers.length > 6 ? () => setTab("users") : undefined,
+      content: <DiscoveryMembersRoster users={filteredUsers.slice(0, 6)} searchTerm={searchTerm} />,
+    },
+    {
+      key: "companies",
+      title: "Companies",
+      count: filteredCompanies.length,
+      viewAll: filteredCompanies.length > 3 ? () => setTab("companies") : undefined,
+      content: (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {filteredCompanies.slice(0, 3).map((company) => (
             <CompanyCard key={company.id} company={company} compact />
           ))}
-          {tab === "all" && filteredCompanies.length > 3 ? (
-            <button
-              onClick={() => setTab("companies")}
-              className="mt-2 w-full rounded-xl border border-white/5 bg-white/[0.02] py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              View all {filteredCompanies.length} companies
-            </button>
-          ) : null}
         </div>
-      ) : (
-        <EmptyState icon={SearchSlash} title="No companies match" description="Try broadening the current filters." className="mt-6 p-6 sm:p-7" />
-      )}
-    </section>
-  );
-
-  const usersList = tab === "all" ? filteredUsers.slice(0, 3) : filteredUsers;
-  const usersSection = (
-    <section className="relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <SectionHeader
-        eyebrow="Members"
-        title="Public identity surfaces"
-        count={filteredUsers.length}
-        description="People with visible company, role, and badge context."
-      />
-      {usersList.length ? (
-        <div className="mt-6 grid gap-3">
-          {usersList.map((user) => (
-            <UserCard key={user.id} user={user} />
-          ))}
-          {tab === "all" && filteredUsers.length > 3 ? (
-            <button
-              onClick={() => setTab("users")}
-              className="mt-2 w-full rounded-xl border border-white/5 bg-white/[0.02] py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              View all {filteredUsers.length} members
-            </button>
-          ) : null}
-        </div>
-      ) : (
-        <EmptyState icon={UsersRound} title="No members match" description="Try a different search term." className="mt-6 p-6 sm:p-7" />
-      )}
-    </section>
-  );
-
-  const postsList = tab === "all" ? filteredPosts.slice(0, 3) : filteredPosts;
-  const postsSection = (
-    <section className="relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <SectionHeader
-        eyebrow="Posts"
-        title="Public publishing stream"
-        count={filteredPosts.length}
-        description="Announcements, showcases, and recruiting updates with authorship and company context."
-      />
-      {postsList.length ? (
-        <div className="mt-6 space-y-3">
-          {postsList.map((post) => (
+      ),
+    },
+    {
+      key: "posts",
+      title: "Posts",
+      count: filteredPosts.length,
+      viewAll: filteredPosts.length > 3 ? () => setTab("posts") : undefined,
+      content: (
+        <div className="space-y-2">
+          {filteredPosts.slice(0, 3).map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
-          {tab === "all" && filteredPosts.length > 3 ? (
-            <button
-              onClick={() => setTab("posts")}
-              className="mt-2 w-full rounded-xl border border-white/5 bg-white/[0.02] py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              View all {filteredPosts.length} posts
-            </button>
-          ) : null}
         </div>
-      ) : (
-        <EmptyState icon={Newspaper} title="No posts match" description="Try a broader publishing search." className="mt-6 p-6 sm:p-7" />
-      )}
-    </section>
-  );
-
-  const projectsList = tab === "all" ? filteredProjects.slice(0, 3) : filteredProjects;
-  const projectsSection = (
-    <section className="relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <SectionHeader
-        eyebrow="Projects"
-        title="Work in motion"
-        count={filteredProjects.length}
-        description="Active infrastructure and build surfaces with status and company ownership."
-      />
-      {projectsList.length ? (
-        <div className="mt-6 grid gap-3">
-          {projectsList.map((project) => (
+      ),
+    },
+    {
+      key: "projects",
+      title: "Projects",
+      count: filteredProjects.length,
+      viewAll: filteredProjects.length > 3 ? () => setTab("projects") : undefined,
+      content: (
+        <div className="grid gap-3 md:grid-cols-2">
+          {filteredProjects.slice(0, 3).map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
-          {tab === "all" && filteredProjects.length > 3 ? (
-            <button
-              onClick={() => setTab("projects")}
-              className="mt-2 w-full rounded-xl border border-white/5 bg-white/[0.02] py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              View all {filteredProjects.length} projects
-            </button>
-          ) : null}
         </div>
-      ) : (
-        <EmptyState icon={Sparkles} title="No projects match" description="No visible project matches this lens." className="mt-6 p-6 sm:p-7" />
-      )}
-    </section>
-  );
-
-  const requestsList = tab === "all" ? filteredRequests.slice(0, 3) : filteredRequests;
-  const requestsSection = (
-    <section className="relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <SectionHeader
-        eyebrow="Requests"
-        title="Operational needs"
-        count={filteredRequests.length}
-        description="Open build requests and public needs visible across the network."
-      />
-      {requestsList.length ? (
-        <div className="mt-6 grid gap-3">
-          {requestsList.map((request) => (
+      ),
+    },
+    {
+      key: "requests",
+      title: "Requests",
+      count: filteredRequests.length,
+      viewAll: filteredRequests.length > 3 ? () => setTab("requests") : undefined,
+      content: (
+        <div className="space-y-2">
+          {filteredRequests.slice(0, 3).map((request) => (
             <BuildRequestCard key={request.id} request={request} />
           ))}
-          {tab === "all" && filteredRequests.length > 3 ? (
-            <button
-              onClick={() => setTab("requests")}
-              className="mt-2 w-full rounded-xl border border-white/5 bg-white/[0.02] py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-            >
-              View all {filteredRequests.length} requests
-            </button>
-          ) : null}
         </div>
-      ) : (
-        <EmptyState icon={ClipboardList} title="No requests match" description="No build request matches the current view." className="mt-6 p-6 sm:p-7" />
-      )}
-    </section>
-  );
+      ),
+    },
+  ].filter((section) => section.count > 0);
+
+  const showCompanyFilters = tab === "all" || tab === "companies";
 
   return (
     <div className="space-y-8">
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        {/* Main Hero Bento (Spans 3 cols) */}
-        <div className="group relative flex min-h-[16rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.02] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] lg:col-span-3">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.15),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-          <div className="relative z-10 inline-flex size-14 items-center justify-center rounded-[1.2rem] border border-blue-400/20 bg-blue-400/10 text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-400/30 transition-transform duration-500 group-hover:scale-110">
-            <Compass className="size-6" />
+      <div className="flex flex-col gap-6 border-b border-white/8 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Compass className="size-5 text-blue-400" />
+            <h1 className="font-display text-2xl text-white">Discovery</h1>
           </div>
-
-          <div className="relative z-10 mt-8">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-400/80">Discovery Index</div>
-            <h2 className="mt-3 font-display text-3xl leading-none text-white transition-colors duration-300 group-hover:text-blue-50 sm:text-4xl">
-              Browse PrismMTR as a public network, not a stack of isolated lists.
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground transition-colors duration-300 group-hover:text-white/80">
-              Search the network, switch lenses, then inspect the visible graph of companies, members, publishing, projects, and requests.
-            </p>
-          </div>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/66">
+            Browse companies, members, posts, projects, and requests across the PrismMTR network.
+          </p>
         </div>
-
-        {/* Stats Bento (Spans 1 col) */}
-        <div className="flex flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-sm lg:col-span-1">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Visible Results</div>
-            <LayoutGrid className="size-4 text-white/40" />
-          </div>
-          <div className="mt-4 flex flex-col items-start gap-2">
-            <div className="font-display text-6xl leading-none text-white">{tabCounts[tab]}</div>
-            <div className="text-xs leading-5 text-muted-foreground">
-              {deferredQuery ? `Filtered by "${deferredQuery}"` : "Across selected lens"}
-            </div>
-          </div>
+        <div className="text-sm text-white/46">
+          {tabCounts[tab]} {tab === "all" ? "results" : tab}
         </div>
+      </div>
 
-        {/* Search & Tabs Bento (Spans 3 cols) */}
-        <div className="flex flex-col gap-6 overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm lg:col-span-3">
-          <SearchBar value={query} onChange={setQuery} placeholder="Search companies, members, tags, and work surfaces" />
+      <div className="space-y-3">
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          placeholder={
+            tab === "users"
+              ? "Search members by display name, handle, company, nickname, or role..."
+              : "Search companies, members, tags, or descriptions..."
+          }
+        />
 
-          <div className="flex flex-wrap gap-2">
-            {tabs.map((value) => {
-              const meta = tabMeta[value];
-              const Icon = meta.icon;
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={sort} onValueChange={(value) => setSort(value as DiscoverySort)}>
+            <SelectTrigger className="h-8 w-auto min-w-[7rem] gap-1.5 rounded-lg border-white/8 bg-white/[0.03] px-3 text-xs text-white/60">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="activity">Most active</SelectItem>
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="a-z">A - Z</SelectItem>
+            </SelectContent>
+          </Select>
 
-              return (
-                <button
-                  key={value}
-                  onClick={() => setTab(value)}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors",
-                    tab === value
-                      ? "border-blue-500/30 bg-blue-500/10 text-white"
-                      : "border-transparent text-muted-foreground hover:bg-white/[0.03] hover:text-white",
-                  )}
-                >
-                  <Icon className={cn("size-4", tab === value ? "text-blue-400" : "")} />
-                  <span>{meta.label}</span>
-                  <span className={cn(
-                    "rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.18em]",
-                    tab === value ? "bg-blue-500/20 text-blue-200" : "bg-white/5 text-white/50"
-                  )}>
-                    {tabCounts[value]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Filters Bento (Spans 1 col) */}
-        <div className="flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm lg:col-span-1 border-white/10">
-          <div className="panel-label">Filters</div>
-          <div className="mt-4 grid gap-3">
-            <label className="text-xs font-medium text-muted-foreground">
-              Sort
-              <Select value={sort} onValueChange={(value) => setSort(value as DiscoverySort)}>
-                <SelectTrigger className="mt-2 h-10 w-full rounded-xl border border-white/8 bg-white/[0.02] px-3 text-sm text-white transition-colors hover:bg-white/[0.04] focus:ring-1 focus:ring-blue-400/30">
-                  <SelectValue />
+          {showCompanyFilters ? (
+            <>
+              <Select value={recruiting} onValueChange={(value) => setRecruiting(value ?? "all")}>
+                <SelectTrigger className="h-8 w-auto min-w-[6.5rem] gap-1.5 rounded-lg border-white/8 bg-white/[0.03] px-3 text-xs text-white/60">
+                  <SelectValue placeholder="Recruiting" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="activity">Most active</SelectItem>
-                  <SelectItem value="latest">Latest</SelectItem>
-                  <SelectItem value="a-z">A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-            </label>
-            <label className="text-xs font-medium text-muted-foreground">
-              Recruiting
-              <Select value={recruiting} onValueChange={(value) => setRecruiting(value as string)}>
-                <SelectTrigger className="mt-2 h-10 w-full rounded-xl border border-white/8 bg-white/[0.02] px-3 text-sm text-white transition-colors hover:bg-white/[0.04] focus:ring-1 focus:ring-blue-400/30">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="all">All recruiting</SelectItem>
                   <SelectItem value="OPEN">Open</SelectItem>
                   <SelectItem value="LIMITED">Limited</SelectItem>
                   <SelectItem value="CLOSED">Closed</SelectItem>
                 </SelectContent>
               </Select>
-            </label>
-            <label className="text-xs font-medium text-muted-foreground">
-              Privacy
-              <Select value={privacy} onValueChange={(value) => setPrivacy(value as string)}>
-                <SelectTrigger className="mt-2 h-10 w-full rounded-xl border border-white/8 bg-white/[0.02] px-3 text-sm text-white transition-colors hover:bg-white/[0.04] focus:ring-1 focus:ring-blue-400/30">
-                  <SelectValue />
+              <Select value={privacy} onValueChange={(value) => setPrivacy(value ?? "all")}>
+                <SelectTrigger className="h-8 w-auto min-w-[5.5rem] gap-1.5 rounded-lg border-white/8 bg-white/[0.03] px-3 text-xs text-white/60">
+                  <SelectValue placeholder="Privacy" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="all">All privacy</SelectItem>
                   <SelectItem value="PUBLIC">Public</SelectItem>
                   <SelectItem value="PRIVATE">Private</SelectItem>
                 </SelectContent>
               </Select>
-            </label>
-          </div>
+            </>
+          ) : null}
+
+          {tab === "users" ? (
+            <div className="text-xs text-white/42">
+              Search matches name, handle, nickname, company, and role.
+            </div>
+          ) : null}
+
+          {deferredQuery ? (
+            <button onClick={() => setQuery("")} className="ml-auto text-xs text-white/36 transition-colors hover:text-white/66">
+              Clear search
+            </button>
+          ) : null}
         </div>
-      </section>
+      </div>
+
+      <div className="flex gap-1 overflow-x-auto border-b border-white/8 pb-px">
+        {tabDefs.map((t) => {
+          const Icon = t.icon;
+          const active = tab === t.value;
+          return (
+            <button
+              key={t.value}
+              onClick={() => setTab(t.value)}
+              className={cn(
+                "relative flex shrink-0 items-center gap-1.5 px-3 py-2 text-[13px] font-medium transition-colors",
+                active ? "text-white" : "text-white/38 hover:text-white/64",
+              )}
+            >
+              <Icon className={cn("size-3.5", active ? "text-blue-400" : "")} />
+              {t.label}
+              <span className={cn("ml-0.5 text-[10px] tabular-nums", active ? "text-white/50" : "text-white/24")}>{tabCounts[t.value]}</span>
+              {active ? <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-blue-400" /> : null}
+            </button>
+          );
+        })}
+      </div>
 
       {tab === "all" ? (
-        <section className="grid gap-8 xl:grid-cols-[minmax(0,1.04fr)_0.96fr]">
-          <div className="space-y-8">
-            {companiesSection}
-            {postsSection}
+        allSections.length ? (
+          <div className="space-y-10">
+            {allSections.map((section) => (
+              <ResultSection key={section.key} title={section.title} count={section.count} onViewAll={section.viewAll}>
+                {section.content}
+              </ResultSection>
+            ))}
           </div>
-          <div className="space-y-8">
-            {usersSection}
-            {projectsSection}
-            {requestsSection}
-          </div>
-        </section>
+        ) : (
+          <CompactInlineEmpty
+            icon={SearchSlash}
+            title="No discovery results"
+            description="Try searching by company, member, project, or role."
+          />
+        )
       ) : (
-        <section className="space-y-8">
-          {tab === "companies" ? companiesSection : null}
-          {tab === "users" ? usersSection : null}
-          {tab === "posts" ? postsSection : null}
-          {tab === "projects" ? projectsSection : null}
-          {tab === "requests" ? requestsSection : null}
-        </section>
-      )}
+        <div key={tab} className="animate-fade-in">
+          {tab === "companies" ? (
+            filteredCompanies.length ? (
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {filteredCompanies.map((company) => (
+                  <CompanyCard key={company.id} company={company} />
+                ))}
+              </div>
+            ) : (
+              <CompactInlineEmpty
+                icon={SearchSlash}
+                title="No companies match"
+                description="Try broadening the search or switching back to all results."
+              />
+            )
+          ) : null}
 
-      <div className="flex flex-wrap gap-2 border-t border-white/8 pt-5">
-        {resultSplit.map((item) => (
-          <div key={item.label} className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-white/58">
-            {item.label}: <span className="text-white">{item.count}</span>
-          </div>
-        ))}
+          {tab === "users" ? (
+            filteredUsers.length ? (
+              <DiscoveryMembersRoster users={filteredUsers} searchTerm={searchTerm} showPreview />
+            ) : (
+              <CompactInlineEmpty
+                icon={UsersRound}
+                title="No members match"
+                description="Search by display name, handle, company, nickname, or role."
+              />
+            )
+          ) : null}
+
+          {tab === "posts" ? (
+            filteredPosts.length ? (
+              <div className="space-y-2">
+                {filteredPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+            ) : (
+              <CompactInlineEmpty icon={Newspaper} title="No posts match" description="Try broadening your search." />
+            )
+          ) : null}
+
+          {tab === "projects" ? (
+            filteredProjects.length ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            ) : (
+              <CompactInlineEmpty icon={Sparkles} title="No projects match" description="No visible projects match this search." />
+            )
+          ) : null}
+
+          {tab === "requests" ? (
+            filteredRequests.length ? (
+              <div className="space-y-2">
+                {filteredRequests.map((request) => (
+                  <BuildRequestCard key={request.id} request={request} />
+                ))}
+              </div>
+            ) : (
+              <CompactInlineEmpty
+                icon={ClipboardList}
+                title="No requests match"
+                description="No build requests match the current search."
+              />
+            )
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ResultSection({
+  title,
+  count,
+  onViewAll,
+  children,
+}: {
+  title: string;
+  count: number;
+  onViewAll?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="mb-4 flex items-center justify-between border-b border-white/8 pb-3">
+        <h2 className="text-sm font-medium text-white/68">{title}</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-white/28">{count}</span>
+          {onViewAll ? (
+            <button onClick={onViewAll} className="text-xs text-white/36 transition-colors hover:text-white/66">
+              View all
+            </button>
+          ) : null}
+        </div>
       </div>
+      {children}
+    </section>
+  );
+}
+
+function CompactInlineEmpty({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 border-t border-white/8 py-5">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[0.9rem] border border-white/10 bg-white/[0.03]">
+        <Icon className="size-4 text-white/42" />
+      </div>
+      <div className="space-y-1">
+        <div className="text-sm font-medium text-white/82">{title}</div>
+        <p className="text-sm leading-6 text-white/52">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function DiscoveryMembersRoster({
+  users,
+  searchTerm,
+  showPreview = false,
+}: {
+  users: UserPreview[];
+  searchTerm: string;
+  showPreview?: boolean;
+}) {
+  const [selectedUserId, setSelectedUserId] = useState<string>(users[0]?.id ?? "");
+  const resolvedSelectedUserId = users.some((user) => user.id === selectedUserId) ? selectedUserId : (users[0]?.id ?? "");
+  const selectedUser = users.find((user) => user.id === resolvedSelectedUserId) ?? null;
+
+  const groupedUsers = useMemo(
+    () =>
+      discoverySiteRoleOrder
+        .map((role) => ({
+          role,
+          label: getDiscoveryGroupLabel(role),
+          theme: getSiteRoleTheme(role),
+          members: users.filter((user) => user.siteRole === role),
+        }))
+        .filter((group) => group.members.length > 0),
+    [users],
+  );
+
+  const roster = (
+    <div className="space-y-6">
+      {groupedUsers.map((group) => (
+        <section key={group.role} className="space-y-2.5">
+          <div className={cn("flex items-center justify-between border-b px-0 pb-2.5", group.theme.dividerClass)}>
+            <div className="inline-flex items-center gap-2.5">
+              <span className={cn("h-5 w-[3px] rounded-full", group.theme.rosterRowEdgeClass)} />
+              <RoleBadge kind="site" role={group.role} />
+              <span className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]", group.theme.rosterGroupClass)}>
+                {group.label}
+              </span>
+            </div>
+            <span className={cn("text-[11px]", group.theme.rosterGroupCountClass)}>{group.members.length}</span>
+          </div>
+
+          <div className="space-y-1">
+            {group.members.map((user) => (
+              <ProfileRosterRow
+                key={user.id}
+                user={user}
+                searchTerm={searchTerm}
+                active={showPreview && selectedUser?.id === user.id}
+                onSelect={() => setSelectedUserId(user.id)}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+
+  if (!showPreview) {
+    return roster;
+  }
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div>{roster}</div>
+      <aside className="xl:sticky xl:top-24 xl:self-start">
+        {selectedUser ? <DiscoveryMemberPreview user={selectedUser} /> : null}
+      </aside>
+    </div>
+  );
+}
+
+function DiscoveryMemberPreview({ user }: { user: UserPreview }) {
+  const { membership, company } = resolveProfilePresence(user);
+
+  return (
+    <div className="space-y-4">
+      <ProfileIdentitySurface
+        user={user}
+        companyRole={membership?.companyRole}
+        primaryCompany={company}
+        variant="preview"
+        headerLabel="Member preview"
+        actionRow={
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button variant="outline" size="sm" render={<Link href={`/users/${user.username ?? ""}`} />}>
+              View profile
+            </Button>
+            <Button variant="secondary" size="sm" render={<Link href={company ? `/companies/${company.slug}` : "/companies"} />}>
+              {company ? "View company" : "Browse companies"}
+            </Button>
+          </div>
+        }
+      />
+
+      <IdentityPanel title="Directory context">
+        <div className="space-y-3 text-sm text-white/68">
+          <div className="flex items-center justify-between border-b border-white/8 pb-3">
+            <span className="text-white/50">Primary workspace</span>
+            <span className="text-white">{company ? company.name : "Independent"}</span>
+          </div>
+          <div className="flex items-center justify-between border-b border-white/8 pb-3">
+            <span className="text-white/50">Memberships</span>
+            <span className="text-white">{user.memberships.length}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-white/50">Decorative badges</span>
+            <span className="text-white">{user.badges.length}</span>
+          </div>
+        </div>
+      </IdentityPanel>
     </div>
   );
 }

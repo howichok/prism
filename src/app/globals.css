@@ -46,6 +46,15 @@
 }
 
 :root {
+  /* Motion tokens */
+  --motion-duration-fast: 120ms;
+  --motion-duration-normal: 180ms;
+  --motion-duration-slow: 300ms;
+  --motion-duration-slower: 500ms;
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-out: cubic-bezier(0, 0.55, 0.45, 1);
+  --motion-ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+
   --background: hsl(0 0% 4%);
   --foreground: hsl(0 0% 98%);
 
@@ -101,43 +110,18 @@
 
   html {
     scrollbar-gutter: stable both-edges;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans), sans-serif;
-    background:
-      radial-gradient(circle at 18% 0%, hsl(199 92% 58% / 0.07), transparent 30%),
-      radial-gradient(circle at 82% 0%, hsl(221 83% 53% / 0.035), transparent 24%),
-      linear-gradient(180deg, hsl(0 0% 5%) 0%, hsl(0 0% 4%) 48%, hsl(0 0% 3%) 100%);
+    background: hsl(0 0% 4%);
     min-height: 100vh;
     letter-spacing: -0.01em;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    position: relative;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(to right, hsl(0 0% 100% / 0.016) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(0 0% 100% / 0.011) 1px, transparent 1px);
-    background-size: 128px 128px;
-    mask-image: linear-gradient(180deg, hsl(0 0% 0% / 0.5), transparent 82%);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 0%, hsl(0 0% 4% / 0.25) 55%, hsl(0 0% 3% / 0.8) 100%);
-    pointer-events: none;
-    z-index: -1;
   }
 
   ::selection {
@@ -225,25 +209,22 @@
     box-shadow: inset 0 -1px 0 var(--border);
   }
 
-  .surface-panel::after,
-  .surface-panel-strong::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, hsl(0 0% 100% / 0.018), transparent 18%);
-    pointer-events: none;
-  }
+  /* ── Keyframes ── */
 
-  @keyframes fade-in {
+  @keyframes fade-up {
     from {
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(8px);
     }
-
     to {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes scale-in {
@@ -251,24 +232,153 @@
       opacity: 0;
       transform: scale(0.97);
     }
-
     to {
       opacity: 1;
       transform: scale(1);
     }
   }
 
-  .animate-fade-in {
-    animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .animate-scale-in {
-    animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes shimmer {
     100% {
       transform: translateX(100%);
+    }
+  }
+
+  @keyframes profile-banner-sheen {
+    0% {
+      transform: translate3d(-46%, 0, 0);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.5;
+    }
+    48% {
+      opacity: 0.28;
+    }
+    100% {
+      transform: translate3d(124%, 0, 0);
+      opacity: 0;
+    }
+  }
+
+  @keyframes profile-banner-drift {
+    0% {
+      transform: translate3d(-2%, 0, 0) scale(1);
+      opacity: 0.52;
+    }
+    50% {
+      transform: translate3d(3%, -2%, 0) scale(1.04);
+      opacity: 0.78;
+    }
+    100% {
+      transform: translate3d(-2%, 0, 0) scale(1);
+      opacity: 0.52;
+    }
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ── Animation utilities ── */
+
+  .animate-fade-in {
+    animation: fade-in var(--motion-duration-slow) var(--motion-ease) both;
+  }
+
+  .animate-fade-up {
+    animation: fade-up var(--motion-duration-slow) var(--motion-ease) both;
+  }
+
+  .animate-scale-in {
+    animation: scale-in var(--motion-duration-normal) var(--motion-ease) both;
+  }
+
+  .animate-slide-up {
+    animation: slide-up var(--motion-duration-slower) var(--motion-ease) both;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s var(--motion-ease-in-out) infinite;
+  }
+
+  /* Stagger children: apply .motion-stagger to parent, children get staggered delays */
+  .motion-stagger > * {
+    animation: fade-up var(--motion-duration-slow) var(--motion-ease) both;
+  }
+  .motion-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .motion-stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .motion-stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .motion-stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .motion-stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .motion-stagger > *:nth-child(6) { animation-delay: 250ms; }
+  .motion-stagger > *:nth-child(7) { animation-delay: 300ms; }
+  .motion-stagger > *:nth-child(8) { animation-delay: 350ms; }
+  .motion-stagger > *:nth-child(n+9) { animation-delay: 400ms; }
+
+  /* Press feedback for interactive elements */
+  .motion-press {
+    transition: transform var(--motion-duration-fast) var(--motion-ease);
+  }
+  .motion-press:active {
+    transform: scale(0.98);
+  }
+
+  /* Hover lift for cards */
+  .motion-lift {
+    transition:
+      transform var(--motion-duration-normal) var(--motion-ease),
+      border-color var(--motion-duration-normal) var(--motion-ease),
+      background-color var(--motion-duration-normal) var(--motion-ease),
+      box-shadow var(--motion-duration-normal) var(--motion-ease);
+  }
+  .motion-lift:hover {
+    transform: translateY(-1px);
+  }
+
+  .profile-banner-sheen {
+    pointer-events: none;
+    will-change: transform, opacity;
+    mix-blend-mode: screen;
+    animation: profile-banner-sheen 5.8s linear infinite;
+  }
+
+  .profile-banner-drift {
+    pointer-events: none;
+    will-change: transform, opacity;
+    mix-blend-mode: screen;
+    animation: profile-banner-drift 4.8s var(--motion-ease-in-out) infinite;
+  }
+
+  /* ── Reduced motion ── */
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-duration-fast: 0ms;
+      --motion-duration-normal: 0ms;
+      --motion-duration-slow: 0ms;
+      --motion-duration-slower: 0ms;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }

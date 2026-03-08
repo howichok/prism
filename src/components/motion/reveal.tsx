@@ -1,24 +1,39 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 import { cn } from "@/lib/utils";
 
 type RevealProps = {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  as?: "div" | "section" | "article" | "li";
 };
 
-export function Reveal({ children, className, delay = 0 }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as: Tag = "div",
+}: RevealProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      className={cn(className)}
+    <Tag
+      className={cn("animate-fade-up", className)}
+      style={delay ? { animationDelay: `${delay * 1000}ms` } : undefined}
     >
       {children}
-    </motion.div>
+    </Tag>
+  );
+}
+
+type StaggerProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export function Stagger({ children, className }: StaggerProps) {
+  return (
+    <div className={cn("motion-stagger", className)}>
+      {children}
+    </div>
   );
 }

@@ -38,9 +38,7 @@ export function SiteHeader({
   const authControls = viewer ? (
     viewer.isGuest ? (
       <>
-        <div className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-white/66 lg:block">
-          Guest mode
-        </div>
+        <span className="hidden text-xs text-white/30 lg:block">Guest</span>
         <DiscordAuthButton configured={discordAuthConfigured} redirectTo="/dashboard" variant="outline" />
       </>
     ) : (
@@ -57,50 +55,40 @@ export function SiteHeader({
   );
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[linear-gradient(180deg,rgba(10,10,10,0.98),rgba(10,10,10,0.94))]">
-      <div className="mx-auto flex h-[3.85rem] max-w-[1400px] items-center gap-5 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-5 lg:gap-7">
-          <Link href="/" className="group flex min-w-0 items-center gap-3 text-foreground">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/18 bg-[linear-gradient(140deg,rgba(14,165,233,0.18),rgba(10,10,10,0.94))] text-primary">
-              <span className="font-display text-sm font-semibold tracking-[-0.08em]">P</span>
-            </div>
-            <div className="min-w-0">
-              <div className="truncate font-display text-[1.05rem] leading-none text-white">PrismMTR</div>
-              <div className="hidden truncate text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:block">
-                Transit Network Platform
-              </div>
-            </div>
-          </Link>
-
-          <nav className={cn("hidden items-center gap-1 md:flex", pathname.startsWith("/dashboard") && "md:hidden")}>
-            {navItems.map((item) => {
-              const active =
-                item.href === "/"
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "rounded-[0.85rem] border px-3.5 py-2 text-[13px] font-medium transition-colors duration-200",
-                    active
-                      ? "border-white/10 bg-white/[0.05] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                      : "border-transparent text-muted-foreground hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        <div className="ml-auto flex items-center justify-end gap-3">
-          <div className="hidden text-[10px] uppercase tracking-[0.22em] text-muted-foreground xl:block">
-            Public network
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[hsl(0_0%_4%)]/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2.5 text-foreground">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400">
+            <span className="font-display text-sm">P</span>
           </div>
+          <span className="font-display text-base text-white">PrismMTR</span>
+        </Link>
+
+        <nav className={cn("hidden items-center gap-1 md:flex", pathname.startsWith("/dashboard") && "md:hidden")}>
+          {navItems.map((item) => {
+            const active =
+              item.href === "/"
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  active
+                    ? "bg-white/[0.06] text-white"
+                    : "text-white/40 hover:text-white/70",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-3">
           {authControls}
         </div>
       </div>

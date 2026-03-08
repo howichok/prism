@@ -1,17 +1,13 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Bell,
   Building2,
   ClipboardCheck,
   ClipboardList,
   Compass,
-  Link2,
   LockKeyhole,
   Megaphone,
-  PlusSquare,
   Shield,
-  UserCircle2,
 } from "lucide-react";
 
 import { endGuestSessionAction } from "@/actions/session";
@@ -19,7 +15,6 @@ import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/platform/empty-state";
 import { PageHeader } from "@/components/platform/page-header";
 import { PostCard } from "@/components/platform/post-card";
-import { StatusBadge } from "@/components/platform/status-badge";
 import { Button } from "@/components/ui/button";
 import { getDashboardData, getModerationOverviewData } from "@/lib/data";
 import { dashboardSidebarItems, guestDashboardSidebarItems } from "@/lib/navigation";
@@ -33,13 +28,13 @@ export default async function DashboardPage() {
     return (
       <AppShell
         title="Guest Dashboard"
-        description="A local workspace tour for exploring PrismMTR without a linked account."
+        description="Preview the PrismMTR workspace without an account."
         items={guestDashboardSidebarItems}
       >
         <PageHeader
           eyebrow="Guest mode"
-          title="Explore the PrismMTR workspace locally"
-          description="A safe environment to explore public companies, identities, and the transit network without a linked account."
+          title="Explore the PrismMTR workspace"
+          description="Browse public companies, identities, and the transit network. Sign in with Discord for full access."
           actions={
             <>
               <Button render={<Link href="/sign-in" />}>
@@ -48,7 +43,7 @@ export default async function DashboardPage() {
               </Button>
               <Button variant="outline" render={<Link href="/discovery" />}>
                 <Compass className="size-4" />
-                Open discovery
+                Discovery
               </Button>
               <form action={endGuestSessionAction}>
                 <Button type="submit" variant="secondary">
@@ -59,133 +54,58 @@ export default async function DashboardPage() {
           }
         />
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {/* Main Hero Bento (Spans 2 cols, 2 rows) */}
+        {/* Quick links */}
+        <div className="motion-stagger grid gap-3 sm:grid-cols-3">
           <Link
             href="/discovery"
-            className="group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.02] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] md:col-span-2 md:row-span-2"
+            className="group flex items-center gap-4 rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.15),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-            <div className="relative z-10 inline-flex size-14 items-center justify-center rounded-[1.2rem] border border-blue-400/20 bg-blue-400/10 text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-400/30 transition-transform duration-500 group-hover:scale-110">
-              <Compass className="size-6" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-white/50">
+              <Compass className="size-5" />
             </div>
-
-            <div className="relative z-10 mt-8">
-              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-400/80">Primary Route</div>
-              <h2 className="mt-3 font-display text-3xl leading-none text-white transition-colors duration-300 group-hover:text-blue-50 sm:text-4xl">Inspect the public network</h2>
-              <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground transition-colors duration-300 group-hover:text-white/80">
-                Discovery, public companies, member identity surfaces, and publishing remain fully visible in guest mode. Your local exploration does not affect the actual environment.
-              </p>
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-white">Discovery</div>
+              <div className="mt-0.5 text-xs text-white/40">Browse the public network</div>
             </div>
-            <ArrowRight className="absolute bottom-8 right-8 size-6 text-white/20 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white/60" />
           </Link>
+          <Link
+            href="/companies"
+            className="group flex items-center gap-4 rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
+          >
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-white/50">
+              <Building2 className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-white">Companies</div>
+              <div className="mt-0.5 text-xs text-white/40">Inspect public hubs</div>
+            </div>
+          </Link>
+          <Link
+            href="/sign-in"
+            className="group flex items-center gap-4 rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
+          >
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-white/50">
+              <Shield className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-white">Full access</div>
+              <div className="mt-0.5 text-xs text-white/40">Sign in with Discord</div>
+            </div>
+          </Link>
+        </div>
 
-          {/* Boundaries Bento (Spans 1 col, 2 rows) */}
-          <div className="relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm md:row-span-2">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-white/60">
-                <Shield className="size-4.5" />
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Guest Limits</div>
-            </div>
-            <div className="flex flex-1 flex-col justify-center space-y-5">
-              {[
-                "Local-only exploration without an account.",
-                "Post creation, editing, and config stay locked.",
-                "Meaningful access to real workspace data.",
-              ].map((line, i) => (
-                <div key={i} className="relative pl-5 text-[13px] leading-relaxed text-muted-foreground">
-                  <span className="absolute left-0 top-2 size-1.5 rounded-full bg-blue-500/30 ring-2 ring-blue-500/10" />
-                  {line}
-                </div>
-              ))}
-            </div>
+        {/* Guest limits */}
+        <div className="rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.15em] text-white/35">
+            <LockKeyhole className="size-3.5" />
+            Locked until sign-in
           </div>
-
-          {/* Action Bentos (Square) */}
-          {[
-            {
-              href: "/companies",
-              title: "Open companies",
-              body: "Inspect recruiting hubs and details.",
-              icon: PlusSquare,
-            },
-            {
-              href: "/sign-in",
-              title: "Upgrade to account",
-              body: "Unlock posting and linked identity.",
-              icon: Shield,
-            },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group relative flex min-h-[14rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03]"
-            >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-              <div className="relative z-10 flex size-11 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.04] text-white/70 transition-colors duration-300 group-hover:border-white/20 group-hover:bg-white/[0.08] group-hover:text-white">
-                <item.icon className="size-5" />
-              </div>
-
-              <div className="relative z-10 mt-6">
-                <h3 className="font-display text-xl text-white transition-colors group-hover:text-blue-100">{item.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{item.body}</p>
-              </div>
-            </Link>
-          ))}
-
-          {/* Surface & Locked Wide Bentos (Span 2 cols) */}
-          <div className="flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-sm md:col-span-2 xl:col-span-2">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-white/60">
-                <Compass className="size-4.5" />
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Live Product Surfaces</div>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              {[
-                { title: "Discovery", body: "Search the network and view projects.", icon: Compass },
-                { title: "Companies", body: "Inspect leadership and public pages.", icon: Building2 },
-                { title: "Identity", body: "Hover mini profiles & public members.", icon: UserCircle2 },
-              ].map((item) => (
-                <div key={item.title} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white/90">
-                    <item.icon className="size-4 text-primary/60" />
-                    {item.title}
-                  </div>
-                  <p className="text-[13px] leading-relaxed text-muted-foreground">{item.body}</p>
-                </div>
-              ))}
-            </div>
+          <div className="mt-3 grid gap-2 text-sm text-white/40 sm:grid-cols-3">
+            <div>Notifications and inbox</div>
+            <div>Post creation and editing</div>
+            <div>Settings and role actions</div>
           </div>
-
-          <div className="relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-sm md:col-span-2 xl:col-span-2">
-            <div className="mb-6 flex items-center gap-3 opacity-60">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-white/60">
-                <LockKeyhole className="size-4.5" />
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Locked until sign-in</div>
-            </div>
-            <div className="grid gap-6 opacity-60 grayscale transition-all duration-300 hover:grayscale-0 hover:opacity-100 md:grid-cols-2">
-              {[
-                { title: "Notifications", body: "Personal workflow requires an account.", icon: Bell },
-                { title: "Post studio", body: "Drafts and publishing stay disabled.", icon: Megaphone },
-                { title: "Control", body: "Settings and role actions are locked.", icon: Shield },
-              ].map((item) => (
-                <div key={item.title} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white/70">
-                    <item.icon className="size-4" />
-                    {item.title}
-                  </div>
-                  <p className="text-[13px] leading-relaxed text-muted-foreground">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        </div>
       </AppShell>
     );
   }
@@ -221,10 +141,6 @@ export default async function DashboardPage() {
 
   const primaryMembership = data.memberships[0] ?? null;
   const companyHubHref = primaryMembership ? `/dashboard/company/${primaryMembership.slug}` : "/dashboard/company/create";
-  const companyHubTitle = primaryMembership ? `Open ${primaryMembership.name}` : "Create company hub";
-  const companyHubBody = primaryMembership
-    ? "Jump straight into your primary company workspace, roster, and publishing flow."
-    : "Start a new company workspace and send it into review.";
   const staffInbox = canAccessModeration(viewer.siteRole)
     ? await getModerationOverviewData().catch((error) => {
       console.error("[dashboard] Failed to load moderation overview for staff dashboard.", {
@@ -247,13 +163,9 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Dashboard"
         title={`Welcome back, ${viewer.displayName ?? viewer.username ?? "member"}`}
-        description="Your personal control panel for identity, network access, and publishing."
+        description="Your workspace for identity, company hubs, and publishing."
         actions={
           <>
-            <Button variant="outline" render={<Link href={companyHubHref} />}>
-              <Compass className="size-4" />
-              {primaryMembership ? "Open Company Hub" : "Create Company Hub"}
-            </Button>
             <Button render={<Link href="/dashboard/posts/new" />}>
               <Megaphone className="size-4" />
               Create Post
@@ -263,170 +175,153 @@ export default async function DashboardPage() {
                 <Shield className="size-4" />
                 Staff Inbox
               </Button>
-            ) : (
-              <Button variant="outline" render={<Link href="/dashboard/company/create" />}>
-                <PlusSquare className="size-4" />
-                Create Company
-              </Button>
-            )}
+            ) : null}
           </>
         }
       />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {/* Main Hero Bento (Primary Company Hub) */}
+      {/* Quick actions */}
+      <div className="motion-stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href={companyHubHref}
-          className="group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.02] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-md transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] md:col-span-2 lg:row-span-2"
+          className="group flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.15),transparent_60%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-          <div className="relative z-10 inline-flex size-14 items-center justify-center rounded-[1.2rem] border border-blue-400/20 bg-blue-400/10 text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-400/30 transition-transform duration-500 group-hover:scale-110">
-            <Compass className="size-6" />
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+              <Building2 className="size-4" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-white">
+                {primaryMembership ? primaryMembership.name : "Create company"}
+              </div>
+              <div className="text-xs text-white/40">
+                {primaryMembership ? "Open company hub" : "Start a new workspace"}
+              </div>
+            </div>
           </div>
-
-          <div className="relative z-10 mt-8">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-400/80">Primary Hub</div>
-            <h2 className="mt-3 font-display text-3xl leading-none text-white transition-colors duration-300 group-hover:text-blue-50 sm:text-4xl">{companyHubTitle}</h2>
-            <p className="mt-4 max-w-md text-sm leading-7 text-muted-foreground transition-colors duration-300 group-hover:text-white/80">
-              {companyHubBody}
-            </p>
-          </div>
-          <ArrowRight className="absolute bottom-8 right-8 size-6 text-white/20 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white/60" />
+          <ArrowRight className="size-4 text-white/15 transition-colors group-hover:text-white/40" />
         </Link>
 
-        {/* Action Bentos */}
         <Link
           href="/dashboard/posts/new"
-          className="group relative flex min-h-[14rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03]"
+          className="group flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
         >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="relative z-10 flex size-11 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.04] text-white/70 transition-colors duration-300 group-hover:border-white/20 group-hover:bg-white/[0.08] group-hover:text-amber-300">
-            <Megaphone className="size-5" />
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+              <Megaphone className="size-4" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-white">Post Studio</div>
+              <div className="text-xs text-white/40">Draft a new post</div>
+            </div>
           </div>
-          <div className="relative z-10 mt-6">
-            <h3 className="font-display text-xl text-white transition-colors group-hover:text-amber-100">Post Studio</h3>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">Draft and publish network announcements.</p>
-          </div>
+          <ArrowRight className="size-4 text-white/15 transition-colors group-hover:text-white/40" />
         </Link>
 
         <Link
           href={canAccessModeration(viewer.siteRole) ? "/moderation" : "/dashboard/applications"}
-          className="group relative flex min-h-[14rem] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03]"
+          className="group flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
         >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="relative z-10 flex size-11 items-center justify-center rounded-[1rem] border border-white/10 bg-white/[0.04] text-white/70 transition-colors duration-300 group-hover:border-white/20 group-hover:bg-white/[0.08] group-hover:text-emerald-300">
-            {canAccessModeration(viewer.siteRole) ? <Shield className="size-5" /> : <ClipboardCheck className="size-5" />}
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+              {canAccessModeration(viewer.siteRole) ? <Shield className="size-4" /> : <ClipboardCheck className="size-4" />}
+            </div>
+            <div>
+              <div className="text-sm font-medium text-white">
+                {canAccessModeration(viewer.siteRole) ? "Staff Inbox" : "Applications"}
+              </div>
+              <div className="text-xs text-white/40">
+                {canAccessModeration(viewer.siteRole)
+                  ? pendingModerationCount ? `${pendingModerationCount} pending` : "No items pending"
+                  : "Track requests"}
+              </div>
+            </div>
           </div>
-          <div className="relative z-10 mt-6">
-            <h3 className="font-display text-xl text-white transition-colors group-hover:text-emerald-100">
-              {canAccessModeration(viewer.siteRole) ? "Staff Inbox" : "Applications"}
-            </h3>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-              {canAccessModeration(viewer.siteRole)
-                ? pendingModerationCount
-                  ? `${pendingModerationCount} item(s) need attention.`
-                  : "No urgent approvals waiting."
-                : "Track requests and pending workflow."}
-            </p>
-          </div>
+          <ArrowRight className="size-4 text-white/15 transition-colors group-hover:text-white/40" />
         </Link>
+      </div>
 
-        {/* Metric Square Bentos */}
-        <div className="flex flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Memberships</div>
-            <Building2 className="size-4 text-white/40" />
-          </div>
-          <div className="mt-4 flex items-end justify-between gap-4">
-            <div className="font-display text-5xl leading-none text-white">{data.memberships.length}</div>
-            <div className="text-right text-xs leading-5 text-muted-foreground">Active<br />hubs</div>
-          </div>
+      {/* Stats row */}
+      <div className="motion-stagger grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-xl border border-white/6 bg-white/[0.02] px-4 py-3">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-white/35">Memberships</div>
+          <div className="mt-1 font-display text-2xl text-white">{data.memberships.length}</div>
         </div>
-
-        <div className="flex flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Notifications</div>
-            <Bell className="size-4 text-white/40" />
-          </div>
-          <div className="mt-4 flex items-end justify-between gap-4">
-            <div className="font-display text-5xl leading-none text-white">{data.notifications.length}</div>
-            <div className="text-right text-xs leading-5 text-muted-foreground">Unread<br />alerts</div>
-          </div>
+        <div className="rounded-xl border border-white/6 bg-white/[0.02] px-4 py-3">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-white/35">Notifications</div>
+          <div className="mt-1 font-display text-2xl text-white">{data.notifications.length}</div>
         </div>
-
-        {/* Wide Content List Bento: My Companies / Pending (Spans 2 cols) */}
-        <div className="flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-sm md:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-white/60">
-                <Building2 className="size-4.5" />
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">My Workspaces</div>
-            </div>
-            <Link href="/companies" className="text-xs font-medium text-white/50 transition-colors hover:text-white">Directory &rarr;</Link>
-          </div>
-
-          <div className="flex flex-col space-y-3">
-            {data.memberships.length ? (
-              data.memberships.map((membership) => (
-                <Link
-                  key={membership.id}
-                  href={`/dashboard/company/${membership.slug}`}
-                  className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-white/5 bg-white/[0.01] p-4 transition-colors hover:border-white/10 hover:bg-white/[0.04]"
-                >
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-white/90 transition-colors group-hover:text-blue-100">{membership.name}</div>
-                    <div className="mt-1 text-xs text-muted-foreground truncate">{membership.description}</div>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-white/50">
-                      {membership.currentRole.replaceAll("_", " ")}
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {membership.counts.members} members
-                    </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-8 text-center">
-                <ClipboardList className="mb-2 size-6 text-white/20" />
-                <div className="text-sm font-medium text-white/70">No active memberships</div>
-                <Link href="/dashboard/company/create" className="mt-2 text-xs text-primary/80 hover:text-primary">Create a company hub</Link>
-              </div>
-            )}
-          </div>
+        <div className="rounded-xl border border-white/6 bg-white/[0.02] px-4 py-3">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-white/35">Posts</div>
+          <div className="mt-1 font-display text-2xl text-white">{data.posts.length}</div>
         </div>
+        <div className="rounded-xl border border-white/6 bg-white/[0.02] px-4 py-3">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-white/35">Applications</div>
+          <div className="mt-1 font-display text-2xl text-white">{data.companyApplications.length}</div>
+        </div>
+      </div>
 
-        {/* Wide Content Box: Publishing (Spans 2 cols) */}
-        <div className="flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-8 backdrop-blur-sm md:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-white/5 text-white/60">
-                <Megaphone className="size-4.5" />
-              </div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Recent Publishing</div>
-            </div>
-            <Link href="/dashboard/posts" className="text-xs font-medium text-white/50 transition-colors hover:text-white">All posts &rarr;</Link>
-          </div>
-
-          {data.posts.length ? (
-            <div className="space-y-3">
-              {data.posts.slice(0, 2).map((post) => (
-                <div key={post.id} className="relative overflow-hidden rounded-xl border border-white/5 bg-white/[0.01] p-4 transition-colors hover:border-white/10 hover:bg-white/[0.04]">
-                  <PostCard post={post} />
+      {/* Workspaces */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-white/50">My workspaces</h2>
+          <Link href="/companies" className="text-xs text-white/30 transition-colors hover:text-white/60">
+            Directory
+          </Link>
+        </div>
+        {data.memberships.length ? (
+          <div className="space-y-2">
+            {data.memberships.map((membership) => (
+              <Link
+                key={membership.id}
+                href={`/dashboard/company/${membership.slug}`}
+                className="group flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-5 py-3.5 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
+              >
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-white">{membership.name}</div>
+                  <div className="mt-0.5 truncate text-xs text-white/40">{membership.description}</div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-8 text-center text-sm text-white/40">
-              No authored posts yet. Start with a post from the dashboard.
-            </div>
-          )}
-        </div>
+                <div className="ml-4 flex shrink-0 items-center gap-3">
+                  <span className="text-[10px] uppercase tracking-[0.15em] text-white/30">
+                    {membership.currentRole.replaceAll("_", " ")}
+                  </span>
+                  <span className="text-xs text-white/25">{membership.counts.members} members</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center rounded-xl border border-dashed border-white/8 py-8 text-center">
+            <ClipboardList className="mb-2 size-5 text-white/20" />
+            <div className="text-sm text-white/50">No active memberships</div>
+            <Link href="/dashboard/company/create" className="mt-2 text-xs text-blue-400/80 hover:text-blue-400">
+              Create a company hub
+            </Link>
+          </div>
+        )}
+      </section>
 
+      {/* Recent posts */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-white/50">Recent posts</h2>
+          <Link href="/dashboard/posts" className="text-xs text-white/30 transition-colors hover:text-white/60">
+            All posts
+          </Link>
+        </div>
+        {data.posts.length ? (
+          <div className="space-y-2">
+            {data.posts.slice(0, 3).map((post) => (
+              <div key={post.id} className="rounded-xl border border-white/6 bg-white/[0.02] px-5 py-3.5">
+                <PostCard post={post} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-white/8 py-8 text-center text-sm text-white/35">
+            No posts yet. Create one from the Post Studio.
+          </div>
+        )}
       </section>
     </AppShell>
   );

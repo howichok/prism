@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { CompanyRole } from "@prisma/client";
 import { Building2, UserRoundPlus, UserSearch } from "lucide-react";
+import type { PreviewCard } from "@base-ui/react/preview-card";
 
 import { ProfileIdentitySurface } from "@/components/platform/profile-identity";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import type { CompanyReference, UserPreview } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -18,24 +18,26 @@ type MiniProfileHoverCardProps = {
   inviteHref?: string;
   children: React.ReactNode;
   className?: string;
+  contentSide?: PreviewCard.Positioner.Props["side"];
+  contentAlign?: PreviewCard.Positioner.Props["align"];
+  contentSideOffset?: number;
+  contentAlignOffset?: number;
 };
 
 function QuickActions({
   profileHref,
   companyHref,
   inviteHref,
-  compact = false,
 }: {
   profileHref: string;
   companyHref?: string;
   inviteHref?: string;
-  compact?: boolean;
 }) {
   return (
-    <div className={cn("grid gap-2", compact ? "grid-cols-3" : "sm:grid-cols-3")}>
+    <div className="grid gap-2 sm:grid-cols-3">
       <Button size="sm" render={<Link href={profileHref} />} className="w-full">
         <UserSearch className="size-3.5" />
-        Profile
+        Full profile
       </Button>
       <Button
         variant="outline"
@@ -86,9 +88,15 @@ function ProfileCard({
       user={user}
       companyRole={companyRole}
       primaryCompany={primaryCompany}
-      variant={expanded ? "full" : "compact"}
-      className={cn(expanded ? "w-full" : "animate-scale-in")}
-      actionRow={<QuickActions profileHref={profileHref} companyHref={companyHref} inviteHref={inviteHref} compact={!expanded} />}
+      variant={expanded ? "full" : "preview"}
+      className={cn(expanded ? "w-full" : "w-full animate-scale-in")}
+      actionRow={
+        <QuickActions
+          profileHref={profileHref}
+          companyHref={companyHref}
+          inviteHref={inviteHref}
+        />
+      }
     />
   );
 }
@@ -100,36 +108,24 @@ export function MiniProfileHoverCard({
   inviteHref,
   children,
   className,
+  contentSide = "inline-end",
+  contentAlign = "start",
+  contentSideOffset = 12,
+  contentAlignOffset = 0,
 }: MiniProfileHoverCardProps) {
   return (
     <HoverCard>
-      <HoverCardTrigger>{children}</HoverCardTrigger>
+      <HoverCardTrigger delay={160} closeDelay={110} render={<div className="block min-w-0" />}>
+        {children}
+      </HoverCardTrigger>
       <HoverCardContent
-        align="start"
-        sideOffset={12}
-        className={cn("w-[23rem] border-none bg-transparent p-0 shadow-none", className)}
+        side={contentSide}
+        align={contentAlign}
+        sideOffset={contentSideOffset}
+        alignOffset={contentAlignOffset}
+        className={cn("w-[min(23.5rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] border-none bg-transparent p-0 shadow-none", className)}
       >
-        <Dialog>
-          <div className="space-y-2">
-            <ProfileCard user={user} companyRole={companyRole} primaryCompany={primaryCompany} inviteHref={inviteHref} />
-            <DialogTrigger render={<Button variant="outline" size="sm" className="w-full" />}>
-              Expand identity
-            </DialogTrigger>
-          </div>
-          <DialogContent className="max-w-2xl border-none bg-transparent p-0 shadow-none">
-            <DialogHeader className="sr-only">
-              <DialogTitle>{user.displayName}</DialogTitle>
-              <DialogDescription>PrismMTR member profile card.</DialogDescription>
-            </DialogHeader>
-            <ProfileCard
-              user={user}
-              companyRole={companyRole}
-              primaryCompany={primaryCompany}
-              inviteHref={inviteHref}
-              expanded
-            />
-          </DialogContent>
-        </Dialog>
+        <ProfileCard user={user} companyRole={companyRole} primaryCompany={primaryCompany} inviteHref={inviteHref} />
       </HoverCardContent>
     </HoverCard>
   );

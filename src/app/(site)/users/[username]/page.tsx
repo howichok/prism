@@ -7,6 +7,7 @@ import { IdentityPanel, ProfileIdentitySurface, ProfileStatsRail } from "@/compo
 import { PostCard } from "@/components/platform/post-card";
 import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { getPublicUserByUsername } from "@/lib/data";
+import { getCompanyRoleLabel } from "@/lib/role-system";
 
 export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -36,7 +37,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
 
   return (
     <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="animate-fade-up grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <ProfileIdentitySurface
           user={user}
           companyRole={primaryMembership?.companyRole}
@@ -68,7 +69,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
           <ProfileStatsRail
             stats={[
               { label: "Companies", value: user.memberships.length, note: "Visible memberships across the network." },
-              { label: "Badges", value: user.badges.length, note: "Identity markers assigned to this profile." },
+              { label: "Decorative badges", value: user.badges.length, note: "Optional cosmetic markers assigned to this profile." },
               { label: "Posts", value: posts.length, note: "Public publishing surfaces authored by this member." },
             ]}
           />
@@ -81,7 +82,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
               >
                 <div className="text-sm font-medium text-white">{primaryMembership.company.name}</div>
                 <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-white/42">
-                  {primaryMembership.companyRole.replaceAll("_", " ")}
+                  {getCompanyRoleLabel(primaryMembership.companyRole)}
                 </div>
               </Link>
             </IdentityPanel>
@@ -89,7 +90,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="animate-fade-up grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]" style={{ animationDelay: "100ms" }}>
         <div className="space-y-4">
           <section className="surface-panel space-y-4 p-5">
             <div className="border-b border-white/8 pb-4">
@@ -135,12 +136,12 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
                   <Link
                     key={membership.company.id}
                     href={`/companies/${membership.company.slug}`}
-                    className="flex items-center justify-between rounded-[1rem] border border-white/8 bg-white/[0.03] px-3 py-3 text-sm transition-colors hover:border-white/14 hover:bg-white/[0.05]"
-                  >
-                    <span className="truncate text-foreground">{membership.company.name}</span>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-white/42">{membership.companyRole.replaceAll("_", " ")}</span>
-                  </Link>
-                ))}
+                  className="flex items-center justify-between rounded-[1rem] border border-white/8 bg-white/[0.03] px-3 py-3 text-sm transition-colors hover:border-white/14 hover:bg-white/[0.05]"
+                >
+                  <span className="truncate text-foreground">{membership.company.name}</span>
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-white/42">{getCompanyRoleLabel(membership.companyRole)}</span>
+                </Link>
+              ))}
               </div>
             ) : (
               <p className="mt-3 text-xs text-muted-foreground">No company memberships.</p>

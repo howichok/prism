@@ -1,20 +1,11 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Bell,
-  Building2,
-  Compass,
-  LayoutDashboard,
-  Megaphone,
-  ShieldCheck,
-  Users2,
-} from "lucide-react";
+import { ArrowRight, Building2, FileText, FolderKanban, Users2 } from "lucide-react";
 
 import { startGuestSessionAction } from "@/actions/session";
 import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { Button } from "@/components/ui/button";
 import { getHomeData } from "@/lib/data";
-import { titleCase } from "@/lib/format";
+import { formatCompactNumber } from "@/lib/format";
 import { getOptionalViewer, isGuestViewer } from "@/lib/session";
 
 export default async function HomePage() {
@@ -44,374 +35,148 @@ export default async function HomePage() {
 
   const hero = signedIn
     ? {
-      eyebrow: "Workspace ready",
-      title: "PrismMTR is ready. Open your dashboard and continue work.",
-      description:
-        "Your dashboard is the main surface for company hubs, posts, notifications, and identity settings.",
+      title: "Your workspace is ready",
+      description: "Continue where you left off in your dashboard.",
       primary: { href: "/dashboard", label: "Open dashboard" },
-      secondary: { href: primaryCompanyHref, label: primaryMembership ? "Open company hub" : "Create company hub" },
+      secondary: { href: primaryCompanyHref, label: primaryMembership ? primaryMembership.company.name : "Create company" },
     }
     : guestMode
       ? {
-        eyebrow: "Guest mode",
-        title: "Preview PrismMTR without an account.",
-        description:
-          "Guest mode opens a local dashboard shell so you can inspect the product before connecting Discord.",
+        title: "Previewing PrismMTR",
+        description: "Explore the workspace locally. Sign in with Discord for full access.",
         primary: { href: "/dashboard", label: "Continue guest dashboard" },
         secondary: { href: "/sign-in", label: "Sign in with Discord" },
       }
       : {
-        eyebrow: "PrismMTR",
-        title: "One dashboard for identity, company hubs, and public network work.",
-        description:
-          "Use PrismMTR to manage members, publish updates, run company spaces, and explore the wider MTR network.",
+        title: "Your transit network workspace",
+        description: "Identity, company hubs, and publishing in one dashboard.",
         primary: { href: "/sign-in", label: "Sign in with Discord" },
-        secondary: { href: "/discovery", label: "Explore discovery" },
+        secondary: { href: "/discovery", label: "Explore the network" },
       };
 
-  const previewSidebar = signedIn
-    ? [
-      { label: "Dashboard", state: "Current route", active: true },
-      { label: primaryMembership ? primaryMembership.company.name : "Company hub", state: primaryMembership ? "Primary workspace" : "Create or join" },
-      { label: "Notifications", state: "Queue and approvals" },
-      { label: "Profile", state: "Identity and settings" },
-    ]
-    : guestMode
-      ? [
-        { label: "Guest dashboard", state: "Local mode", active: true },
-        { label: "Discovery", state: "Fully visible" },
-        { label: "Companies", state: "Public hubs" },
-        { label: "Restricted actions", state: "Locked until sign-in" },
-      ]
-      : [
-        { label: "Dashboard", state: "Unlock after sign-in", active: true },
-        { label: "Company hubs", state: "Members and projects" },
-        { label: "Publishing", state: "Posts and updates" },
-        { label: "Discovery", state: "Public network" },
-      ];
-
-  const previewTasks = signedIn
-    ? [
-      {
-        label: "Continue company work",
-        body: primaryMembership
-          ? `Open ${primaryMembership.company.name} and manage members, projects, and posts.`
-          : "Create a company workspace and submit it for review.",
-        href: primaryCompanyHref,
-        icon: Building2,
-      },
-      {
-        label: "Check notifications",
-        body: "Review moderation requests, inbox changes, and workflow updates from one place.",
-        href: "/dashboard/notifications",
-        icon: Bell,
-      },
-    ]
-    : guestMode
-      ? [
-        {
-          label: "Inspect dashboard structure",
-          body: "See how the real workspace is organized before connecting a full account.",
-          href: "/dashboard",
-          icon: LayoutDashboard,
-        },
-        {
-          label: "Move into full access",
-          body: "Sign in with Discord when you want publishing, company control, and notifications.",
-          href: "/sign-in",
-          icon: ShieldCheck,
-        },
-      ]
-      : [
-        {
-          label: "Enter the dashboard",
-          body: "Sign in once and use one workspace for identity, company hubs, and publishing.",
-          href: "/sign-in",
-          icon: ShieldCheck,
-        },
-        {
-          label: "Explore the public network",
-          body: "Browse companies, members, projects, and posts before creating an account.",
-          href: "/discovery",
-          icon: Compass,
-        },
-      ];
-
-  const livePreview = [
-    data.featuredCompanies[0]
-      ? {
-        label: "Company hub",
-        title: data.featuredCompanies[0].name,
-        meta: `${data.featuredCompanies[0].counts.members} members / ${titleCase(data.featuredCompanies[0].recruitingStatus)}`,
-        href: `/companies/${data.featuredCompanies[0].slug}`,
-      }
-      : {
-        label: "Company hub",
-        title: "PrismMTR Open Source",
-        meta: "1,204 members / Recruiting",
-        href: "/discovery",
-      },
-    data.featuredProjects[0]
-      ? {
-        label: "Project",
-        title: data.featuredProjects[0].title,
-        meta: `${data.featuredProjects[0].company.name} / ${titleCase(data.featuredProjects[0].status)}`,
-        href: `/companies/${data.featuredProjects[0].company.slug}`,
-      }
-      : {
-        label: "Project",
-        title: "Next.js Integration Rewrite",
-        meta: "PrismMTR / Active",
-        href: "/discovery",
-      },
-    data.featuredPosts[0]
-      ? {
-        label: "Post",
-        title: data.featuredPosts[0].title,
-        meta: `${data.featuredPosts[0].author.displayName} / ${titleCase(data.featuredPosts[0].type)}`,
-        href: `/posts/${data.featuredPosts[0].slug}`,
-      }
-      : {
-        label: "Post",
-        title: "Q3 Community Update & Roadmap",
-        meta: "Alex / Announcement",
-        href: "/discovery",
-      },
-  ].filter(Boolean) as Array<{ label: string; title: string; meta: string; href: string }>;
-
-  const capabilityItems = [
-    {
-      icon: Users2,
-      title: "Identity",
-      body: "Profiles, roles, and presence stay tied to one account and one dashboard.",
-    },
-    {
-      icon: Building2,
-      title: "Company hubs",
-      body: "Members, projects, invites, and posts stay together inside a shared workspace.",
-    },
-    {
-      icon: Megaphone,
-      title: "Publishing and discovery",
-      body: "Public updates flow out from the workspace into discovery for the wider network.",
-    },
+  const networkStats = [
+    { label: "Members", value: formatCompactNumber(data.stats.members), icon: Users2 },
+    { label: "Companies", value: formatCompactNumber(data.stats.companies), icon: Building2 },
+    { label: "Posts", value: formatCompactNumber(data.stats.posts), icon: FileText },
+    { label: "Projects", value: formatCompactNumber(data.stats.projects), icon: FolderKanban },
   ];
 
-  const workflowItems = [
-    {
-      step: "01",
-      title: signedIn ? "Return to your dashboard" : guestMode ? "Preview the dashboard" : "Connect your identity",
-      body: signedIn
-        ? "Start from the dashboard instead of hunting through separate sections."
-        : guestMode
-          ? "Guest mode shows the real shell without giving account-only permissions."
-          : "Discord unlocks the same identity across profile, company access, and moderation-aware routes.",
-    },
-    {
-      step: "02",
-      title: "Work inside a company hub",
-      body: "Use one workspace for members, projects, posts, applications, and company settings.",
-    },
-    {
-      step: "03",
-      title: "Publish to the network",
-      body: "Posts, projects, and public company activity stay visible through discovery and public profiles.",
-    },
-  ];
+  const featured = [
+    ...data.featuredCompanies.slice(0, 3).map((company) => ({
+      type: "Company" as const,
+      title: company.name,
+      meta: `${formatCompactNumber(company.counts.members)} members`,
+      href: `/companies/${company.slug}`,
+    })),
+    ...data.featuredPosts.slice(0, 2).map((post) => ({
+      type: "Post" as const,
+      title: post.title,
+      meta: post.author.displayName,
+      href: `/posts/${post.slug}`,
+    })),
+  ].slice(0, 4);
 
   return (
-    <div className="mx-auto w-full max-w-[1380px] px-4 pb-18 pt-8 sm:px-6 lg:px-8">
-      <section className="border-b border-white/8 pb-12">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/72">
-            <span className="size-2 rounded-full bg-blue-400" />
-            {hero.eyebrow}
-          </div>
-          <h1 className="mt-6 max-w-4xl font-display text-[2.3rem] leading-[0.92] text-white sm:text-[3.2rem] xl:text-[4rem]">
-            {hero.title}
-          </h1>
-          <p className="mt-4 max-w-2xl text-[15px] leading-7 text-white/72">{hero.description}</p>
-
-          <div className="mt-7 flex flex-wrap justify-center gap-3">
-            <Button render={<Link href={hero.primary.href} />} size="lg">
-              {hero.primary.label}
-              <ArrowRight className="size-4" />
-            </Button>
-            <Button variant="outline" render={<Link href={hero.secondary.href} />} size="lg">
-              {hero.secondary.label}
-            </Button>
-          </div>
-
-          {!signedIn && !guestMode ? (
-            <div className="mt-6 flex flex-col items-center gap-3">
-              <div className="text-sm text-white/50">or preview dashboard locally</div>
-              <form action={startGuestSessionAction}>
-                <button
-                  type="submit"
-                  className="group inline-flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white"
-                >
-                  <span className="border-b border-white/20 pb-0.5 transition-colors group-hover:border-white/60">
-                    Continue as guest
-                  </span>
-                  <ArrowRight className="size-3.5 opacity-60 transition-transform group-hover:translate-x-0.5 group-hover:opacity-100" />
-                </button>
-              </form>
-            </div>
-          ) : null}
+    <div className="mx-auto w-full max-w-[1080px] px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:px-8">
+      {/* Hero */}
+      <section className="flex flex-col items-center text-center">
+        <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/60">
+          <span className="size-1.5 rounded-full bg-blue-400 animate-pulse-soft" />
+          PrismMTR
         </div>
 
-        <div className="mt-10 overflow-hidden rounded-[1.15rem] border border-white/8 bg-[linear-gradient(180deg,rgba(14,14,16,0.96),rgba(9,9,11,0.98))] shadow-[0_20px_48px_rgba(0,0,0,0.28)]">
-          <div className="flex items-center justify-between border-b border-white/8 px-4 py-3 sm:px-6">
-            <div className="inline-flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-[0.85rem] border border-blue-400/16 bg-blue-400/[0.08] text-blue-200">
-                <LayoutDashboard className="size-4.5" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">Dashboard preview</div>
-                <div className="text-xs text-white/56">
-                  {signedIn
-                    ? "This is where company work, publishing, and notifications stay connected."
-                    : guestMode
-                      ? "Guest mode opens this shell locally without a full account."
-                      : "Sign in once, then use the dashboard as the main PrismMTR workspace."}
-                </div>
-              </div>
-            </div>
-            <div className="hidden rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/68 sm:block">
-              {signedIn ? "Active account" : guestMode ? "Local guest session" : "After sign-in"}
-            </div>
-          </div>
+        <h1 className="animate-fade-up mt-6 max-w-3xl font-display text-[2.5rem] leading-[0.93] text-white sm:text-[3.5rem] lg:text-[4.2rem]" style={{ animationDelay: "80ms" }}>
+          {hero.title}
+        </h1>
 
-          <div className="grid lg:grid-cols-[220px_minmax(0,1fr)]">
-            <aside className="border-b border-white/8 px-4 py-5 lg:border-b-0 lg:border-r lg:px-5">
-              <div className="space-y-2">
-                {previewSidebar.map((item) => (
-                  <div
-                    key={item.label}
-                    className={`rounded-[0.9rem] px-3 py-2.5 ${item.active ? "border border-white/10 bg-white/[0.04]" : "border border-transparent"}`}
-                  >
-                    <div className="text-sm font-medium text-white">{item.label}</div>
-                    <div className="mt-1 text-xs leading-5 text-white/56">{item.state}</div>
-                  </div>
-                ))}
-              </div>
-            </aside>
+        <p className="animate-fade-up mt-5 max-w-lg text-base leading-7 text-white/60" style={{ animationDelay: "150ms" }}>
+          {hero.description}
+        </p>
 
-            <div className="grid lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="px-4 py-5 sm:px-6">
-                <div className="border-b border-white/8 pb-4">
-                  <div className="panel-label">What you can do next</div>
-                  <h2 className="mt-3 font-display text-[1.6rem] leading-none text-white">
-                    {signedIn ? "Continue work from one place" : guestMode ? "Explore the product before signing in" : "See how PrismMTR is organized"}
-                  </h2>
-                </div>
-
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  {previewTasks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="group border-t border-white/8 pt-4 transition-colors hover:border-white/14"
-                    >
-                      <div className="inline-flex items-center gap-2 text-sm font-medium text-white">
-                        <item.icon className="size-4 text-blue-300" />
-                        {item.label}
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-white/68">{item.body}</p>
-                      <div className="mt-3 inline-flex items-center gap-2 text-sm text-white/66 transition-colors group-hover:text-white">
-                        Open
-                        <ArrowRight className="size-3.5" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-white/8 px-4 py-5 sm:px-6 lg:border-l lg:border-t-0">
-                <div className="border-b border-white/8 pb-4">
-                  <div className="panel-label">Live on the network</div>
-                  <h2 className="mt-3 font-display text-[1.35rem] leading-none text-white">Public activity stays connected</h2>
-                </div>
-
-                <div className="mt-5 space-y-4">
-                  {livePreview.map((item) => (
-                    <Link key={item.href} href={item.href} className="group block border-b border-white/8 pb-4 transition-colors hover:border-white/14">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-white/46">{item.label}</div>
-                      <div className="mt-2 text-sm font-medium text-white">{item.title}</div>
-                      <div className="mt-2 text-sm leading-6 text-white/62">{item.meta}</div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="animate-fade-up mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: "220ms" }}>
+          <Button render={<Link href={hero.primary.href} />} size="lg">
+            {hero.primary.label}
+            <ArrowRight className="size-4" />
+          </Button>
+          <Button variant="outline" render={<Link href={hero.secondary.href} />} size="lg">
+            {hero.secondary.label}
+          </Button>
         </div>
+
+        {!signedIn && !guestMode ? (
+          <form action={startGuestSessionAction} className="mt-5">
+            <button
+              type="submit"
+              className="text-sm text-white/40 transition-colors hover:text-white/70"
+            >
+              or continue as guest
+            </button>
+          </form>
+        ) : null}
       </section>
 
-      <section className="grid gap-10 border-b border-white/8 py-12 lg:grid-cols-[minmax(0,0.9fr)_1.1fr]">
-        <div>
-          <div className="panel-label">What PrismMTR does</div>
-          <h2 className="mt-3 font-display text-[2rem] leading-none text-white">A workspace first, not just a public directory.</h2>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-white/68">
-            PrismMTR combines member identity, company coordination, and public discovery so the dashboard becomes the place where the network actually moves.
+      {/* Network stats */}
+      <section className="animate-fade-up mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/8 bg-white/[0.04] sm:mt-20 sm:grid-cols-4" style={{ animationDelay: "300ms" }}>
+        {networkStats.map((stat) => (
+          <div key={stat.label} className="flex flex-col items-center gap-1 bg-[hsl(0_0%_4%)] px-4 py-5 sm:py-6">
+            <stat.icon className="mb-1 size-4 text-white/30" />
+            <div className="font-display text-2xl text-white">{stat.value}</div>
+            <div className="text-[11px] uppercase tracking-[0.15em] text-white/40">{stat.label}</div>
+          </div>
+        ))}
+      </section>
+
+      {/* Featured activity */}
+      {featured.length > 0 ? (
+        <section className="animate-fade-up mt-14 sm:mt-16" style={{ animationDelay: "400ms" }}>
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-white/50">Recent on the network</h2>
+            <Link
+              href="/discovery"
+              className="text-sm text-white/30 transition-colors hover:text-white/60"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {featured.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group flex items-center justify-between rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4 motion-lift hover:border-white/12 hover:bg-white/[0.04]"
+              >
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">{item.type}</div>
+                  <div className="mt-1 truncate text-sm font-medium text-white/90">{item.title}</div>
+                  <div className="mt-0.5 text-xs text-white/40">{item.meta}</div>
+                </div>
+                <ArrowRight className="ml-4 size-4 shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Bottom CTA - only for signed-out */}
+      {!signedIn ? (
+        <section className="mt-16 flex flex-col items-center border-t border-white/6 pt-12 text-center sm:mt-20">
+          <h2 className="font-display text-xl text-white sm:text-2xl">
+            {guestMode
+              ? "Ready for full access?"
+              : "Start from one workspace"}
+          </h2>
+          <p className="mt-2 max-w-md text-sm text-white/45">
+            {guestMode
+              ? "Sign in with Discord to unlock publishing, company management, and notifications."
+              : "Dashboard, company hubs, publishing, and identity in one place."}
           </p>
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-3">
-          {capabilityItems.map((item) => (
-            <div key={item.title} className="border-t border-white/8 pt-4">
-              <div className="flex size-10 items-center justify-center rounded-[0.9rem] border border-white/10 bg-white/[0.03] text-white/76">
-                <item.icon className="size-4.5" />
-              </div>
-              <div className="mt-4 text-base font-medium text-white">{item.title}</div>
-              <p className="mt-2 text-sm leading-6 text-white/68">{item.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="py-12">
-        <div className="max-w-2xl">
-          <div className="panel-label">How it works</div>
-          <h2 className="mt-3 font-display text-[2rem] leading-none text-white">Public discovery and workspace activity stay in the same flow.</h2>
-        </div>
-
-        <div className="mt-8 grid gap-8 md:grid-cols-3">
-          {workflowItems.map((item) => (
-            <div key={item.step} className="border-t border-white/8 pt-4">
-              <div className="text-[12px] font-semibold uppercase tracking-[0.2em] text-blue-400">{item.step}</div>
-              <div className="mt-3 text-base font-medium text-white">{item.title}</div>
-              <p className="mt-2 text-sm leading-6 text-white/68">{item.body}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 flex flex-col gap-5 border-t border-white/8 pt-8 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-xl font-display text-white">
-              {signedIn
-                ? "Go back to the dashboard and continue from the real workspace."
-                : guestMode
-                  ? "Keep exploring locally, or sign in when you want full access."
-                  : "Start in the dashboard when you are ready to use PrismMTR."}
-            </div>
-            <p className="mt-2 text-sm leading-6 text-white/66">
-              {signedIn
-                ? "Everything important routes through your account, company access, and notifications."
-                : guestMode
-                  ? "Guest mode is useful for exploration, but account-based work starts with Discord identity."
-                  : "Dashboard is the main destination for companies, publishing, profile controls, and notifications."}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button render={<Link href={hero.primary.href} />}>{hero.primary.label}</Button>
-            <Button variant="outline" render={<Link href={hero.secondary.href} />}>
-              {hero.secondary.label}
+          <div className="mt-6 flex gap-3">
+            <Button render={<Link href={guestMode ? "/sign-in" : hero.primary.href} />}>
+              {guestMode ? "Sign in with Discord" : hero.primary.label}
             </Button>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

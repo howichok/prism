@@ -33,7 +33,7 @@ export function ProfileMenu({ displayName, username, avatarUrl, accentColor, sit
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.03] p-1 pr-3 transition-all duration-200 hover:border-primary/20 hover:bg-white/[0.06]" />
+          <button className="flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.03] p-1 pr-3 motion-lift hover:border-primary/20 hover:bg-white/[0.06]" />
         }
       >
         <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} size="sm" />
