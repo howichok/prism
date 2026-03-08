@@ -1,5 +1,7 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type SiteRole } from "@prisma/client";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { db } from "@/lib/db";
 import { getAuthSession } from "@/lib/auth";
@@ -25,8 +27,71 @@ const sessionUserArgs = Prisma.validator<Prisma.UserDefaultArgs>()({
 });
 
 export type SessionUser = Prisma.UserGetPayload<typeof sessionUserArgs>;
+export const GUEST_SESSION_COOKIE = "prismmtr-guest";
 
-export async function getSessionUser() {
+export type GuestSessionUser = {
+  id: "guest-local";
+  name: "Guest Explorer";
+  email: null;
+  emailVerified: null;
+  image: null;
+  discordId: null;
+  discordUsername: null;
+  username: "guest";
+  displayName: "Guest Explorer";
+  bio: string;
+  minecraftNickname: null;
+  passwordHash: null;
+  siteRole: SiteRole;
+  avatarUrl: null;
+  bannerUrl: null;
+  accentColor: "#55d4ff";
+  onboardingCompletedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  linkedAccounts: [];
+  userBadges: [];
+  companyMemberships: [];
+  isGuest: true;
+};
+
+export type AppViewer = SessionUser | GuestSessionUser;
+
+function buildGuestSessionUser(): GuestSessionUser {
+  const now = new Date();
+
+  return {
+    id: "guest-local",
+    name: "Guest Explorer",
+    email: null,
+    emailVerified: null,
+    image: null,
+    discordId: null,
+    discordUsername: null,
+    username: "guest",
+    displayName: "Guest Explorer",
+    bio: "Local guest mode for exploring the PrismMTR dashboard and work surfaces without a full account.",
+    minecraftNickname: null,
+    passwordHash: null,
+    siteRole: "USER" as SiteRole,
+    avatarUrl: null,
+    bannerUrl: null,
+    accentColor: "#55d4ff",
+    onboardingCompletedAt: now,
+    createdAt: now,
+    updatedAt: now,
+    linkedAccounts: [],
+    userBadges: [],
+    companyMemberships: [],
+    isGuest: true,
+  };
+}
+
+export function isGuestViewer(viewer: AppViewer | null | undefined): viewer is GuestSessionUser {
+  return Boolean(viewer && "isGuest" in viewer && viewer.isGuest);
+}
+
+async function resolveSessionUser() {
   let session;
 
   try {
@@ -56,6 +121,22 @@ export async function getSessionUser() {
   }
 }
 
+const getCachedSessionUser = cache(resolveSessionUser);
+
+export async function getSessionUser() {
+  return getCachedSessionUser();
+}
+
+export async function getGuestSessionUser() {
+  const cookieStore = await cookies();
+
+  if (cookieStore.get(GUEST_SESSION_COOKIE)?.value !== "1") {
+    return null;
+  }
+
+  return buildGuestSessionUser();
+}
+
 export async function getOptionalSessionUser() {
   try {
     return await getSessionUser();
@@ -65,10 +146,40 @@ export async function getOptionalSessionUser() {
   }
 }
 
+export async function getOptionalViewer() {
+  const user = await getOptionalSessionUser();
+
+  if (user) {
+    return user;
+  }
+
+  return getGuestSessionUser();
+}
+
+export async function requireAppViewer(options?: { onboarded?: boolean }) {
+  const viewer = await getOptionalViewer();
+
+  if (!viewer) {
+    redirect("/sign-in");
+  }
+
+  if (!isGuestViewer(viewer) && options?.onboarded && !viewer.onboardingCompletedAt) {
+    redirect("/onboarding");
+  }
+
+  return viewer;
+}
+
 export async function requireUser(options?: { onboarded?: boolean }) {
   const user = await getSessionUser();
 
   if (!user) {
+    const guest = await getGuestSessionUser();
+
+    if (guest) {
+      redirect("/dashboard");
+    }
+
     redirect("/sign-in");
   }
 

@@ -1,14 +1,16 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { isDiscordAuthConfigured } from "@/lib/env";
-import { requireUser } from "@/lib/session";
+import { isGuestViewer, requireAppViewer } from "@/lib/session";
 
 export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const viewer = await requireUser();
+  const viewer = await requireAppViewer();
   const headerViewer = {
     displayName: viewer.displayName,
     username: viewer.username,
     avatarUrl: viewer.avatarUrl,
     accentColor: viewer.accentColor,
+    siteRole: viewer.siteRole,
+    isGuest: isGuestViewer(viewer),
   };
 
   return (

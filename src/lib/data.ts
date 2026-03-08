@@ -469,6 +469,15 @@ export async function getHomeData() {
           visibility: Visibility.PUBLIC,
         },
       }),
+      db.project.count({
+        where: {
+          visibility: Visibility.PUBLIC,
+          company: {
+            privacy: Privacy.PUBLIC,
+            status: ModerationStatus.APPROVED,
+          },
+        },
+      }),
     ]),
   ]);
 
@@ -480,6 +489,7 @@ export async function getHomeData() {
       members: stats[0],
       companies: stats[1],
       posts: stats[2],
+      projects: stats[3],
     },
   };
 }

@@ -9,8 +9,9 @@ import { titleCase } from "@/lib/format";
 
 export function ProjectCard({ project }: { project: ProjectSummary }) {
   return (
-    <div className="group overflow-hidden rounded-[1rem] border border-white/8 bg-card/90 p-4 transition-all duration-200 hover:border-white/14 hover:bg-card/96">
-      <div className="flex items-start justify-between gap-4">
+    <div className="group relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             <DraftingCompass className="size-3.5" />
@@ -44,19 +45,19 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
         </Link>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-3 border-t border-border/80 pt-4">
+      <div className="relative mt-5 flex items-center justify-between gap-3 border-t border-white/5 pt-4">
         <MiniProfileHoverCard user={project.author} primaryCompany={project.company}>
-          <div className="inline-flex cursor-pointer items-center gap-2 rounded-[0.8rem] border border-transparent px-2 py-1.5 transition-colors hover:bg-muted/50">
+          <div className="inline-flex cursor-pointer items-center gap-2 rounded-[1rem] border border-transparent px-2 py-1.5 transition-colors hover:bg-white/[0.04]">
             <UserAvatar
               name={project.author.displayName}
               image={project.author.avatarUrl}
               accentColor={project.author.accentColor}
               size="sm"
             />
-            <span className="text-xs font-medium text-foreground">{project.author.displayName}</span>
+            <span className="text-xs font-medium text-white/80">{project.author.displayName}</span>
           </div>
         </MiniProfileHoverCard>
-        <div className="rounded-[0.8rem] border border-white/8 bg-white/[0.03] px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="rounded-[1rem] border border-white/5 bg-white/[0.02] px-3 py-2 text-[10px] uppercase tracking-[0.22em] text-white/50">
           Active infrastructure
         </div>
       </div>

@@ -13,7 +13,7 @@ export function SearchBar({
 }) {
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/38" />
+      <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-200/60" />
       <Input
         value={value}
         onChange={(event) => onChange(event.target.value)}

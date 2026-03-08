@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CompanyRole } from "@prisma/client";
-import { ClipboardList, Megaphone, UserRoundPlus } from "lucide-react";
+import { ClipboardCheck, ClipboardList, FolderKanban, Megaphone, Settings, UserRoundPlus, UsersRound } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/platform/empty-state";
@@ -14,7 +14,7 @@ import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
 import { getCompanyHubData } from "@/lib/data";
 import { getCompanySidebarItems } from "@/lib/navigation";
-import { canManageInvites } from "@/lib/permissions";
+import { canEditCompanySettings, canManageInvites } from "@/lib/permissions";
 import { requireUser } from "@/lib/session";
 
 export default async function CompanyHubOverviewPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -47,6 +47,54 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
   }
 
   const coOwners = data.members.filter((member) => member.companyRole === CompanyRole.CO_OWNER).slice(0, 3);
+  const canManageCompanyInvites = Boolean(data.currentMembership && canManageInvites(data.currentMembership.companyRole));
+  const canEditSettings = Boolean(data.currentMembership && canEditCompanySettings(data.currentMembership.companyRole));
+  const managementPaths = [
+    {
+      href: `/dashboard/company/${slug}/members`,
+      label: "Members",
+      body: "Search the roster, inspect roles, and manage access.",
+      icon: UsersRound,
+    },
+    {
+      href: `/dashboard/company/${slug}/projects`,
+      label: "Projects",
+      body: "Track active work, build requests, and delivery status.",
+      icon: FolderKanban,
+    },
+    {
+      href: `/dashboard/company/${slug}/posts`,
+      label: "Posts",
+      body: "Keep announcements, recruitment, and updates visible.",
+      icon: Megaphone,
+    },
+    {
+      href: `/dashboard/company/${slug}/applications`,
+      label: "Applications",
+      body: "Review company intake and member requests in one flow.",
+      icon: ClipboardCheck,
+    },
+    ...(canManageCompanyInvites
+      ? [
+          {
+            href: `/dashboard/company/${slug}/invites`,
+            label: "Invites",
+            body: "Create or revoke invite codes without leaving the hub.",
+            icon: UserRoundPlus,
+          },
+        ]
+      : []),
+    ...(canEditSettings
+      ? [
+          {
+            href: `/dashboard/company/${slug}/settings`,
+            label: "Settings",
+            body: "Edit public company details and moderation-sensitive fields.",
+            icon: Settings,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <AppShell
@@ -76,7 +124,7 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
 
       <section className="surface-panel-strong overflow-hidden p-0">
         <div
-          className="h-34 border-b border-white/8 sm:h-40"
+          className="h-32 border-b border-white/8 sm:h-36"
           style={{
             background: data.company.bannerUrl
               ? `url(${data.company.bannerUrl})`
@@ -104,7 +152,7 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
             </div>
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
             <div className="space-y-5">
               <p className="max-w-3xl text-sm leading-8 text-muted-foreground">{data.company.description}</p>
 
@@ -118,52 +166,72 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
                   </span>
                 ))}
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: "Members", value: data.company.counts.members, body: "Visible roster and role structure." },
-                  { label: "Projects", value: data.company.counts.projects, body: "Active work tied to the company." },
-                  { label: "Posts", value: data.company.counts.posts, body: "Publishing surfaces inside and outside the hub." },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-4">
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">{stat.label}</div>
-                    <div className="mt-3 font-display text-[2rem] leading-none text-white">{stat.value}</div>
-                    <p className="mt-3 text-xs leading-6 text-muted-foreground">{stat.body}</p>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <div className="space-y-2">
-              {[
-                {
-                  href: `/dashboard/company/${slug}/members`,
-                  label: "Open roster workspace",
-                  body: "Search members, inspect roles, and manage access.",
-                },
-                {
-                  href: `/dashboard/company/${slug}/projects`,
-                  label: "Review project surfaces",
-                  body: "Track active work with status and company ownership.",
-                },
-                {
-                  href: `/dashboard/company/${slug}/posts`,
-                  label: "Manage publishing",
-                  body: "Keep announcements, recruitment, and updates visible.",
-                },
-                {
-                  href: `/dashboard/company/${slug}/applications`,
-                  label: "Review applications",
-                  body: "Move join requests and other intake through one flow.",
-                },
-              ].map((item) => (
+            <div className="space-y-3">
+              <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-4">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Current role</div>
+                <div className="mt-3">
+                  {data.currentMembership ? (
+                    <RoleBadge kind="company" role={data.currentMembership.companyRole} />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Public viewer</span>
+                  )}
+                </div>
+              </div>
+              <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-4">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">Recruiting status</div>
+                <div className="mt-3">
+                  <StatusBadge status={data.company.recruitingStatus} />
+                </div>
+                <p className="mt-3 text-xs leading-6 text-muted-foreground">
+                  Public discovery reflects the current recruiting posture and moderation state of this company.
+                </p>
+              </div>
+              <Button variant="outline" className="w-full" render={<Link href={`/companies/${slug}`} />}>
+                View public company page
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: "Members", value: data.company.counts.members, body: "Visible roster and role structure." },
+              { label: "Projects", value: data.company.counts.projects, body: "Active work tied to the company." },
+              { label: "Posts", value: data.company.counts.posts, body: "Publishing surfaces inside and outside the hub." },
+              { label: "Applications", value: data.applications.length, body: "Open intake waiting for review." },
+            ].map((stat) => (
+              <div key={stat.label} className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-4">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">{stat.label}</div>
+                <div className="mt-3 font-display text-[2rem] leading-none text-white">{stat.value}</div>
+                <p className="mt-3 text-xs leading-6 text-muted-foreground">{stat.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 border-t border-white/8 pt-6">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <div className="panel-label">Primary paths</div>
+                <h2 className="mt-3 font-display text-[1.55rem] leading-none text-white">Navigate the company workspace</h2>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {managementPaths.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block rounded-[1rem] border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-white/14 hover:bg-white/[0.05]"
+                  className="group rounded-[1rem] border border-white/8 bg-white/[0.03] p-4 transition-colors hover:border-white/14 hover:bg-white/[0.05]"
                 >
-                  <div className="text-sm font-medium text-white">{item.label}</div>
-                  <p className="mt-2 text-xs leading-6 text-muted-foreground">{item.body}</p>
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-[0.9rem] border border-blue-400/16 bg-blue-400/[0.08] text-blue-200">
+                      <item.icon className="size-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-white">{item.label}</div>
+                      <p className="mt-2 text-xs leading-6 text-muted-foreground">{item.body}</p>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -223,19 +291,23 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
           </section>
 
           <section className="surface-panel space-y-4 p-5">
-            <div className="panel-label">Operational note</div>
+            <div className="panel-label">Operations note</div>
             <p className="text-sm leading-7 text-muted-foreground">
-              This hub keeps company identity, roster, work, invites, and publishing inside one shell instead of scattering them across generic admin pages.
+              The hub groups identity, people, work, invites, and publishing into one operating surface so members do not have to hunt through disconnected admin panels.
             </p>
-            <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-3.5 py-3">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">Current role</div>
-              <div className="mt-2">
-                {data.currentMembership ? (
-                  <RoleBadge kind="company" role={data.currentMembership.companyRole} />
-                ) : (
-                  <span className="text-sm text-muted-foreground">Public viewer</span>
-                )}
-              </div>
+            <div className="space-y-2">
+              {canManageCompanyInvites ? (
+                <Button variant="outline" className="w-full justify-start" render={<Link href={`/dashboard/company/${slug}/invites`} />}>
+                  <UserRoundPlus className="size-4" />
+                  Manage invites
+                </Button>
+              ) : null}
+              {canEditSettings ? (
+                <Button variant="outline" className="w-full justify-start" render={<Link href={`/dashboard/company/${slug}/settings`} />}>
+                  <Settings className="size-4" />
+                  Open settings
+                </Button>
+              ) : null}
             </div>
           </section>
         </div>

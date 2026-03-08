@@ -9,8 +9,9 @@ import { formatDate, titleCase } from "@/lib/format";
 
 export function PostCard({ post }: { post: PostSummary }) {
   return (
-    <article className="group relative overflow-hidden rounded-[1rem] border border-white/8 bg-card/90 p-4 transition-all duration-200 hover:border-white/14 hover:bg-card/96">
-      <div className="relative space-y-4">
+    <article className="group relative overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             <Newspaper className="size-3.5" />
@@ -42,23 +43,23 @@ export function PostCard({ post }: { post: PostSummary }) {
             </div>
           </div>
 
-          <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] p-3.5">
+          <div className="rounded-[1.2rem] border border-white/5 bg-white/[0.02] p-4 transition-colors group-hover:border-white/10 group-hover:bg-white/[0.04]">
             <div className="panel-label">Surface</div>
-            <div className="mt-3 space-y-3 text-sm">
+            <div className="mt-4 space-y-3 text-sm">
               {post.company ? (
                 <Link
                   href={`/companies/${post.company.slug}`}
-                  className="flex items-center justify-between rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-foreground/80 transition-colors hover:border-white/14 hover:text-foreground"
+                  className="flex items-center justify-between rounded-[1rem] border border-white/5 bg-white/[0.02] px-3 py-2.5 text-white/70 transition-colors hover:border-white/10 hover:bg-white/[0.05] hover:text-white"
                 >
-                  <span className="truncate text-xs font-medium">{post.company.name}</span>
+                  <span className="truncate text-xs font-semibold">{post.company.name}</span>
                   <ArrowUpRight className="size-3.5 shrink-0" />
                 </Link>
               ) : (
-                <div className="rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-xs font-medium text-muted-foreground">
+                <div className="rounded-[1rem] border border-white/5 bg-white/[0.01] px-3 py-2.5 text-xs font-medium text-white/40">
                   Independent post
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 rounded-[0.8rem] border border-white/8 bg-background/75 px-3 py-2.5 text-xs text-muted-foreground">
+              <div className="inline-flex items-center gap-2 rounded-[1rem] border border-white/5 bg-white/[0.01] px-3 py-2.5 text-xs text-white/50">
                 <CalendarClock className="size-3.5" />
                 {formatDate(post.createdAt)}
               </div>

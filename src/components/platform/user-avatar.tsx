@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -10,7 +12,7 @@ type UserAvatarProps = {
   className?: string;
 };
 
-export function UserAvatar({ name, image, accentColor, size = "default", className }: UserAvatarProps) {
+function UserAvatarComponent({ name, image, accentColor, size = "default", className }: UserAvatarProps) {
   return (
     <Avatar
       size={size}
@@ -27,3 +29,5 @@ export function UserAvatar({ name, image, accentColor, size = "default", classNa
     </Avatar>
   );
 }
+
+export const UserAvatar = memo(UserAvatarComponent);

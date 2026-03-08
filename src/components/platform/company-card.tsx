@@ -20,18 +20,19 @@ export function CompanyCard({
   className?: string;
 }) {
   return (
-    <Link
-      href={href ?? `/companies/${company.slug}`}
+    <article
       className={cn(
-        "group block rounded-[1rem] border border-white/8 bg-card/90 p-4 transition-colors duration-200 hover:border-white/14 hover:bg-card/96",
+        "group relative block overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/[0.01] p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03] shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
         className,
       )}
     >
-      <div className="space-y-4">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div
-              className="flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 text-sm font-semibold text-white"
+            <Link
+              href={href ?? `/companies/${company.slug}`}
+              className="flex size-12 shrink-0 items-center justify-center rounded-[1rem] border border-white/10 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{
                 background: company.bannerUrl
                   ? `linear-gradient(160deg, rgba(10,10,10,0.16), rgba(10,10,10,0.7)), url(${company.bannerUrl})`
@@ -41,10 +42,12 @@ export function CompanyCard({
               }}
             >
               {company.name.slice(0, 2).toUpperCase()}
-            </div>
+            </Link>
             <div className="min-w-0">
               <div className="panel-label">Company</div>
-              <h3 className="mt-2 truncate font-display text-[1.35rem] leading-none text-white">{company.name}</h3>
+              <Link href={href ?? `/companies/${company.slug}`} className="mt-2 block truncate font-display text-[1.35rem] leading-none text-white transition-colors hover:text-white/80">
+                {company.name}
+              </Link>
               <div className="mt-2 truncate text-[10px] uppercase tracking-[0.2em] text-white/44">
                 Led by {company.owner.displayName}
               </div>
@@ -77,16 +80,16 @@ export function CompanyCard({
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 border-t border-white/8 pt-4">
+        <div className="grid grid-cols-3 gap-3 border-t border-white/8 pt-5">
           {[
             { label: "Members", value: formatCompactNumber(company.counts.members), icon: UsersRound },
             { label: "Projects", value: company.counts.projects, icon: BriefcaseBusiness },
             { label: "Posts", value: company.counts.posts, icon: Sparkles },
           ].map((item) => (
-            <div key={item.label} className="rounded-[0.9rem] border border-white/8 bg-white/[0.03] px-3 py-3">
-              <item.icon className="size-3.5 text-primary/78" />
-              <div className="mt-2 text-base font-semibold text-white">{item.value}</div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{item.label}</div>
+            <div key={item.label} className="relative flex flex-col items-center justify-center overflow-hidden rounded-[1rem] border border-white/5 bg-white/[0.02] p-3 text-center transition-colors group-hover:border-white/10 group-hover:bg-white/[0.04]">
+              <item.icon className="size-4 text-white/50 transition-colors group-hover:text-blue-400" />
+              <div className="mt-2 font-display text-lg leading-none text-white">{item.value}</div>
+              <div className="mt-1 text-[9px] uppercase tracking-[0.2em] text-white/40">{item.label}</div>
             </div>
           ))}
         </div>
@@ -123,6 +126,6 @@ export function CompanyCard({
           </MiniProfileHoverCard>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

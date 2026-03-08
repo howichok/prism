@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Settings, User2 } from "lucide-react";
+import { SiteRole } from "@prisma/client";
+import { LayoutDashboard, LogOut, Settings, Shield, User2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 import { UserAvatar } from "@/components/platform/user-avatar";
@@ -14,16 +15,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { canAccessModeration } from "@/lib/permissions";
 
 type ProfileMenuProps = {
   displayName: string;
   username: string | null;
   avatarUrl?: string | null;
   accentColor?: string | null;
+  siteRole: SiteRole;
 };
 
-export function ProfileMenu({ displayName, username, avatarUrl, accentColor }: ProfileMenuProps) {
+export function ProfileMenu({ displayName, username, avatarUrl, accentColor, siteRole }: ProfileMenuProps) {
   const router = useRouter();
+  const showModeration = canAccessModeration(siteRole);
 
   return (
     <DropdownMenu>
@@ -64,6 +68,12 @@ export function ProfileMenu({ displayName, username, avatarUrl, accentColor }: P
             <Settings className="size-4" />
             Settings
           </DropdownMenuItem>
+          {showModeration ? (
+            <DropdownMenuItem onClick={() => router.push("/moderation")}>
+              <Shield className="size-4" />
+              Staff Inbox
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>

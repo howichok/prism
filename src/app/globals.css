@@ -62,7 +62,7 @@
   --secondary-foreground: hsl(0 0% 90%);
 
   --muted: hsl(0 0% 10%);
-  --muted-foreground: hsl(0 0% 64%);
+  --muted-foreground: hsl(240 5% 71%);
 
   --accent: hsl(221 83% 53%);
   --accent-foreground: hsl(0 0% 100%);
@@ -100,7 +100,7 @@
   }
 
   html {
-    @apply scroll-smooth;
+    scrollbar-gutter: stable both-edges;
   }
 
   body {
@@ -125,7 +125,7 @@
     background-image:
       linear-gradient(to right, hsl(0 0% 100% / 0.016) 1px, transparent 1px),
       linear-gradient(to bottom, hsl(0 0% 100% / 0.011) 1px, transparent 1px);
-    background-size: 104px 104px;
+    background-size: 128px 128px;
     mask-image: linear-gradient(180deg, hsl(0 0% 0% / 0.5), transparent 82%);
     pointer-events: none;
     z-index: -1;
@@ -182,19 +182,17 @@
   .surface-panel {
     @apply relative overflow-hidden rounded-[1.05rem] border bg-card/90;
     border-color: hsl(0 0% 100% / 0.06);
-    backdrop-filter: blur(10px);
     box-shadow:
       0 0 0 1px hsl(0 0% 100% / 0.01),
-      0 14px 34px rgb(0 0 0 / 0.26);
+      0 12px 28px rgb(0 0 0 / 0.18);
   }
 
   .surface-panel-strong {
     @apply relative overflow-hidden rounded-[1.05rem] border bg-card/94;
     border-color: hsl(0 0% 100% / 0.08);
-    backdrop-filter: blur(12px);
     box-shadow:
       inset 0 1px 0 hsl(0 0% 100% / 0.03),
-      0 18px 44px rgb(0 0 0 / 0.3);
+      0 14px 36px rgb(0 0 0 / 0.22);
   }
 
   .surface-panel-soft {
@@ -203,7 +201,7 @@
   }
 
   .panel-label {
-    @apply text-[10px] font-medium uppercase tracking-[0.24em] text-muted-foreground;
+    @apply text-[10px] font-medium uppercase tracking-[0.24em] text-white/60;
   }
 
   .panel-heading {
@@ -266,5 +264,11 @@
 
   .animate-scale-in {
     animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
   }
 }

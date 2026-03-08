@@ -7,12 +7,12 @@ import { Search, ShieldCheck, UserSearch } from "lucide-react";
 
 import { MemberRoleEditor } from "@/components/forms/member-role-editor";
 import { EmptyState } from "@/components/platform/empty-state";
+import { IdentityPanel, ProfileIdentitySurface } from "@/components/platform/profile-identity";
 import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
 import type { CompanySummary, UserPreview } from "@/lib/data";
-import { formatDate } from "@/lib/format";
 import { canManageRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
@@ -203,91 +203,36 @@ export function CompanyMembersWorkspace({
 
       <aside className="surface-panel-strong overflow-hidden xl:sticky xl:top-28 xl:self-start">
         {selectedMember ? (
-          <div className="overflow-hidden">
-            <div
-              className="h-32 border-b border-white/8"
-              style={{
-                background: selectedMember.bannerUrl
-                  ? `linear-gradient(to bottom, transparent 40%, hsl(0 0% 8%)), url(${selectedMember.bannerUrl})`
-                  : `linear-gradient(135deg, ${selectedMember.accentColor ?? "hsl(221 83% 53%)"} 0%, hsl(0 0% 8%) 100%)`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
+          <div className="space-y-4 p-4">
+            <ProfileIdentitySurface
+              user={selectedMember}
+              companyRole={selectedMember.companyRole}
+              primaryCompany={company}
+              variant="preview"
+              headerLabel="Selected member"
+              actionRow={
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button variant="outline" size="sm" render={<Link href={`/users/${selectedMember.username ?? ""}`} />}>
+                    View profile
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => setSelectedMemberId(selectedMember.id)}>
+                    Focused
+                  </Button>
+                </div>
+              }
             />
-            <div className="space-y-4 p-4">
-              <div className="-mt-12 flex items-end gap-3">
-                <UserAvatar
-                  name={selectedMember.displayName}
-                  image={selectedMember.avatarUrl}
-                  accentColor={selectedMember.accentColor}
-                  size="lg"
-                  className="size-16 border-[3px] border-card"
-                />
-                <div className="pb-1">
-                  <div className="panel-label">Selected member</div>
-                  <div className="mt-2 text-lg font-semibold text-foreground">{selectedMember.displayName}</div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-white/42">@{selectedMember.username ?? "member"}</div>
+
+            {canManageRole(currentRole, selectedMember.companyRole) ? (
+              <IdentityPanel title="Role management">
+                <div className="flex items-center gap-2 text-primary">
+                  <ShieldCheck className="size-3.5" />
+                  <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Manage company role</span>
                 </div>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                <RoleBadge kind="company" role={selectedMember.companyRole} />
-                {selectedMember.siteRole !== "USER" ? <RoleBadge kind="site" role={selectedMember.siteRole} /> : null}
-              </div>
-
-              <p className="text-sm text-muted-foreground">{selectedMember.bio ?? "No bio added yet."}</p>
-
-              <div className="space-y-2">
-                <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
-                  <div className="panel-label">Details</div>
-                  <div className="mt-2 space-y-1.5 text-xs text-muted-foreground">
-                    <div>Joined company: {formatDate(selectedMember.joinedAt)}</div>
-                    <div>Joined PrismMTR: {formatDate(selectedMember.createdAt)}</div>
-                    <div>Minecraft: {selectedMember.minecraftNickname ?? "Not set"}</div>
-                  </div>
+                <div className="mt-3">
+                  <MemberRoleEditor companyId={company.id} memberId={selectedMember.id} currentRole={selectedMember.companyRole} />
                 </div>
-
-                <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
-                  <div className="panel-label">Badges</div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {selectedMember.badges.length ? (
-                      selectedMember.badges.map((badge) => (
-                        <span
-                          key={badge.id}
-                          className="rounded-md border px-2 py-0.5 text-xs font-medium text-foreground"
-                          style={{ borderColor: `${badge.color}40`, backgroundColor: `${badge.color}15` }}
-                        >
-                          {badge.name}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-muted-foreground/60">No badges assigned yet.</span>
-                    )}
-                  </div>
-                </div>
-
-                {canManageRole(currentRole, selectedMember.companyRole) ? (
-                  <div className="rounded-[1rem] border border-white/8 bg-white/[0.03] p-3">
-                    <div className="flex items-center gap-2 text-primary">
-                      <ShieldCheck className="size-3.5" />
-                      <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Role management</span>
-                    </div>
-                    <div className="mt-3">
-                      <MemberRoleEditor companyId={company.id} memberId={selectedMember.id} currentRole={selectedMember.companyRole} />
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Button variant="outline" size="sm" render={<Link href={`/users/${selectedMember.username ?? ""}`} />}>
-                  View profile
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => setSelectedMemberId(selectedMember.id)}>
-                  Focused
-                </Button>
-              </div>
-            </div>
+              </IdentityPanel>
+            ) : null}
           </div>
         ) : (
           <div className="p-6 text-sm text-muted-foreground">Select a member from the roster.</div>

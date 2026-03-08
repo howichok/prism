@@ -9,6 +9,13 @@ export const dashboardSidebarItems: SidebarItem[] = [
   { href: "/dashboard/settings", label: "Settings", icon: "settings" },
 ];
 
+export const guestDashboardSidebarItems: SidebarItem[] = [
+  { href: "/dashboard", label: "Overview", icon: "layoutDashboard" },
+  { href: "/discovery", label: "Discovery", icon: "compass" },
+  { href: "/companies", label: "Companies", icon: "building2" },
+  { href: "/sign-in", label: "Sign In", icon: "userCircle2" },
+];
+
 export const moderationSidebarItems: SidebarItem[] = [
   { href: "/moderation", label: "Overview", icon: "shield" },
   { href: "/moderation/posts", label: "Posts", icon: "megaphone" },

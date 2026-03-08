@@ -1,16 +1,18 @@
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { isDiscordAuthConfigured } from "@/lib/env";
-import { getOptionalSessionUser } from "@/lib/session";
+import { getOptionalViewer, isGuestViewer } from "@/lib/session";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const viewer = await getOptionalSessionUser();
+  const viewer = await getOptionalViewer();
   const headerViewer = viewer
     ? {
         displayName: viewer.displayName,
         username: viewer.username,
         avatarUrl: viewer.avatarUrl,
         accentColor: viewer.accentColor,
+        siteRole: viewer.siteRole,
+        isGuest: isGuestViewer(viewer),
       }
     : null;
 
