@@ -32,22 +32,26 @@ const targetMeta: Record<
     label: string;
     icon: typeof Building2;
     chipClass: string;
+    edgeClass: string;
   }
 > = {
   company: {
     label: "Company",
     icon: Building2,
     chipClass: "border-amber-400/16 bg-amber-400/8 text-amber-200",
+    edgeClass: "bg-gradient-to-b from-amber-300/50 to-transparent",
   },
   post: {
     label: "Post",
     icon: Megaphone,
     chipClass: "border-blue-400/16 bg-blue-400/8 text-blue-200",
+    edgeClass: "bg-gradient-to-b from-blue-400/50 to-transparent",
   },
   report: {
     label: "Report",
     icon: ClipboardList,
     chipClass: "border-rose-300/16 bg-rose-300/8 text-rose-100",
+    edgeClass: "bg-gradient-to-b from-rose-300/50 to-transparent",
   },
 };
 
@@ -135,18 +139,18 @@ export function ModerationQueueTable({
   }
 
   return (
-    <div className="space-y-5">
-      {showOverview ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <ModerationSummaryCell label="Needs attention" value={summary.total} emphasis />
-          <ModerationSummaryCell label="Companies" value={summary.company} />
-          <ModerationSummaryCell label="Posts" value={summary.post} />
-          <ModerationSummaryCell label="Reports" value={summary.report} />
-        </div>
-      ) : null}
+    <div className="surface-panel-strong overflow-hidden">
+      <div className="border-b border-white/8 px-5 py-4">
+        <div className="flex flex-col gap-4">
+          {showOverview ? (
+            <div className="grid gap-px overflow-hidden rounded-[1rem] border border-white/8 bg-white/[0.02] sm:grid-cols-2 xl:grid-cols-4">
+              <ModerationSummaryCell label="Needs attention" value={summary.total} emphasis />
+              <ModerationSummaryCell label="Companies" value={summary.company} />
+              <ModerationSummaryCell label="Posts" value={summary.post} />
+              <ModerationSummaryCell label="Reports" value={summary.report} />
+            </div>
+          ) : null}
 
-      <div className="surface-panel-strong overflow-hidden">
-        <div className="border-b border-white/8 px-5 py-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <div className="panel-label">Review queue</div>
@@ -183,7 +187,7 @@ export function ModerationQueueTable({
           {feedback ? (
             <div
               className={cn(
-                "mt-4 flex items-center gap-2 rounded-[0.9rem] border px-3 py-2.5 text-sm",
+                "flex items-center gap-2 rounded-[0.9rem] border px-3 py-2.5 text-sm",
                 feedback.tone === "success"
                   ? "border-emerald-400/16 bg-emerald-400/10 text-emerald-100"
                   : "border-rose-400/16 bg-rose-400/10 text-rose-100",
@@ -194,6 +198,7 @@ export function ModerationQueueTable({
             </div>
           ) : null}
         </div>
+      </div>
 
         <div className="divide-y divide-white/8">
           {filteredRows.length ? (
@@ -203,7 +208,8 @@ export function ModerationQueueTable({
               const rowPending = isPending && pendingAction?.rowId === row.id;
 
               return (
-                <section key={row.id} className="px-5 py-4">
+                <section key={row.id} className="relative overflow-hidden px-5 py-4">
+                  <span className={cn("absolute inset-y-4 left-0 w-px rounded-full opacity-85", meta.edgeClass)} />
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(15rem,0.95fr)_auto] xl:items-start">
                     <div className="min-w-0 space-y-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -249,7 +255,7 @@ export function ModerationQueueTable({
                       ) : null}
                       <Button
                         size="sm"
-                        className="gap-1.5 bg-emerald-500/16 text-emerald-100 hover:bg-emerald-500/24"
+                        className="gap-1.5 border-emerald-400/16 bg-emerald-500/16 text-emerald-100 hover:bg-emerald-500/24"
                         onClick={() => handleDecision(row, "approve")}
                         disabled={isPending}
                       >
@@ -266,13 +272,7 @@ export function ModerationQueueTable({
                         {rowPending && pendingAction?.decision === "reject" ? <Loader2 className="size-3.5 animate-spin" /> : <XCircle className="size-3.5" />}
                         Reject
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1.5"
-                        onClick={() => handleDecision(row, "archive")}
-                        disabled={isPending}
-                      >
+                      <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleDecision(row, "archive")} disabled={isPending}>
                         {rowPending && pendingAction?.decision === "archive" ? <Loader2 className="size-3.5 animate-spin" /> : <Archive className="size-3.5" />}
                         Archive
                       </Button>
@@ -296,7 +296,6 @@ export function ModerationQueueTable({
           )}
         </div>
       </div>
-    </div>
   );
 }
 
@@ -312,8 +311,8 @@ function ModerationSummaryCell({
   return (
     <div
       className={cn(
-        "rounded-[1rem] border px-4 py-4",
-        emphasis ? "border-blue-400/16 bg-blue-400/[0.08]" : "border-white/8 bg-white/[0.02]",
+        "px-4 py-4",
+        emphasis ? "bg-blue-400/[0.08]" : "bg-transparent",
       )}
     >
       <div className="text-[11px] uppercase tracking-[0.18em] text-white/42">{label}</div>

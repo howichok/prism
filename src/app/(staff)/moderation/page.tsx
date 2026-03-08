@@ -41,6 +41,12 @@ export default async function ModerationPage() {
       href: null,
     })),
   ].sort((left, right) => right.submittedAt.getTime() - left.submittedAt.getTime());
+  const newestRow = rows[0] ?? null;
+  const queueFocus =
+    data.reports.length > 0 ? "Reports need direct review first." :
+    data.companies.length > 0 ? "Company approvals are waiting for staff." :
+    data.posts.length > 0 ? "Posts are ready for publication review." :
+    "No active moderation backlog right now.";
 
   return (
     <AppShell title="Moderation" description="Staff queues for companies, posts, and reports." items={moderationSidebarItems}>
@@ -49,6 +55,26 @@ export default async function ModerationPage() {
         title="Staff overview"
         description="Review public-facing changes, process reports, and keep every active moderation queue in sync."
       />
+      <section className="surface-panel-soft px-5 py-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-center">
+          <div>
+            <div className="panel-label">Queue focus</div>
+            <p className="mt-2 text-sm leading-7 text-white/74">{queueFocus}</p>
+          </div>
+          <div className="grid gap-px overflow-hidden rounded-[1rem] border border-white/8 bg-white/[0.02] sm:grid-cols-2">
+            <div className="px-4 py-3">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/42">Open queue</div>
+              <div className="mt-2 font-display text-[1.75rem] leading-none text-white">{rows.length}</div>
+              <div className="mt-1 text-xs text-white/44">Total items needing staff attention</div>
+            </div>
+            <div className="px-4 py-3">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/42">Latest item</div>
+              <div className="mt-2 text-sm font-medium text-white">{newestRow ? newestRow.title : "Queue is clear"}</div>
+              <div className="mt-1 text-xs text-white/44">{newestRow ? newestRow.targetType : "No pending review"}</div>
+            </div>
+          </div>
+        </div>
+      </section>
       <ModerationQueueTable
         rows={rows}
         showOverview

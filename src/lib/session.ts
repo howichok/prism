@@ -122,12 +122,7 @@ async function resolveSessionUser() {
 }
 
 const getCachedSessionUser = cache(resolveSessionUser);
-
-export async function getSessionUser() {
-  return getCachedSessionUser();
-}
-
-export async function getGuestSessionUser() {
+const getCachedGuestSessionUser = cache(async () => {
   const cookieStore = await cookies();
 
   if (cookieStore.get(GUEST_SESSION_COOKIE)?.value !== "1") {
@@ -135,6 +130,24 @@ export async function getGuestSessionUser() {
   }
 
   return buildGuestSessionUser();
+});
+
+const getCachedOptionalViewer = cache(async () => {
+  const user = await getOptionalSessionUser();
+
+  if (user) {
+    return user;
+  }
+
+  return getGuestSessionUser();
+});
+
+export async function getSessionUser() {
+  return getCachedSessionUser();
+}
+
+export async function getGuestSessionUser() {
+  return getCachedGuestSessionUser();
 }
 
 export async function getOptionalSessionUser() {
@@ -147,13 +160,7 @@ export async function getOptionalSessionUser() {
 }
 
 export async function getOptionalViewer() {
-  const user = await getOptionalSessionUser();
-
-  if (user) {
-    return user;
-  }
-
-  return getGuestSessionUser();
+  return getCachedOptionalViewer();
 }
 
 export async function requireAppViewer(options?: { onboarded?: boolean }) {

@@ -76,6 +76,7 @@ export default async function CompanySettingsPage({ params }: { params: Promise<
             recruitingStatus: data.company.recruitingStatus,
             tags: data.company.tags,
             brandColor: data.company.brandColor ?? "#55d4ff",
+            discordInviteUrl: data.company.discordInviteUrl ?? "",
           }}
         />
       ) : (

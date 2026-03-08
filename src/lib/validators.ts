@@ -10,6 +10,25 @@ import {
 import { z } from "zod";
 
 const usernamePattern = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$/;
+const discordInviteHosts = new Set(["discord.gg", "www.discord.gg", "discord.com", "www.discord.com"]);
+
+const discordInviteUrlSchema = z
+  .string()
+  .trim()
+  .url("Enter a valid Discord invite URL.")
+  .refine((value) => {
+    try {
+      const url = new URL(value);
+      const path = url.pathname.replace(/\/+$/, "");
+
+      return (
+        discordInviteHosts.has(url.hostname.toLowerCase()) &&
+        (path.startsWith("/invite/") || (url.hostname.toLowerCase().endsWith("discord.gg") && path.length > 1))
+      );
+    } catch {
+      return false;
+    }
+  }, "Use a Discord invite URL from discord.gg or discord.com/invite/.");
 
 export const onboardingSchema = z
   .object({
@@ -67,6 +86,7 @@ export const companyCreateSchema = z.object({
   recruitingStatus: z.nativeEnum(RecruitingStatus),
   tags: z.array(z.string().trim().min(2).max(20)).max(6),
   brandColor: z.string().trim().regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/).optional().or(z.literal("")),
+  discordInviteUrl: discordInviteUrlSchema.optional().or(z.literal("")),
 });
 
 export const companySettingsSchema = companyCreateSchema.extend({
@@ -112,4 +132,22 @@ export const companyRoleUpdateSchema = z.object({
   companyId: z.string().cuid(),
   memberId: z.string().cuid(),
   companyRole: z.nativeEnum(CompanyRole),
+});
+
+export const companyCollaborationRequestSchema = z.object({
+  sourceCompanyId: z.string().cuid(),
+  targetCompanyId: z.string().cuid(),
+  message: z.string().trim().max(280).optional().or(z.literal("")),
+});
+
+export const companyCollaborationDecisionSchema = z.object({
+  collaborationId: z.string().cuid(),
+});
+
+export const companyCollaborationRejectSchema = companyCollaborationDecisionSchema.extend({
+  reason: z.string().trim().max(280).optional().or(z.literal("")),
+});
+
+export const companyCollaborationEndSchema = companyCollaborationDecisionSchema.extend({
+  companyId: z.string().cuid().optional(),
 });

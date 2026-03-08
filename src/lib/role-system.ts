@@ -1,5 +1,5 @@
 import { CompanyRole, SiteRole } from "@prisma/client";
-import { Crown, Shield, ShieldCheck, UserRound, type LucideIcon } from "lucide-react";
+import { Crown, type LucideIcon } from "lucide-react";
 
 export const siteRoleRank: Record<SiteRole, number> = {
   USER: 0,
@@ -101,13 +101,14 @@ export const siteRoleThemes: Record<
   SiteRole,
   {
     chipClass: string;
-    chipIcon: LucideIcon;
+    chipIcon?: LucideIcon;
     bannerBackground: string;
     bannerSheenBackground: string;
     bannerGlowBackground?: string;
     usernameClass: string;
     surfaceClass: string;
     softPanelClass: string;
+    rosterSurfaceClass: string;
     avatarRingClass: string;
     contextLabelClass: string;
     dividerClass: string;
@@ -117,12 +118,14 @@ export const siteRoleThemes: Record<
     rosterRowHoverClass: string;
     rosterRowActiveClass: string;
     rosterRowEdgeClass: string;
+    inlineSurfaceClass: string;
+    inlineHoverClass: string;
+    menuSurfaceClass: string;
   }
 > = {
   ADMIN: {
     chipClass:
-      "rounded-[0.65rem] border-rose-300/20 bg-[linear-gradient(180deg,rgba(111,29,36,0.28),rgba(22,10,12,0.92))] text-rose-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
-    chipIcon: Shield,
+      "rounded-full border border-rose-400/24 bg-[linear-gradient(180deg,rgba(19,20,24,0.98),rgba(10,11,14,0.98))] text-rose-200/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
     bannerBackground:
       "radial-gradient(circle at 14% 18%, rgba(251, 113, 133, 0.12), transparent 32%), linear-gradient(135deg, rgba(18, 21, 25, 0.985) 0%, rgba(11, 13, 17, 0.992) 42%, rgba(8, 10, 12, 1) 100%)",
     bannerSheenBackground:
@@ -131,7 +134,8 @@ export const siteRoleThemes: Record<
       "radial-gradient(circle at 18% 30%, rgba(244, 63, 94, 0.12), transparent 32%), radial-gradient(circle at 72% 18%, rgba(190, 24, 93, 0.07), transparent 24%)",
     usernameClass: "text-rose-200",
     surfaceClass: "border-white/8 bg-[linear-gradient(180deg,rgba(12,12,14,0.992),rgba(8,10,12,0.992))]",
-    softPanelClass: "border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))]",
+    softPanelClass: "border-rose-300/12 bg-[linear-gradient(180deg,rgba(70,18,26,0.12),rgba(255,255,255,0.01))]",
+    rosterSurfaceClass: "border-rose-300/12 bg-[linear-gradient(90deg,rgba(78,20,28,0.14),rgba(255,255,255,0.00))]",
     avatarRingClass: "border-rose-300/24",
     contextLabelClass:
       "rounded-[0.72rem] border-rose-300/16 bg-[linear-gradient(180deg,rgba(120,32,32,0.18),rgba(24,12,14,0.82))] text-rose-100/88",
@@ -142,11 +146,13 @@ export const siteRoleThemes: Record<
     rosterRowHoverClass: "hover:border-rose-300/14 hover:bg-[linear-gradient(90deg,rgba(92,25,31,0.12),rgba(255,255,255,0.00))]",
     rosterRowActiveClass: "border-rose-300/18 bg-[linear-gradient(90deg,rgba(92,25,31,0.18),rgba(255,255,255,0.00))]",
     rosterRowEdgeClass: "bg-gradient-to-b from-rose-300/50 to-transparent",
+    inlineSurfaceClass: "border-rose-300/12 bg-[linear-gradient(90deg,rgba(78,20,28,0.16),rgba(255,255,255,0.00))]",
+    inlineHoverClass: "hover:border-rose-300/16 hover:bg-[linear-gradient(90deg,rgba(92,25,31,0.12),rgba(255,255,255,0.00))]",
+    menuSurfaceClass: "border-rose-300/12 bg-[linear-gradient(180deg,rgba(70,18,26,0.14),rgba(255,255,255,0.01))]",
   },
   MOD: {
     chipClass:
-      "rounded-full border-sky-300/18 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(8,47,73,0.62))] text-sky-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
-    chipIcon: ShieldCheck,
+      "rounded-full border border-sky-400/22 bg-[linear-gradient(180deg,rgba(19,22,28,0.98),rgba(10,12,16,0.98))] text-sky-200/88 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
     bannerBackground:
       "radial-gradient(circle at 18% 16%, rgba(59, 130, 246, 0.22), transparent 34%), linear-gradient(135deg, rgba(16, 33, 62, 0.96) 0%, rgba(12, 20, 36, 0.98) 42%, rgba(8, 10, 12, 1) 100%)",
     bannerSheenBackground:
@@ -155,7 +161,8 @@ export const siteRoleThemes: Record<
       "radial-gradient(circle at 18% 34%, rgba(56, 189, 248, 0.22), transparent 34%), radial-gradient(circle at 76% 16%, rgba(96, 165, 250, 0.14), transparent 26%)",
     usernameClass: "text-sky-200",
     surfaceClass: "border-sky-300/12 bg-[linear-gradient(180deg,rgba(9,14,20,0.985),rgba(10,10,10,0.985))]",
-    softPanelClass: "border-sky-300/10 bg-[linear-gradient(180deg,rgba(14,42,78,0.10),rgba(255,255,255,0.01))]",
+    softPanelClass: "border-sky-300/12 bg-[linear-gradient(180deg,rgba(16,44,82,0.12),rgba(255,255,255,0.01))]",
+    rosterSurfaceClass: "border-sky-300/12 bg-[linear-gradient(90deg,rgba(18,50,92,0.14),rgba(255,255,255,0.00))]",
     avatarRingClass: "border-sky-300/22",
     contextLabelClass:
       "rounded-full border-sky-300/14 bg-[linear-gradient(180deg,rgba(18,36,64,0.96),rgba(11,25,40,0.92))] text-sky-100/90",
@@ -166,10 +173,12 @@ export const siteRoleThemes: Record<
     rosterRowHoverClass: "hover:border-sky-300/12 hover:bg-[linear-gradient(90deg,rgba(24,56,104,0.10),rgba(255,255,255,0.00))]",
     rosterRowActiveClass: "border-sky-300/16 bg-[linear-gradient(90deg,rgba(24,56,104,0.16),rgba(255,255,255,0.00))]",
     rosterRowEdgeClass: "bg-gradient-to-b from-sky-300/44 to-transparent",
+    inlineSurfaceClass: "border-sky-300/12 bg-[linear-gradient(90deg,rgba(18,50,92,0.16),rgba(255,255,255,0.00))]",
+    inlineHoverClass: "hover:border-sky-300/14 hover:bg-[linear-gradient(90deg,rgba(24,56,104,0.12),rgba(255,255,255,0.00))]",
+    menuSurfaceClass: "border-sky-300/12 bg-[linear-gradient(180deg,rgba(16,44,82,0.14),rgba(255,255,255,0.01))]",
   },
   USER: {
-    chipClass: "rounded-full border-white/10 bg-white/[0.04] text-white/68",
-    chipIcon: UserRound,
+    chipClass: "rounded-full border border-white/10 bg-[linear-gradient(180deg,rgba(20,22,27,0.96),rgba(11,13,16,0.96))] text-white/66 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
     bannerBackground:
       "radial-gradient(circle at 14% 14%, rgba(96, 165, 250, 0.08), transparent 28%), linear-gradient(135deg, rgba(17, 22, 30, 0.96) 0%, rgba(11, 13, 18, 0.98) 42%, rgba(8, 10, 12, 1) 100%)",
     bannerSheenBackground:
@@ -177,6 +186,7 @@ export const siteRoleThemes: Record<
     usernameClass: "text-white/72",
     surfaceClass: "border-white/8 bg-popover/95",
     softPanelClass: "border-border/60 bg-muted/30",
+    rosterSurfaceClass: "border-white/8 bg-white/[0.02]",
     avatarRingClass: "border-white/12",
     contextLabelClass: "border-white/12 bg-black/25 text-white/72",
     dividerClass: "border-white/8",
@@ -186,6 +196,9 @@ export const siteRoleThemes: Record<
     rosterRowHoverClass: "hover:border-white/8 hover:bg-white/[0.03]",
     rosterRowActiveClass: "border-white/12 bg-white/[0.05]",
     rosterRowEdgeClass: "bg-gradient-to-b from-white/22 to-transparent",
+    inlineSurfaceClass: "border-white/8 bg-white/[0.03]",
+    inlineHoverClass: "hover:border-white/12 hover:bg-white/[0.05]",
+    menuSurfaceClass: "border-white/8 bg-white/[0.03]",
   },
 };
 

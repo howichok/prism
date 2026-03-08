@@ -21,6 +21,7 @@ CREATE TYPE "ReportStatus" AS ENUM ('OPEN', 'IN_REVIEW', 'ACTIONED', 'REJECTED',
 CREATE TYPE "ApplicationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'WITHDRAWN');
 CREATE TYPE "LinkedAccountProvider" AS ENUM ('DISCORD', 'MICROSOFT', 'EMAIL');
 CREATE TYPE "ActivityEventType" AS ENUM ('MEMBER_JOINED', 'POST_PUBLISHED', 'ROLE_CHANGED', 'APPLICATION_REVIEWED', 'PROJECT_CREATED', 'COMPANY_UPDATED', 'BUILD_REQUEST_SUBMITTED');
+CREATE TYPE "CollaborationStatus" AS ENUM ('PENDING', 'ACTIVE', 'REJECTED', 'CANCELLED', 'ENDED');
 
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -66,6 +67,7 @@ CREATE TABLE "Company" (
     "logoUrl" TEXT,
     "bannerUrl" TEXT,
     "brandColor" TEXT,
+    "discordInviteUrl" TEXT,
     "privacy" "Privacy" NOT NULL DEFAULT 'PUBLIC',
     "recruitingStatus" "RecruitingStatus" NOT NULL DEFAULT 'OPEN',
     "ownerId" TEXT NOT NULL,
@@ -112,6 +114,23 @@ CREATE TABLE "CompanyApplication" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "CompanyApplication_pkey" PRIMARY KEY ("id")
+);
+
+CREATE TABLE "CompanyCollaboration" (
+    "id" TEXT NOT NULL,
+    "companyAId" TEXT NOT NULL,
+    "companyBId" TEXT NOT NULL,
+    "requestingCompanyId" TEXT NOT NULL,
+    "createdByUserId" TEXT NOT NULL,
+    "status" "CollaborationStatus" NOT NULL DEFAULT 'PENDING',
+    "message" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "respondedAt" TIMESTAMP(3),
+    "startedAt" TIMESTAMP(3),
+    "endedAt" TIMESTAMP(3),
+    "endedByCompanyId" TEXT,
+
+    CONSTRAINT "CompanyCollaboration_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "Post" (
@@ -276,6 +295,12 @@ CREATE INDEX "CompanyInvite_companyId_active_idx" ON "CompanyInvite"("companyId"
 CREATE INDEX "CompanyApplication_status_idx" ON "CompanyApplication"("status");
 CREATE UNIQUE INDEX "CompanyApplication_companyId_userId_key" ON "CompanyApplication"("companyId", "userId");
 
+CREATE INDEX "CompanyCollaboration_companyAId_status_idx" ON "CompanyCollaboration"("companyAId", "status");
+CREATE INDEX "CompanyCollaboration_companyBId_status_idx" ON "CompanyCollaboration"("companyBId", "status");
+CREATE INDEX "CompanyCollaboration_requestingCompanyId_status_idx" ON "CompanyCollaboration"("requestingCompanyId", "status");
+CREATE INDEX "CompanyCollaboration_status_createdAt_idx" ON "CompanyCollaboration"("status", "createdAt");
+CREATE INDEX "CompanyCollaboration_companyAId_companyBId_status_idx" ON "CompanyCollaboration"("companyAId", "companyBId", "status");
+
 CREATE UNIQUE INDEX "Post_slug_key" ON "Post"("slug");
 CREATE INDEX "Post_status_idx" ON "Post"("status");
 CREATE INDEX "Post_visibility_idx" ON "Post"("visibility");
@@ -317,6 +342,12 @@ ALTER TABLE "CompanyInvite" ADD CONSTRAINT "CompanyInvite_createdById_fkey" FORE
 ALTER TABLE "CompanyApplication" ADD CONSTRAINT "CompanyApplication_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "CompanyApplication" ADD CONSTRAINT "CompanyApplication_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "CompanyApplication" ADD CONSTRAINT "CompanyApplication_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "CompanyCollaboration" ADD CONSTRAINT "CompanyCollaboration_companyAId_fkey" FOREIGN KEY ("companyAId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CompanyCollaboration" ADD CONSTRAINT "CompanyCollaboration_companyBId_fkey" FOREIGN KEY ("companyBId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CompanyCollaboration" ADD CONSTRAINT "CompanyCollaboration_requestingCompanyId_fkey" FOREIGN KEY ("requestingCompanyId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "CompanyCollaboration" ADD CONSTRAINT "CompanyCollaboration_createdByUserId_fkey" FOREIGN KEY ("createdByUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CompanyCollaboration" ADD CONSTRAINT "CompanyCollaboration_endedByCompanyId_fkey" FOREIGN KEY ("endedByCompanyId") REFERENCES "Company"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "Post" ADD CONSTRAINT "Post_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE SET NULL ON UPDATE CASCADE;

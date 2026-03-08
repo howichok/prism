@@ -20,7 +20,6 @@ import { IdentityPanel, ProfileIdentitySurface, resolveProfilePresence } from "@
 import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { PostCard } from "@/components/platform/post-card";
 import { ProjectCard } from "@/components/platform/project-card";
-import { RoleBadge } from "@/components/platform/role-badge";
 import { SearchBar } from "@/components/platform/search-bar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -513,7 +512,6 @@ function DiscoveryMembersRoster({
           <div className={cn("flex items-center justify-between border-b px-0 pb-2.5", group.theme.dividerClass)}>
             <div className="inline-flex items-center gap-2.5">
               <span className={cn("h-5 w-[3px] rounded-full", group.theme.rosterRowEdgeClass)} />
-              <RoleBadge kind="site" role={group.role} />
               <span className={cn("rounded-full border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em]", group.theme.rosterGroupClass)}>
                 {group.label}
               </span>

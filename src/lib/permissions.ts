@@ -64,3 +64,7 @@ export function canInviteToCompany(role: CompanyRole) {
 export function canLeaveCompany(role: CompanyRole) {
   return role !== CompanyRole.OWNER;
 }
+
+export function canManageCompanyCollaborations(role: CompanyRole) {
+  return role === CompanyRole.OWNER;
+}

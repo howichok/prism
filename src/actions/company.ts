@@ -87,6 +87,7 @@ export async function createCompanyAction(input: unknown) {
       privacy: values.privacy,
       recruitingStatus: values.recruitingStatus,
       brandColor: values.brandColor || null,
+      discordInviteUrl: values.discordInviteUrl || null,
       tags: values.tags,
       ownerId: user.id,
       status: ModerationStatus.PENDING_REVIEW,
@@ -167,6 +168,7 @@ export async function updateCompanySettingsAction(input: unknown) {
       privacy: values.privacy,
       recruitingStatus: values.recruitingStatus,
       brandColor: values.brandColor || null,
+      discordInviteUrl: values.discordInviteUrl || null,
       tags: values.tags,
       status:
         membership.company.status === ModerationStatus.APPROVED ? ModerationStatus.PENDING_REVIEW : membership.company.status,

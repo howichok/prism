@@ -1,26 +1,34 @@
 import Link from "next/link";
+import { CompanyRole } from "@prisma/client";
 import { notFound } from "next/navigation";
-import { Building2, Layers3 } from "lucide-react";
+import { ArrowUpRight, Building2, Handshake, Layers3 } from "lucide-react";
 
+import { CompanyCollaborationRequestCard } from "@/components/platform/company-collaboration-request-card";
 import { FeedItem } from "@/components/platform/feed-item";
-import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { PostCard } from "@/components/platform/post-card";
+import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { ProjectCard } from "@/components/platform/project-card";
 import { PublicDataUnavailable } from "@/components/platform/public-data-unavailable";
 import { StatusBadge } from "@/components/platform/status-badge";
-import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
-import { getPublicCompanyBySlug } from "@/lib/data";
-import { formatCompactNumber } from "@/lib/format";
+import { getPublicCompanyBySlugForViewer } from "@/lib/data";
+import { formatCompactNumber, formatDate } from "@/lib/format";
+import { getCompanyRoleLabel } from "@/lib/role-system";
+import { getOptionalViewer, isGuestViewer } from "@/lib/session";
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getPublicCompanyBySlug(slug).catch((error) => {
-    console.error("[company-detail] Error loading company", error);
-    return null;
-  });
+  const viewer = await getOptionalViewer();
+  const viewerContext = viewer && !isGuestViewer(viewer) ? { id: viewer.id, siteRole: viewer.siteRole } : null;
+  let data: Awaited<ReturnType<typeof getPublicCompanyBySlugForViewer>> | false = false;
 
-  if (!data) {
+  try {
+    data = await getPublicCompanyBySlugForViewer(slug, viewerContext);
+  } catch (error) {
+    console.error("[company-detail] Error loading company", error);
+  }
+
+  if (data === false) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <PublicDataUnavailable
@@ -31,11 +39,38 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     );
   }
 
-  const { company, posts, projects, activity } = data;
-
-  if (!company) {
+  if (!data) {
     return notFound();
   }
+
+  const { company, posts, projects, activity, viewerMembership, viewerSourceCompanies, collaborations } = data;
+
+  const isSignedIn = Boolean(viewerContext);
+  const isMember = Boolean(viewerMembership);
+  const isLeadership =
+    viewerMembership?.companyRole === CompanyRole.OWNER ||
+    viewerMembership?.companyRole === CompanyRole.CO_OWNER ||
+    viewerMembership?.companyRole === CompanyRole.TRUSTED_MEMBER;
+  const canRequestCollaboration = isSignedIn && !isMember && viewerSourceCompanies.length > 0;
+  const primaryCta = isMember
+    ? {
+        label: "Open company hub",
+        href: `/dashboard/company/${company.slug}`,
+        external: false,
+      }
+    : isSignedIn && company.discordInviteUrl
+      ? {
+          label: "Open Discord invite",
+          href: company.discordInviteUrl,
+          external: true,
+        }
+      : !isSignedIn
+        ? {
+            label: "Sign in with Discord",
+            href: "/sign-in",
+            external: false,
+          }
+        : null;
 
   return (
     <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -45,9 +80,9 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           className="h-40 rounded-t-xl border border-b-0 border-white/6 sm:h-48"
           style={{
             background: company.bannerUrl
-              ? `url(${company.bannerUrl})`
-              : company.brandColor ?? "#141414",
-            backgroundSize: "cover",
+              ? `linear-gradient(180deg, rgba(8,10,14,0.14), rgba(8,10,14,0.72)), url(${company.bannerUrl})`
+              : `radial-gradient(circle at 18% 18%, ${company.brandColor ?? "#55d4ff"}35, transparent 26%), linear-gradient(135deg, rgba(9,12,18,0.98) 0%, rgba(6,8,11,0.98) 48%, rgba(4,6,8,1) 100%)`,
+            backgroundSize: company.bannerUrl ? "cover" : "auto",
             backgroundPosition: "center",
           }}
         />
@@ -104,7 +139,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
       </section>
 
       {/* Content + sidebar */}
-      <div className="animate-fade-up grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]" style={{ animationDelay: "120ms" }}>
+      <div className="animate-fade-in grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-6">
           {activity.length > 0 ? (
             <section>
@@ -116,6 +151,41 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 {activity.slice(0, 5).map((item) => (
                   <div key={item.id} className="rounded-xl border border-white/6 bg-white/[0.02] px-5 py-3.5">
                     <FeedItem item={item} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {collaborations.active.length > 0 ? (
+            <section>
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-medium text-white/50">
+                <Handshake className="size-4" />
+                Active collaborations
+              </h2>
+              <div className="space-y-2">
+                {collaborations.active.map((collaboration) => (
+                  <div
+                    key={collaboration.id}
+                    className="rounded-xl border border-white/6 bg-white/[0.02] px-5 py-4"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <Link
+                          href={`/companies/${(collaboration.otherCompany ?? collaboration.targetCompany).slug}`}
+                          className="text-sm font-medium text-white transition-colors hover:text-white/76"
+                        >
+                          {(collaboration.otherCompany ?? collaboration.targetCompany).name}
+                        </Link>
+                        <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                          Active since {collaboration.startedAt ? formatDate(collaboration.startedAt) : "now"}
+                        </p>
+                      </div>
+                      <StatusBadge status={collaboration.status} />
+                    </div>
+                    {collaboration.message ? (
+                      <p className="mt-3 text-sm leading-7 text-white/58">{collaboration.message}</p>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -152,22 +222,16 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
 
         {/* Sidebar */}
         <div className="space-y-4">
-          <div className="rounded-xl border border-white/6 bg-white/[0.02] p-4">
+          <div className="surface-panel-soft p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-xs font-medium uppercase tracking-[0.15em] text-white/35">Leadership</h3>
-              <Button variant="outline" size="sm" render={<Link href="/sign-in" />}>
-                Join
-              </Button>
+              {viewerMembership ? (
+                <span className="text-[10px] uppercase tracking-[0.16em] text-white/42">
+                  {isLeadership ? "Leadership" : `Your role: ${getCompanyRoleLabel(viewerMembership.companyRole)}`}
+                </span>
+              ) : null}
             </div>
-            <MiniProfileHoverCard user={company.owner} companyRole="OWNER" primaryCompany={company}>
-              <div className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/[0.04]">
-                <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} />
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-white">{company.owner.displayName}</div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-white/30">Owner</div>
-                </div>
-              </div>
-            </MiniProfileHoverCard>
+            <ProfileRosterRow user={company.owner} companyRole="OWNER" primaryCompany={company} variant="identity" />
           </div>
 
           <div className="rounded-xl border border-white/6 bg-white/[0.02] p-4">
@@ -177,23 +241,62 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             </div>
             <div className="space-y-1">
               {company.members.slice(0, 6).map((member) => (
-                <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={company}>
-                  <div className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/[0.04]">
-                    <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
-                    <span className="truncate text-sm text-white/70">{member.displayName}</span>
-                  </div>
-                </MiniProfileHoverCard>
+                <ProfileRosterRow
+                  key={member.id}
+                  user={member}
+                  companyRole={member.companyRole}
+                  primaryCompany={company}
+                  variant="identity"
+                />
               ))}
             </div>
           </div>
 
           <div className="rounded-xl border border-white/6 bg-white/[0.02] p-4">
-            <Button className="w-full" render={<Link href="/sign-in" />}>
-              Join with Discord
-            </Button>
+            {primaryCta ? (
+              <Button
+                className="w-full"
+                render={
+                  primaryCta.external ? (
+                    <a href={primaryCta.href} target="_blank" rel="noreferrer" />
+                  ) : (
+                    <Link href={primaryCta.href} />
+                  )
+                }
+              >
+                {primaryCta.label}
+                {primaryCta.external ? <ArrowUpRight className="size-4" /> : null}
+              </Button>
+            ) : (
+              <div className="rounded-[0.95rem] border border-white/8 bg-white/[0.03] px-3.5 py-3 text-sm text-white/76">
+                No public Discord invite is configured for this company yet.
+              </div>
+            )}
             <Button variant="outline" className="mt-2 w-full" render={<Link href="/discovery" />}>
               Explore discovery
             </Button>
+            {isLeadership ? (
+              <Button variant="outline" className="mt-2 w-full" render={<Link href={`/dashboard/company/${slug}/collaborations`} />}>
+                Manage collaborations
+              </Button>
+            ) : null}
+            {canRequestCollaboration ? (
+              <div className="mt-3">
+                <CompanyCollaborationRequestCard
+                  targetCompany={company}
+                  sourceCompanies={viewerSourceCompanies}
+                />
+              </div>
+            ) : null}
+            {!isSignedIn ? (
+              <p className="mt-3 text-xs leading-6 text-muted-foreground">
+                Sign in first to access dashboard workspaces, applications, and company-aware actions.
+              </p>
+            ) : !isMember && !company.discordInviteUrl && !canRequestCollaboration ? (
+              <p className="mt-3 text-xs leading-6 text-muted-foreground">
+                Leadership can add a public Discord invite in Company Settings when they want this page to route members directly into the community.
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

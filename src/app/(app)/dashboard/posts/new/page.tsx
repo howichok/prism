@@ -7,12 +7,12 @@ import { EmptyState } from "@/components/platform/empty-state";
 import { PageHeader } from "@/components/platform/page-header";
 import { Button } from "@/components/ui/button";
 import { dashboardSidebarItems } from "@/lib/navigation";
-import { getDashboardData } from "@/lib/data";
+import { getPostCreationContext } from "@/lib/data";
 import { requireUser } from "@/lib/session";
 
 export default async function DashboardNewPostPage() {
   const viewer = await requireUser({ onboarded: true });
-  const data = await getDashboardData(viewer.id).catch((error) => {
+  const data = await getPostCreationContext(viewer.id).catch((error) => {
     console.error("[dashboard:new-post] Failed to load post creation context.", {
       userId: viewer.id,
       error,
@@ -42,7 +42,7 @@ export default async function DashboardNewPostPage() {
       <PageHeader
         eyebrow="New Post"
         title="Create a PrismMTR post"
-        description="Announcements, recruitment posts, showcases, and progress updates all run through the same structured publishing flow."
+        description="Start with the post basics, then choose where it belongs and how it should be published."
       />
       <PostForm companies={data.memberships} />
     </AppShell>

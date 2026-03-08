@@ -80,20 +80,22 @@ export default async function HomePage() {
     <div className="mx-auto w-full max-w-[1080px] px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:px-8">
       {/* Hero */}
       <section className="flex flex-col items-center text-center">
-        <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/60">
-          <span className="size-1.5 rounded-full bg-blue-400 animate-pulse-soft" />
-          PrismMTR
+        <div className="animate-fade-up flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-white/60">
+            <span className="size-1.5 rounded-full bg-blue-400 animate-pulse-soft" />
+            PrismMTR
+          </div>
+
+          <h1 className="mt-6 max-w-3xl font-display text-[2.5rem] leading-[0.93] text-white sm:text-[3.5rem] lg:text-[4.2rem]">
+            {hero.title}
+          </h1>
+
+          <p className="mt-5 max-w-lg text-base leading-7 text-white/60">
+            {hero.description}
+          </p>
         </div>
 
-        <h1 className="animate-fade-up mt-6 max-w-3xl font-display text-[2.5rem] leading-[0.93] text-white sm:text-[3.5rem] lg:text-[4.2rem]" style={{ animationDelay: "80ms" }}>
-          {hero.title}
-        </h1>
-
-        <p className="animate-fade-up mt-5 max-w-lg text-base leading-7 text-white/60" style={{ animationDelay: "150ms" }}>
-          {hero.description}
-        </p>
-
-        <div className="animate-fade-up mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: "220ms" }}>
+        <div className="animate-fade-up mt-8 flex flex-wrap justify-center gap-3">
           <Button render={<Link href={hero.primary.href} />} size="lg">
             {hero.primary.label}
             <ArrowRight className="size-4" />
@@ -116,7 +118,7 @@ export default async function HomePage() {
       </section>
 
       {/* Network stats */}
-      <section className="animate-fade-up mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/8 bg-white/[0.04] sm:mt-20 sm:grid-cols-4" style={{ animationDelay: "300ms" }}>
+      <section className="animate-fade-in mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-white/8 bg-white/[0.04] sm:mt-20 sm:grid-cols-4">
         {networkStats.map((stat) => (
           <div key={stat.label} className="flex flex-col items-center gap-1 bg-[hsl(0_0%_4%)] px-4 py-5 sm:py-6">
             <stat.icon className="mb-1 size-4 text-white/30" />
@@ -128,7 +130,7 @@ export default async function HomePage() {
 
       {/* Featured activity */}
       {featured.length > 0 ? (
-        <section className="animate-fade-up mt-14 sm:mt-16" style={{ animationDelay: "400ms" }}>
+        <section className="animate-fade-in mt-14 sm:mt-16">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-sm font-medium text-white/50">Recent on the network</h2>
             <Link

@@ -38,6 +38,7 @@ export function CompanyForm({
       recruitingStatus: RecruitingStatus.OPEN,
       tags: [],
       brandColor: "#55d4ff",
+      discordInviteUrl: "",
     },
   });
   const privacy = useWatch({ control: form.control, name: "privacy" });
@@ -83,6 +84,18 @@ export function CompanyForm({
         <div className="space-y-2">
           <Label htmlFor="company-brand-color">Brand color</Label>
           <Input id="company-brand-color" {...form.register("brandColor")} className="h-12 rounded-2xl border-white/10 bg-white/6 text-white" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="company-discord-invite">Discord invite link</Label>
+          <Input
+            id="company-discord-invite"
+            {...form.register("discordInviteUrl")}
+            placeholder="https://discord.gg/your-invite"
+            className="h-12 rounded-2xl border-white/10 bg-white/6 text-white"
+          />
+          <p className="text-xs leading-6 text-white/46">
+            Public company pages use this invite as the join action for signed-in viewers.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="company-tags">Tags (comma separated)</Label>

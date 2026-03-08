@@ -1,4 +1,12 @@
-import { ApplicationStatus, BuildRequestStatus, ModerationStatus, ProjectStatus, RecruitingStatus, ReportStatus } from "@prisma/client";
+import {
+  ApplicationStatus,
+  BuildRequestStatus,
+  CollaborationStatus,
+  ModerationStatus,
+  ProjectStatus,
+  RecruitingStatus,
+  ReportStatus,
+} from "@prisma/client";
 
 import { Badge } from "@/components/ui/badge";
 import { titleCase } from "@/lib/format";
@@ -7,6 +15,7 @@ import { cn } from "@/lib/utils";
 type StatusValue =
   | ApplicationStatus
   | BuildRequestStatus
+  | CollaborationStatus
   | ModerationStatus
   | ProjectStatus
   | RecruitingStatus
@@ -25,12 +34,15 @@ const toneMap: Record<string, string> = {
   PENDING: "border-sky-500/30 bg-sky-500/10 text-sky-400",
   PENDING_REVIEW: "border-sky-500/30 bg-sky-500/10 text-sky-400",
   ACTIONED: "border-sky-500/30 bg-sky-500/10 text-sky-400",
+  ACTIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
   REJECTED: "border-rose-500/30 bg-rose-500/10 text-rose-400",
   CLOSED: "border-border bg-secondary text-muted-foreground",
   ARCHIVED: "border-border bg-secondary text-muted-foreground",
   WITHDRAWN: "border-border bg-secondary text-muted-foreground",
   ON_HOLD: "border-border bg-secondary text-muted-foreground",
   RESOLVED: "border-border bg-secondary text-muted-foreground",
+  CANCELLED: "border-border bg-secondary text-muted-foreground",
+  ENDED: "border-border bg-secondary text-muted-foreground",
 };
 
 export function StatusBadge({ status, className }: { status: StatusValue; className?: string }) {

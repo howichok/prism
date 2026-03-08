@@ -7,6 +7,7 @@ import { LayoutDashboard, LogOut, Settings, Shield, User2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 import { UserAvatar } from "@/components/platform/user-avatar";
+import { RoleBadge } from "@/components/platform/role-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { canAccessModeration } from "@/lib/permissions";
+import { getSiteRoleTheme } from "@/lib/role-system";
+import { cn } from "@/lib/utils";
 
 type ProfileMenuProps = {
   displayName: string;
@@ -28,30 +31,51 @@ type ProfileMenuProps = {
 export function ProfileMenu({ displayName, username, avatarUrl, accentColor, siteRole }: ProfileMenuProps) {
   const router = useRouter();
   const showModeration = canAccessModeration(siteRole);
+  const theme = getSiteRoleTheme(siteRole);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.03] p-1 pr-3 motion-lift hover:border-primary/20 hover:bg-white/[0.06]" />
+          <button
+            className={cn(
+              "flex items-center gap-2 rounded-full border p-1 pr-3 motion-lift",
+              theme.inlineSurfaceClass,
+              theme.inlineHoverClass,
+            )}
+          />
         }
       >
-        <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} size="sm" />
+        <UserAvatar
+          name={displayName}
+          image={avatarUrl}
+          accentColor={accentColor}
+          size="sm"
+          className={theme.avatarRingClass}
+        />
         <div className="hidden text-left sm:block">
           <div className="max-w-[8rem] truncate text-[13px] font-medium text-white">{displayName}</div>
-          <div className="max-w-[8rem] truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className={cn("max-w-[8rem] truncate text-[10px] uppercase tracking-[0.2em]", theme.usernameClass)}>
             @{username ?? "member"}
           </div>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <div className="flex items-center gap-3 p-2">
-          <UserAvatar name={displayName} image={avatarUrl} accentColor={accentColor} />
+        <div className={cn("mx-2 mt-2 flex items-center gap-3 rounded-[1rem] border p-2.5", theme.menuSurfaceClass)}>
+          <UserAvatar
+            name={displayName}
+            image={avatarUrl}
+            accentColor={accentColor}
+            className={theme.avatarRingClass}
+          />
           <div className="min-w-0 flex flex-col gap-0.5">
             <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className={cn("truncate text-xs", theme.usernameClass)}>
               @{username ?? "member"}
             </p>
+            <div className="pt-1">
+              <RoleBadge kind="site" role={siteRole} />
+            </div>
           </div>
         </div>
         <DropdownMenuSeparator />

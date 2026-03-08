@@ -1,5 +1,6 @@
 import {
   ApplicationStatus,
+  CollaborationStatus,
   CompanyRole,
   ModerationStatus,
   Prisma,
@@ -7,7 +8,9 @@ import {
   ReportStatus,
   Visibility,
 } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
+import { canManageCompanyCollaboration } from "@/lib/company-collaborations";
 import { db } from "@/lib/db";
 
 const badgeSelect = Prisma.validator<Prisma.BadgeSelect>()({
@@ -71,6 +74,7 @@ const companySummarySelect = Prisma.validator<Prisma.CompanySelect>()({
   logoUrl: true,
   bannerUrl: true,
   brandColor: true,
+  discordInviteUrl: true,
   privacy: true,
   recruitingStatus: true,
   status: true,
@@ -158,6 +162,34 @@ const buildRequestSummarySelect = Prisma.validator<Prisma.BuildRequestSelect>()(
   },
 });
 
+const collaborationSummarySelect = Prisma.validator<Prisma.CompanyCollaborationSelect>()({
+  id: true,
+  companyAId: true,
+  companyBId: true,
+  requestingCompanyId: true,
+  status: true,
+  message: true,
+  createdAt: true,
+  respondedAt: true,
+  startedAt: true,
+  endedAt: true,
+  companyA: {
+    select: companyReferenceSelect,
+  },
+  companyB: {
+    select: companyReferenceSelect,
+  },
+  requestingCompany: {
+    select: companyReferenceSelect,
+  },
+  createdByUser: {
+    select: userPreviewSelect,
+  },
+  endedByCompany: {
+    select: companyReferenceSelect,
+  },
+});
+
 type BadgeRecord = Prisma.BadgeGetPayload<{ select: typeof badgeSelect }>;
 type CompanyReferenceRecord = Prisma.CompanyGetPayload<{ select: typeof companyReferenceSelect }>;
 type UserPreviewRecord = Prisma.UserGetPayload<{ select: typeof userPreviewSelect }>;
@@ -165,6 +197,7 @@ type CompanySummaryRecord = Prisma.CompanyGetPayload<{ select: typeof companySum
 type PostSummaryRecord = Prisma.PostGetPayload<{ select: typeof postSummarySelect }>;
 type ProjectSummaryRecord = Prisma.ProjectGetPayload<{ select: typeof projectSummarySelect }>;
 type BuildRequestSummaryRecord = Prisma.BuildRequestGetPayload<{ select: typeof buildRequestSummarySelect }>;
+type CollaborationSummaryRecord = Prisma.CompanyCollaborationGetPayload<{ select: typeof collaborationSummarySelect }>;
 
 export type BadgeChip = BadgeRecord;
 export type CompanyReference = CompanyReferenceRecord;
@@ -195,6 +228,37 @@ export type CompanyMemberPreview = UserPreview & {
   joinedAt: Date;
 };
 
+export type CompanyMembershipSummary = CompanyReference & {
+  currentRole: CompanyRole;
+  joinedAt: Date;
+};
+
+export type CompanyCollaborationSummary = {
+  id: string;
+  status: CollaborationStatus;
+  message: string | null;
+  createdAt: Date;
+  respondedAt: Date | null;
+  startedAt: Date | null;
+  endedAt: Date | null;
+  companyAId: string;
+  companyBId: string;
+  requestingCompanyId: string;
+  sourceCompany: CompanyReference;
+  targetCompany: CompanyReference;
+  requestingCompany: CompanyReference;
+  otherCompany: CompanyReference | null;
+  createdBy: UserPreview;
+  endedByCompany: CompanyReference | null;
+};
+
+export type CompanyCollaborationBuckets = {
+  active: CompanyCollaborationSummary[];
+  incoming: CompanyCollaborationSummary[];
+  outgoing: CompanyCollaborationSummary[];
+  history: CompanyCollaborationSummary[];
+};
+
 export type CompanySummary = {
   id: string;
   name: string;
@@ -203,6 +267,7 @@ export type CompanySummary = {
   logoUrl: string | null;
   bannerUrl: string | null;
   brandColor: string | null;
+  discordInviteUrl: string | null;
   privacy: CompanySummaryRecord["privacy"];
   recruitingStatus: CompanySummaryRecord["recruitingStatus"];
   status: CompanySummaryRecord["status"];
@@ -353,6 +418,7 @@ function mapCompanySummary(record: CompanySummaryRecord): CompanySummary {
     logoUrl: record.logoUrl,
     bannerUrl: record.bannerUrl,
     brandColor: record.brandColor,
+    discordInviteUrl: record.discordInviteUrl,
     privacy: record.privacy,
     recruitingStatus: record.recruitingStatus,
     status: record.status,
@@ -418,7 +484,66 @@ function mapBuildRequestSummary(record: BuildRequestSummaryRecord): BuildRequest
   };
 }
 
-export async function getHomeData() {
+function mapCollaborationSummary(
+  record: CollaborationSummaryRecord,
+  perspectiveCompanyId?: string | null,
+): CompanyCollaborationSummary {
+  const sourceCompany =
+    record.requestingCompanyId === record.companyAId ? record.companyA : record.companyB;
+  const targetCompany =
+    record.requestingCompanyId === record.companyAId ? record.companyB : record.companyA;
+
+  return {
+    id: record.id,
+    status: record.status,
+    message: record.message ?? null,
+    createdAt: record.createdAt,
+    respondedAt: record.respondedAt ?? null,
+    startedAt: record.startedAt ?? null,
+    endedAt: record.endedAt ?? null,
+    companyAId: record.companyAId,
+    companyBId: record.companyBId,
+    requestingCompanyId: record.requestingCompanyId,
+    sourceCompany,
+    targetCompany,
+    requestingCompany: record.requestingCompany,
+    otherCompany:
+      perspectiveCompanyId === record.companyAId
+        ? record.companyB
+        : perspectiveCompanyId === record.companyBId
+          ? record.companyA
+          : null,
+    createdBy: mapUserPreview(record.createdByUser),
+    endedByCompany: record.endedByCompany,
+  };
+}
+
+function partitionCompanyCollaborations(
+  collaborations: CompanyCollaborationSummary[],
+  companyId: string,
+): CompanyCollaborationBuckets {
+  return {
+    active: collaborations.filter((collaboration) => collaboration.status === CollaborationStatus.ACTIVE),
+    incoming: collaborations.filter(
+      (collaboration) =>
+        collaboration.status === CollaborationStatus.PENDING &&
+        collaboration.requestingCompanyId !== companyId,
+    ),
+    outgoing: collaborations.filter(
+      (collaboration) =>
+        collaboration.status === CollaborationStatus.PENDING &&
+        collaboration.requestingCompanyId === companyId,
+    ),
+    history: collaborations.filter((collaboration) =>
+      (
+        [CollaborationStatus.REJECTED, CollaborationStatus.CANCELLED, CollaborationStatus.ENDED] as CollaborationStatus[]
+      ).includes(collaboration.status),
+    ),
+  };
+}
+
+const getCachedHomeData = unstable_cache(
+  async () => {
   const [featuredCompanies, featuredPosts, featuredProjects, stats] = await Promise.all([
     db.company.findMany({
       where: {
@@ -492,6 +617,16 @@ export async function getHomeData() {
       projects: stats[3],
     },
   };
+  },
+  ["home-data"],
+  {
+    revalidate: 120,
+    tags: ["home-data"],
+  },
+);
+
+export async function getHomeData() {
+  return getCachedHomeData();
 }
 
 export async function getDiscoveryData() {
@@ -586,6 +721,75 @@ export async function getPublicCompanies() {
 }
 
 export async function getPublicCompanyBySlug(slug: string) {
+  return getPublicCompanyBySlugForViewer(slug, null);
+}
+
+async function getViewerCollaborationSources({
+  viewerId,
+  viewerSiteRole,
+  excludeCompanyId,
+}: {
+  viewerId: string;
+  viewerSiteRole: "ADMIN" | "MOD" | "USER";
+  excludeCompanyId: string;
+}) {
+  if (viewerSiteRole === "ADMIN") {
+    const companies = await db.company.findMany({
+      where: {
+        id: {
+          not: excludeCompanyId,
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: companyReferenceSelect,
+    });
+
+    return companies;
+  }
+
+  const memberships = await db.companyMember.findMany({
+    where: {
+      userId: viewerId,
+      companyRole: CompanyRole.OWNER,
+      companyId: {
+        not: excludeCompanyId,
+      },
+    },
+    orderBy: {
+      joinedAt: "asc",
+    },
+    select: {
+      company: {
+        select: companyReferenceSelect,
+      },
+    },
+  });
+
+  return memberships.map((membership) => membership.company);
+}
+
+async function getCompanyCollaborationsForCompany(companyId: string) {
+  const collaborations = await db.companyCollaboration.findMany({
+    where: {
+      OR: [{ companyAId: companyId }, { companyBId: companyId }],
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+    select: collaborationSummarySelect,
+  });
+
+  return collaborations.map((collaboration) => mapCollaborationSummary(collaboration, companyId));
+}
+
+export async function getPublicCompanyBySlugForViewer(
+  slug: string,
+  viewer: { id: string; siteRole: "ADMIN" | "MOD" | "USER" } | null,
+) {
   const company = await db.company.findFirst({
     where: {
       slug,
@@ -641,6 +845,32 @@ export async function getPublicCompanyBySlug(slug: string) {
     return null;
   }
 
+  const viewerMembership = viewer?.id
+    ? await db.companyMember.findUnique({
+        where: {
+          companyId_userId: {
+            companyId: company.id,
+            userId: viewer.id,
+          },
+        },
+        select: {
+          companyRole: true,
+        },
+      })
+    : null;
+
+  const [collaborations, viewerSourceCompanies] = await Promise.all([
+    getCompanyCollaborationsForCompany(company.id),
+    viewer
+      ? getViewerCollaborationSources({
+          viewerId: viewer.id,
+          viewerSiteRole: viewer.siteRole,
+          excludeCompanyId: company.id,
+        })
+      : Promise.resolve([]),
+  ]);
+  const collaborationBuckets = partitionCompanyCollaborations(collaborations, company.id);
+
   return {
     company: mapCompanySummary(company),
     posts: company.posts.map(mapPostSummary),
@@ -654,6 +884,90 @@ export async function getPublicCompanyBySlug(slug: string) {
       actor: event.actor ? mapUserPreview(event.actor) : null,
       company: event.company,
     })),
+    viewerMembership,
+    viewerSourceCompanies,
+    collaborations: collaborationBuckets,
+  };
+}
+
+export async function getCompanyCollaborationWorkspaceData(
+  slug: string,
+  viewer: { id: string; siteRole: "ADMIN" | "MOD" | "USER" },
+) {
+  const company = await db.company.findFirst({
+    where: {
+      slug,
+      ...(viewer.siteRole === "ADMIN"
+        ? {}
+        : {
+            members: {
+              some: {
+                userId: viewer.id,
+              },
+            },
+          }),
+    },
+    select: companySummarySelect,
+  });
+
+  if (!company) {
+    return null;
+  }
+
+  const [currentMembership, collaborations] = await Promise.all([
+    db.companyMember.findUnique({
+      where: {
+        companyId_userId: {
+          companyId: company.id,
+          userId: viewer.id,
+        },
+      },
+      select: {
+        id: true,
+        companyRole: true,
+        joinedAt: true,
+      },
+    }),
+    getCompanyCollaborationsForCompany(company.id),
+  ]);
+
+  const buckets = partitionCompanyCollaborations(collaborations, company.id);
+  const canManageCollaborations = canManageCompanyCollaboration({
+    siteRole: viewer.siteRole,
+    companyRole: currentMembership?.companyRole,
+  });
+  const availableTargets = canManageCollaborations
+    ? await db.company.findMany({
+        where: {
+          id: {
+            not: company.id,
+          },
+          ...(viewer.siteRole === "ADMIN"
+            ? {}
+            : {
+                status: ModerationStatus.APPROVED,
+              }),
+        },
+        orderBy: {
+          name: "asc",
+        },
+        select: companyReferenceSelect,
+      })
+    : [];
+
+  return {
+    company: mapCompanySummary(company),
+    currentMembership,
+    canManageCollaborations,
+    availableTargets,
+    collaborations: buckets,
+    counts: {
+      active: buckets.active.length,
+      incoming: buckets.incoming.length,
+      outgoing: buckets.outgoing.length,
+      history: buckets.history.length,
+      total: collaborations.length,
+    },
   };
 }
 
@@ -813,6 +1127,49 @@ export async function getDashboardData(userId: string) {
     posts: authoredPosts.map(mapPostSummary),
     buildRequests: buildRequests.map(mapBuildRequestSummary),
     companyApplications,
+  };
+}
+
+export async function getDashboardPostsWorkspace(userId: string) {
+  const posts = await db.post.findMany({
+    where: {
+      authorId: userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 12,
+    select: postSummarySelect,
+  });
+
+  return {
+    posts: posts.map(mapPostSummary),
+  };
+}
+
+export async function getPostCreationContext(userId: string) {
+  const memberships = await db.companyMember.findMany({
+    where: {
+      userId,
+    },
+    orderBy: {
+      joinedAt: "asc",
+    },
+    select: {
+      companyRole: true,
+      joinedAt: true,
+      company: {
+        select: companyReferenceSelect,
+      },
+    },
+  });
+
+  return {
+    memberships: memberships.map((membership) => ({
+      ...membership.company,
+      currentRole: membership.companyRole,
+      joinedAt: membership.joinedAt,
+    })) satisfies CompanyMembershipSummary[],
   };
 }
 

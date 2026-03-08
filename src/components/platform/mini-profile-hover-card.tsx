@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useCallback, useState } from "react";
 import Link from "next/link";
 import { CompanyRole } from "@prisma/client";
 import { Building2, UserRoundPlus, UserSearch } from "lucide-react";
@@ -24,7 +25,7 @@ type MiniProfileHoverCardProps = {
   contentAlignOffset?: number;
 };
 
-function QuickActions({
+const QuickActions = memo(function QuickActions({
   profileHref,
   companyHref,
   inviteHref,
@@ -35,35 +36,51 @@ function QuickActions({
 }) {
   return (
     <div className="grid gap-2 sm:grid-cols-3">
-      <Button size="sm" render={<Link href={profileHref} />} className="w-full">
+      <Button
+        size="sm"
+        render={<Link href={profileHref} prefetch={false} />}
+        className="w-full"
+      >
         <UserSearch className="size-3.5" />
         Full profile
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        render={<Link href={companyHref ?? "#"} />}
-        disabled={!companyHref}
-        className="w-full"
-      >
-        <Building2 className="size-3.5" />
-        Company
-      </Button>
-      <Button
-        variant="secondary"
-        size="sm"
-        render={<Link href={inviteHref ?? "#"} />}
-        disabled={!inviteHref}
-        className="w-full"
-      >
-        <UserRoundPlus className="size-3.5" />
-        Invite
-      </Button>
+      {companyHref ? (
+        <Button
+          variant="outline"
+          size="sm"
+          render={<Link href={companyHref} prefetch={false} />}
+          className="w-full"
+        >
+          <Building2 className="size-3.5" />
+          Company
+        </Button>
+      ) : (
+        <Button variant="outline" size="sm" disabled className="w-full">
+          <Building2 className="size-3.5" />
+          Company
+        </Button>
+      )}
+      {inviteHref ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          render={<Link href={inviteHref} prefetch={false} />}
+          className="w-full"
+        >
+          <UserRoundPlus className="size-3.5" />
+          Invite
+        </Button>
+      ) : (
+        <Button variant="secondary" size="sm" disabled className="w-full">
+          <UserRoundPlus className="size-3.5" />
+          Invite
+        </Button>
+      )}
     </div>
   );
-}
+});
 
-function ProfileCard({
+const ProfileCard = memo(function ProfileCard({
   user,
   companyRole,
   primaryCompany,
@@ -89,7 +106,7 @@ function ProfileCard({
       companyRole={companyRole}
       primaryCompany={primaryCompany}
       variant={expanded ? "full" : "preview"}
-      className={cn(expanded ? "w-full" : "w-full animate-scale-in")}
+      className={cn("w-full")}
       actionRow={
         <QuickActions
           profileHref={profileHref}
@@ -99,7 +116,7 @@ function ProfileCard({
       }
     />
   );
-}
+});
 
 export function MiniProfileHoverCard({
   user,
@@ -113,8 +130,18 @@ export function MiniProfileHoverCard({
   contentSideOffset = 12,
   contentAlignOffset = 0,
 }: MiniProfileHoverCardProps) {
+  const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      setHasOpened(true);
+    }
+  }, []);
+
   return (
-    <HoverCard>
+    <HoverCard open={open} onOpenChange={handleOpenChange}>
       <HoverCardTrigger delay={160} closeDelay={110} render={<div className="block min-w-0" />}>
         {children}
       </HoverCardTrigger>
@@ -125,7 +152,14 @@ export function MiniProfileHoverCard({
         alignOffset={contentAlignOffset}
         className={cn("w-[min(23.5rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] border-none bg-transparent p-0 shadow-none", className)}
       >
-        <ProfileCard user={user} companyRole={companyRole} primaryCompany={primaryCompany} inviteHref={inviteHref} />
+        {hasOpened || open ? (
+          <ProfileCard
+            user={user}
+            companyRole={companyRole}
+            primaryCompany={primaryCompany}
+            inviteHref={inviteHref}
+          />
+        ) : null}
       </HoverCardContent>
     </HoverCard>
   );

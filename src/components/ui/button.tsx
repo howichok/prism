@@ -6,19 +6,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-[0.8rem] border text-sm font-medium whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow] duration-200 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring/18 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 active:translate-y-px [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2",
+  "group/button relative isolate inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[0.8rem] border text-sm font-medium whitespace-nowrap transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-[var(--motion-duration-normal)] ease-[var(--motion-ease)] outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring/18 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.985] active:duration-[var(--motion-duration-fast)] aria-[busy=true]:cursor-wait motion-reduce:transform-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 gap-2 before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.11)_42%,transparent_72%)] before:opacity-0 before:translate-x-[-120%] before:transition-[transform,opacity] before:duration-[var(--motion-duration-slow)] before:ease-[var(--motion-ease)] hover:before:translate-x-[120%] hover:before:opacity-100 focus-visible:before:opacity-100 focus-visible:before:translate-x-[10%] disabled:before:hidden motion-reduce:before:hidden",
   {
     variants: {
       variant: {
         default:
-          "border-primary/26 bg-[linear-gradient(180deg,hsl(221_83%_57%),hsl(221_83%_52%))] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_16px_28px_-18px_rgba(37,99,235,0.75)] hover:-translate-y-0.5 hover:border-primary/34 hover:bg-[linear-gradient(180deg,hsl(221_83%_60%),hsl(221_83%_54%))]",
+          "border-primary/26 bg-[linear-gradient(180deg,hsl(221_83%_57%),hsl(221_83%_52%))] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.09),0_14px_28px_-20px_rgba(37,99,235,0.78)] hover:border-primary/34 hover:bg-[linear-gradient(180deg,hsl(221_83%_60%),hsl(221_83%_54%))] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_16px_30px_-20px_rgba(37,99,235,0.82)] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_18px_-18px_rgba(37,99,235,0.68)]",
         outline:
-          "border-white/10 bg-white/[0.025] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-white/16 hover:bg-white/[0.05]",
+          "border-white/10 bg-white/[0.025] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/16 hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-22px_rgba(255,255,255,0.3)] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
         secondary:
-          "border-white/8 bg-white/[0.04] text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:-translate-y-0.5 hover:border-white/12 hover:bg-white/[0.07]",
+          "border-white/8 bg-white/[0.04] text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/12 hover:bg-white/[0.07] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-22px_rgba(255,255,255,0.26)] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
         ghost: "border-transparent text-foreground hover:bg-white/[0.05] dark:hover:bg-white/[0.05]",
         destructive:
-          "border-destructive/28 bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-0.5 hover:bg-destructive/90",
+          "border-destructive/28 bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:bg-destructive/90 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_14px_24px_-18px_rgba(239,68,68,0.55)] active:shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_10px_18px_-16px_rgba(239,68,68,0.46)]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -43,12 +43,18 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  render,
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  const resolvedNativeButton = nativeButton ?? (render ? false : true)
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      render={render}
+      nativeButton={resolvedNativeButton}
       {...props}
     />
   )

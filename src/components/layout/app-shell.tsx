@@ -50,7 +50,7 @@ export function AppShell({
           className="hidden self-start lg:sticky lg:top-[4.5rem] lg:block"
         />
         <div className="min-w-0 space-y-8 lg:border-l lg:border-white/6 lg:pl-10 xl:pl-12">
-          <main className="animate-fade-up min-w-0 space-y-8">{children}</main>
+          <main className="animate-fade-in min-w-0 space-y-8">{children}</main>
           {rail ? <div className="grid gap-6 xl:grid-cols-2">{rail}</div> : null}
         </div>
       </div>

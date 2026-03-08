@@ -5,6 +5,8 @@ import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-c
 import { UserAvatar } from "@/components/platform/user-avatar";
 import type { ActivitySummary } from "@/lib/data";
 import { formatRelativeTime } from "@/lib/format";
+import { getSiteRoleTheme } from "@/lib/role-system";
+import { cn } from "@/lib/utils";
 
 const activityIconMap = {
   MEMBER_JOINED: UserPlus2,
@@ -18,6 +20,7 @@ const activityIconMap = {
 
 export function FeedItem({ item }: { item: ActivitySummary }) {
   const Icon = activityIconMap[item.type as keyof typeof activityIconMap] ?? ActivitySquare;
+  const actorTheme = item.actor ? getSiteRoleTheme(item.actor.siteRole) : null;
 
   return (
     <div className="group flex gap-3 rounded-[0.95rem] border border-border/80 bg-card/80 p-3.5 transition-colors hover:border-primary/16">
@@ -28,12 +31,19 @@ export function FeedItem({ item }: { item: ActivitySummary }) {
         <div className="flex flex-wrap items-center gap-2">
           {item.actor ? (
             <MiniProfileHoverCard user={item.actor} primaryCompany={item.company}>
-              <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-[0.75rem] border border-white/6 bg-white/[0.03] px-2 py-1.5 transition-colors hover:border-primary/16">
+              <div
+                className={cn(
+                  "inline-flex cursor-pointer items-center gap-1.5 rounded-[0.85rem] border px-2 py-1.5 transition-colors",
+                  actorTheme?.inlineSurfaceClass,
+                  actorTheme?.inlineHoverClass,
+                )}
+              >
                 <UserAvatar
                   name={item.actor.displayName}
                   image={item.actor.avatarUrl}
                   accentColor={item.actor.accentColor}
                   size="sm"
+                  className={actorTheme?.avatarRingClass}
                 />
                 <span className="text-sm font-medium text-foreground">{item.actor.displayName}</span>
               </div>

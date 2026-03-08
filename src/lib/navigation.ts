@@ -28,6 +28,7 @@ export function getCompanySidebarItems(slug: string): SidebarItem[] {
   return [
     { href: `/dashboard/company/${slug}`, label: "Overview", icon: "layoutDashboard" },
     { href: `/dashboard/company/${slug}/members`, label: "Members", icon: "usersRound" },
+    { href: `/dashboard/company/${slug}/collaborations`, label: "Collaborations", icon: "handshake" },
     { href: `/dashboard/company/${slug}/projects`, label: "Projects", icon: "folderKanban" },
     { href: `/dashboard/company/${slug}/posts`, label: "Posts", icon: "megaphone" },
     { href: `/dashboard/company/${slug}/applications`, label: "Applications", icon: "clipboardCheck" },

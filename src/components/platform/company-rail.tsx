@@ -1,9 +1,8 @@
 import Link from "next/link";
 
-import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
+import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { StatusBadge } from "@/components/platform/status-badge";
-import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
 import type { CompanyRole } from "@prisma/client";
 import type { CompanySummary } from "@/lib/data";
@@ -56,15 +55,9 @@ export function CompanyRail({
 
       <div className="surface-panel p-4">
         <div className="panel-label">Leadership</div>
-        <MiniProfileHoverCard user={company.owner} companyRole="OWNER" primaryCompany={company}>
-          <div className="mt-3 flex cursor-pointer items-center gap-3 rounded-[0.85rem] border border-white/6 bg-white/[0.03] p-2.5 transition-colors hover:border-primary/20 hover:bg-white/[0.05]">
-            <UserAvatar name={company.owner.displayName} image={company.owner.avatarUrl} accentColor={company.owner.accentColor} size="sm" />
-            <div className="min-w-0">
-              <div className="truncate text-sm font-medium text-foreground">{company.owner.displayName}</div>
-              <div className="truncate text-xs text-muted-foreground">@{company.owner.username ?? "member"}</div>
-            </div>
-          </div>
-        </MiniProfileHoverCard>
+        <div className="mt-3">
+          <ProfileRosterRow user={company.owner} companyRole="OWNER" primaryCompany={company} variant="identity" />
+        </div>
         <p className="mt-3 text-xs leading-6 text-muted-foreground">
           Public company pages stay discoverable while the internal hub provides structured workflows.
         </p>

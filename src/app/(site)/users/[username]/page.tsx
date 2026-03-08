@@ -90,7 +90,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
         </div>
       </div>
 
-      <div className="animate-fade-up grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]" style={{ animationDelay: "100ms" }}>
+      <div className="animate-fade-in grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="space-y-4">
           <section className="surface-panel space-y-4 p-5">
             <div className="border-b border-white/8 pb-4">

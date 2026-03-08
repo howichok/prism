@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { CompanyRole } from "@prisma/client";
-import { ClipboardCheck, ClipboardList, FolderKanban, Megaphone, Settings, UserRoundPlus, UsersRound } from "lucide-react";
+import { ClipboardCheck, ClipboardList, FolderKanban, Handshake, Megaphone, Settings, UserRoundPlus, UsersRound } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { EmptyState } from "@/components/platform/empty-state";
 import { FeedItem } from "@/components/platform/feed-item";
-import { MiniProfileHoverCard } from "@/components/platform/mini-profile-hover-card";
 import { PageHeader } from "@/components/platform/page-header";
+import { ProfileRosterRow } from "@/components/platform/profile-roster-row";
 import { ProjectCard } from "@/components/platform/project-card";
 import { RoleBadge } from "@/components/platform/role-badge";
 import { StatusBadge } from "@/components/platform/status-badge";
-import { UserAvatar } from "@/components/platform/user-avatar";
 import { Button } from "@/components/ui/button";
 import { getCompanyHubData } from "@/lib/data";
 import { getCompanySidebarItems } from "@/lib/navigation";
@@ -55,6 +54,12 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
       label: "Members",
       body: "Search the roster, inspect roles, and manage access.",
       icon: UsersRound,
+    },
+    {
+      href: `/dashboard/company/${slug}/collaborations`,
+      label: "Collaborations",
+      body: "Track active partnerships, incoming requests, and outgoing links.",
+      icon: Handshake,
     },
     {
       href: `/dashboard/company/${slug}/projects`,
@@ -262,30 +267,15 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
               <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">{coOwners.length + 1} visible</div>
             </div>
             <div className="space-y-2">
-              <MiniProfileHoverCard user={data.company.owner} companyRole="OWNER" primaryCompany={data.company}>
-                <div className="flex cursor-pointer items-center gap-3 rounded-[1rem] border border-white/8 bg-white/[0.03] p-3 transition-colors hover:border-white/14 hover:bg-white/[0.05]">
-                  <UserAvatar
-                    name={data.company.owner.displayName}
-                    image={data.company.owner.avatarUrl}
-                    accentColor={data.company.owner.accentColor}
-                    size="sm"
-                  />
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{data.company.owner.displayName}</div>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">Owner</div>
-                  </div>
-                </div>
-              </MiniProfileHoverCard>
+              <ProfileRosterRow user={data.company.owner} companyRole="OWNER" primaryCompany={data.company} variant="identity" />
               {coOwners.map((member) => (
-                <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={data.company}>
-                  <div className="flex cursor-pointer items-center gap-3 rounded-[1rem] border border-white/8 bg-white/[0.03] p-3 transition-colors hover:border-white/14 hover:bg-white/[0.05]">
-                    <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
-                    <div className="min-w-0">
-                      <div className="truncate text-sm text-foreground">{member.displayName}</div>
-                      <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">Co-owner</div>
-                    </div>
-                  </div>
-                </MiniProfileHoverCard>
+                <ProfileRosterRow
+                  key={member.id}
+                  user={member}
+                  companyRole={member.companyRole}
+                  primaryCompany={data.company}
+                  variant="identity"
+                />
               ))}
             </div>
           </section>
@@ -326,18 +316,13 @@ export default async function CompanyHubOverviewPage({ params }: { params: Promi
           </div>
           <div className="space-y-2">
             {data.members.slice(0, 6).map((member) => (
-              <MiniProfileHoverCard key={member.id} user={member} companyRole={member.companyRole} primaryCompany={data.company}>
-                <div className="flex cursor-pointer items-center justify-between rounded-[1rem] border border-white/8 bg-white/[0.03] px-3 py-3 transition-colors hover:border-white/14 hover:bg-white/[0.05]">
-                  <div className="flex items-center gap-2.5">
-                    <UserAvatar name={member.displayName} image={member.avatarUrl} accentColor={member.accentColor} size="sm" />
-                    <div>
-                      <div className="text-sm font-medium text-foreground">{member.displayName}</div>
-                      <div className="text-xs text-muted-foreground">@{member.username ?? "member"}</div>
-                    </div>
-                  </div>
-                  <RoleBadge kind="company" role={member.companyRole} />
-                </div>
-              </MiniProfileHoverCard>
+              <ProfileRosterRow
+                key={member.id}
+                user={member}
+                companyRole={member.companyRole}
+                primaryCompany={data.company}
+                variant="identity"
+              />
             ))}
           </div>
         </section>

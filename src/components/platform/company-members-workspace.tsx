@@ -135,32 +135,22 @@ export function CompanyMembersWorkspace({
                     const manageable = canManageRole(currentRole, member.companyRole);
 
                     return (
-                      <div
+                      <ProfileRosterRow
                         key={member.id}
-                        className={cn(
-                          "rounded-lg border p-2.5 transition-colors",
-                          active
-                            ? "border-blue-400/22 bg-blue-400/[0.08]"
-                            : "border-white/8 bg-white/[0.03] hover:border-white/14 hover:bg-white/[0.05]",
-                        )}
-                      >
-                        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                          <ProfileRosterRow
-                            user={member}
-                            primaryCompany={company}
-                            companyRole={member.companyRole}
-                            active={active}
-                            onSelect={() => setSelectedMemberId(member.id)}
-                            rightRailExtra={
-                              manageable ? (
-                                <span className="rounded-full border border-blue-400/18 bg-blue-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-blue-200">
-                                  Manageable
-                                </span>
-                              ) : null
-                            }
-                          />
-                        </div>
-                      </div>
+                        user={member}
+                        primaryCompany={company}
+                        companyRole={member.companyRole}
+                        variant="identity"
+                        active={active}
+                        onSelect={() => setSelectedMemberId(member.id)}
+                        rightRailExtra={
+                          manageable ? (
+                            <span className="rounded-full border border-blue-400/18 bg-blue-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-blue-200">
+                              Manageable
+                            </span>
+                          ) : null
+                        }
+                      />
                     );
                   })}
                 </div>
